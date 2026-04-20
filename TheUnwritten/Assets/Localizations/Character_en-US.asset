@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: Character_en-US
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: en-US
+  m_SharedData: {fileID: 11400000, guid: ce9debe9986194a05983387e9ed8b23b, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 5682225152
+    m_Localized: Messenger
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2927658718453760
+    m_Localized: Isabelle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2928788584259584
+    m_Localized: Kaell
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2929571409158144
+    m_Localized: Tabor
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2936924212813824
+    m_Localized: Lena
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

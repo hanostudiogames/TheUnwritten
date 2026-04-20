@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63e1adf3284d64cdb9724d5a3005b610, type: 3}
+  m_Name: TurnTable_1
+  m_EditorClassIdentifier: Assembly-CSharp::Data.TurnData
+  Turn: 1
+  StartDialogueRecords:
+  - rid: 6598480599176446236
+  - rid: 6598480599176446237
+  - rid: 6598480599176446257
+  - rid: 6598480599176446258
+  - rid: 6598480666054885522
+  EndDialogueRecords: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 6598480599176446236
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 1
+        TypingSpeed: 0.1
+        EndDelaySeconds: 2
+        AnswerIds: 
+    - rid: 6598480599176446237
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 2
+        TypingSpeed: 0.1
+        EndDelaySeconds: 2
+        AnswerIds: 
+    - rid: 6598480599176446257
+      type: {class: CharacterSpeechRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 3
+        TypingSpeed: 0.05
+        EndDelaySeconds: 2
+        AnswerIds: 
+        CharacterLocalKey: messenger
+    - rid: 6598480599176446258
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 4
+        TypingSpeed: 0.1
+        EndDelaySeconds: 2
+        AnswerIds: 010000000200000003000000
+    - rid: 6598480666054885522
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 1
+        TypingSpeed: 0.05
+        EndDelaySeconds: 1
+        AnswerIds: 

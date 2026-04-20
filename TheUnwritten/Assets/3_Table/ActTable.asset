@@ -1,0 +1,114 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b25facc3f4c24e3cb6e09d740f1c489, type: 3}
+  m_Name: ActTable
+  m_EditorClassIdentifier: Assembly-CSharp::Tables.ActTable
+  ActRecords:
+  - Index: 1
+    SceneRecords:
+    - Index: 1
+      DialogueRecords:
+      - rid: 6598480760733696273
+      - rid: 6598480897316487168
+      - rid: 6598480787560726630
+      - rid: 6598480897316487260
+      - rid: 6598480897316487262
+      - rid: 6598480897316487261
+      - rid: 6598480897316487342
+      - rid: 6598480897316487356
+      - rid: 6598480897316487435
+      - rid: 6598480897316487448
+  references:
+    version: 2
+    RefIds:
+    - rid: 6598480760733696273
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 1
+        TypingSpeed: 0.08
+        EndDelaySeconds: 0.3
+        AnswerIds: 
+        PostActionType: 0
+    - rid: 6598480787560726630
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 3
+        TypingSpeed: 0.1
+        EndDelaySeconds: 0.5
+        AnswerIds: 
+        PostActionType: 0
+    - rid: 6598480897316487168
+      type: {class: CharacterSpeechRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 2
+        TypingSpeed: 0.1
+        EndDelaySeconds: 1
+        AnswerIds: 
+        PostActionType: 0
+        CharacterLocalKey: 
+    - rid: 6598480897316487260
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 4
+        TypingSpeed: 0.5
+        EndDelaySeconds: 1
+        AnswerIds: 
+        PostActionType: 0
+    - rid: 6598480897316487261
+      type: {class: CharacterSpeechRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 6
+        TypingSpeed: 0.1
+        EndDelaySeconds: 1
+        AnswerIds: 010000000200000003000000
+        PostActionType: 0
+        CharacterLocalKey: 
+    - rid: 6598480897316487262
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 5
+        TypingSpeed: 0.1
+        EndDelaySeconds: 1
+        AnswerIds: 
+        PostActionType: 0
+    - rid: 6598480897316487342
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 7
+        TypingSpeed: 0.1
+        EndDelaySeconds: 1
+        AnswerIds: 
+        PostActionType: 0
+    - rid: 6598480897316487356
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 8
+        TypingSpeed: 0.2
+        EndDelaySeconds: 1
+        AnswerIds: 
+        PostActionType: 1
+    - rid: 6598480897316487435
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 9
+        TypingSpeed: 0.2
+        EndDelaySeconds: 1
+        AnswerIds: 
+        PostActionType: 2
+    - rid: 6598480897316487448
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 10
+        TypingSpeed: 0.05
+        EndDelaySeconds: 1
+        AnswerIds: 
+        PostActionType: 0
