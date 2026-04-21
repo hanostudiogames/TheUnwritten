@@ -20,6 +20,7 @@ namespace Common
         Fold,
         RandomShake,
         Shake,
+        RandomCollapse,
     }
     
     // public enum FoodType

@@ -103,6 +103,26 @@ namespace UI
                         
                         break;
                     }
+                    
+                    case DialogueActionType.Shake:
+                    {
+                        foreach (var tmp in tmps)
+                        {
+                            tmp.DoShake(7f, action.Duration);
+                        }
+                        
+                        break;
+                    }
+                    
+                    case DialogueActionType.RandomCollapse:
+                    {
+                        foreach (var tmp in tmps)
+                        {
+                            tmp.DORandomCollapse(action.Duration, 0.01f);
+                        }
+                        
+                        break;
+                    }
                 }
                 
                 // if (action.IsAwait)

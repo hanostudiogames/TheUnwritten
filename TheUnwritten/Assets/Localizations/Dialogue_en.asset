@@ -88,6 +88,11 @@ MonoBehaviour:
       gathered, and shaped themselves."
     m_Metadata:
       m_Items: []
+  - m_Id: 7959460654866432
+    m_Localized: "      \u2014 No one. This card \n      \u2014 I just have to trust
+      it."
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

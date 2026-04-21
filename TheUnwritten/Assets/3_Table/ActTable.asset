@@ -33,6 +33,7 @@ MonoBehaviour:
     - Index: 3
       DialogueRecords:
       - rid: 6598480915748356349
+      - rid: 6598480915748356384
   references:
     version: 2
     RefIds:
@@ -163,4 +164,21 @@ MonoBehaviour:
         TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 
+        DialogueActions:
+        - DialogueActionType: 5
+          Duration: 3
+          StartDelay: 0
+          EndDelay: 0
+        - DialogueActionType: 2
+          Duration: 3
+          StartDelay: 0
+          EndDelay: 1
+    - rid: 6598480915748356384
+      type: {class: CharacterSpeechRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 15
+        TypingSpeed: 0.1
+        EndDelaySeconds: 1
+        AnswerIds: 
         DialogueActions: []
+        CharacterLocalKey: 
