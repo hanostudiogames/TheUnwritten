@@ -1,5 +1,4 @@
 using System;
-using System.Text.RegularExpressions;
 using UnityEngine;
 
 using Cysharp.Threading.Tasks;
@@ -57,42 +56,42 @@ namespace UI.Components
         public async UniTask TypeTextAsync(string text)
         {
             _isEnd = false;
-            typingText?.SetText(string.Empty);
-            
+
+            // 전체 텍스트를 먼저 세팅하고 maxVisibleCharacters 로 점진 공개.
+            // 이렇게 하면 TMP 가 최종 레이아웃으로 미리 wrapping 을 확정하므로
+            // 타이핑 도중 단어가 다음 줄로 튀는 현상이 발생하지 않는다.
+            if (typingText != null)
+            {
+                typingText.SetText(text);
+                typingText.maxVisibleCharacters = 0;
+            }
+
             await UniTask.Yield(PlayerLoopTiming.PostLateUpdate);
-           
-            if(_param != null)
+            typingText?.ForceMeshUpdate();
+
+            if (_param != null)
                 await UniTask.Delay(TimeSpan.FromSeconds(_param.StartDelaySeconds));
-            
-            string currentText = "";
+
             float typingSpeed = _param?.TypingSpeed ?? 0.05f;
+            int total = typingText?.textInfo?.characterCount ?? 0;
 
-            // 정규식을 통해 태그와 텍스트 분리
-            MatchCollection matches = Regex.Matches(text, @"(<[^>]+>|[ \t]+\n|\n|[^<])");
-
-            for (int i = 0; i < matches.Count; i++)
+            for (int i = 1; i <= total; i++)
             {
                 if (_isEnd)
                 {
-                    typingText?.SetText(text);
+                    if (typingText != null)
+                        typingText.maxVisibleCharacters = total;
                     return;
                 }
 
-                string part = matches[i].Value;
-                currentText += part;
+                if (typingText != null)
+                    typingText.maxVisibleCharacters = i;
 
-                // 🔥 이거 반드시 있어야 함
-                typingText?.SetText(currentText);
-
-                bool isTag = part.StartsWith("<");
-                bool isSpriteTag = part.StartsWith("<sprite");
-
-                // sprite는 딜레이 포함
-                if (!isTag || isSpriteTag)
-                    await UniTask.Delay(TimeSpan.FromSeconds(typingSpeed));
+                await UniTask.Delay(TimeSpan.FromSeconds(typingSpeed));
             }
 
-            typingText?.SetText(text);
+            if (typingText != null)
+                typingText.maxVisibleCharacters = total;
 
             if (_param != null)
             {
