@@ -165,11 +165,7 @@ MonoBehaviour:
         EndDelaySeconds: 1
         AnswerIds: 
         DialogueActions:
-        - DialogueActionType: 5
-          Duration: 3
-          StartDelay: 0
-          EndDelay: 0
-        - DialogueActionType: 2
+        - DialogueActionType: 6
           Duration: 3
           StartDelay: 0
           EndDelay: 1
