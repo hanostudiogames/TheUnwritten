@@ -9,6 +9,17 @@ using UI.Effects;
 
 namespace UI
 {
+    [Serializable]
+    public class DialogueAction
+    {
+        public DialogueActionType DialogueActionType = DialogueActionType.None;
+        public float Duration = 0; 
+        // public bool IsAwait = false;
+        
+        public float StartDelay = 0;
+        public float EndDelay = 0;
+    }
+    
     public class DialoguePostAction
     {
         public class Param
@@ -17,8 +28,8 @@ namespace UI
             public List<TextMeshProUGUI> TMPs { get; private set; } = new();
             public int ActIndex { get; private set; }
             public int SceneIndex { get; private set; }
-            public DialoguePostActionType ActionType { get; private set; } = DialoguePostActionType.None;
-            public Action OnComplete { get; private set; } = null;
+            
+            public List<DialogueAction> DialogueActions { get; private set; } = new();
 
             public Param(List<TextMeshProUGUI> tmps, int actIndex, int sceneIndex)
             {
@@ -27,9 +38,9 @@ namespace UI
                 SceneIndex = sceneIndex;
             }
 
-            public Param WithDialoguePostActionType(DialoguePostActionType actionType)
+            public Param WithDialogueActions(List<DialogueAction> dialogueActions)
             {
-                ActionType = actionType;
+                DialogueActions = dialogueActions;
                 return this;
             }
         }
@@ -45,65 +56,121 @@ namespace UI
         
         public async UniTask ExecuteAsync()
         {
+            var dialogueActions = _param?.DialogueActions;
+            if (dialogueActions == null)
+                return;
+            
             var tmps = _param?.TMPs;
             if (tmps == null)
                 return;
 
-            switch (_param.ActionType)
+            for (int i = 0; i < dialogueActions.Count; ++i)
             {
-                case DialoguePostActionType.DoShearAllTMP:
+                var action = dialogueActions[i];
+                if(action == null)
+                    continue;
+
+                await UniTask.Delay(TimeSpan.FromSeconds(action.StartDelay));
+                
+                switch (action.DialogueActionType)
                 {
-                    // await tmp.DORandomShake(10f, 1f, 0.1f).ToUniTask();
-                    for (int i = 0; i < tmps.Count; ++i)
+                    case DialogueActionType.Shear:
                     {
-                        var tmp = tmps[i];
-                        if (tmp == null)
-                            continue;
+                        foreach (var tmp in tmps)
+                        {
+                            tmp?.DoShear(1f, action.Duration);
+                        }
+
+                        break;
+                    }
+
+                    case DialogueActionType.Fold:
+                    {
+                        foreach (var tmp in tmps)
+                        {
+                            tmp?.DoFold(0.5f, action.Duration);
+                        }
+       
+                        break;
+                    }
+
+                    case DialogueActionType.RandomShake:
+                    {
+                        foreach (var tmp in tmps)
+                        {
+                            tmp.DORandomShake(7f, action.Duration, 0.05f);
+                        }
                         
-                        tmp.DORandomShake(7f, 2f, 0.05f);
+                        break;
                     }
-
-                    await UniTask.Delay(TimeSpan.FromSeconds(3f));
-                   
-                    for (int i = 0; i < tmps.Count; ++i)
-                    {
-                        var tmp = tmps[i];
-                        if (tmp == null)
-                            continue;
-
-                        tmp.DoShear(1f, 2f);
-                    }
-                    
-                    // for (int i = 0; i < tmps.Count; i++)
-                    // {
-                    //     var tmp = tmps[i];
-                    //     if (tmp == null)
-                    //         continue;
-                    //
-                    //     tmp.DoFold(0.3f, 2f);
-                    // }
-
-                    await UniTask.Delay(TimeSpan.FromSeconds(3f));
-                    
-                    break;
                 }
-
-                case DialoguePostActionType.DoFoldAllTMP:
-                {
-                    for (int i = 0; i < tmps.Count; ++i)
-                    {
-                        var tmp = tmps[i];
-                        if (tmp == null)
-                            continue;
-
-                        tmp.DoFold(0.5f, 5f);
-                    }
-                    
-                    // await UniTask.Delay(TimeSpan.FromSeconds(3f));
-                    
-                    break;
-                }
+                
+                // if (action.IsAwait)
+                //     await UniTask.Delay(TimeSpan.FromSeconds(action.Duration));
+                
+                await UniTask.Delay(TimeSpan.FromSeconds(action.EndDelay));
             }
+            
+            
+            // var tmps = _param?.TMPs;
+            // if (tmps == null)
+            //     return;
+            //
+            // switch (_param.ActionType)
+            // {
+            //     case DialoguePostActionType.DoShearAllTMP:
+            //     {
+            //         // await tmp.DORandomShake(10f, 1f, 0.1f).ToUniTask();
+            //         for (int i = 0; i < tmps.Count; ++i)
+            //         {
+            //             var tmp = tmps[i];
+            //             if (tmp == null)
+            //                 continue;
+            //             
+            //             tmp.DORandomShake(7f, 2f, 0.05f);
+            //         }
+            //
+            //         await UniTask.Delay(TimeSpan.FromSeconds(3f));
+            //        
+            //         for (int i = 0; i < tmps.Count; ++i)
+            //         {
+            //             var tmp = tmps[i];
+            //             if (tmp == null)
+            //                 continue;
+            //
+            //             tmp.DoShear(1f, 2f);
+            //         }
+            //         
+            //         // for (int i = 0; i < tmps.Count; i++)
+            //         // {
+            //         //     var tmp = tmps[i];
+            //         //     if (tmp == null)
+            //         //         continue;
+            //         //
+            //         //     tmp.DoFold(0.3f, 2f);
+            //         // }
+            //
+            //         await UniTask.Delay(TimeSpan.FromSeconds(3f));
+            //         
+            //         break;
+            //     }
+            //
+            //     case DialoguePostActionType.DoFoldAllTMP:
+            //     {
+            //         for (int i = 0; i < tmps.Count; ++i)
+            //         {
+            //             var tmp = tmps[i];
+            //             if (tmp == null)
+            //                 continue;
+            //
+            //             tmp.DoFold(0.5f, 5f);
+            //         }
+            //         
+            //         // await UniTask.Delay(TimeSpan.FromSeconds(3f));
+            //         
+            //         break;
+            //     }
+            // }
         }
     }
 }

@@ -27,6 +27,12 @@ MonoBehaviour:
       - rid: 6598480897316487356
       - rid: 6598480897316487435
       - rid: 6598480897316487448
+      - rid: 6598480915748356340
+      - rid: 6598480915748356342
+      - rid: 6598480915748356348
+    - Index: 3
+      DialogueRecords:
+      - rid: 6598480915748356349
   references:
     version: 2
     RefIds:
@@ -37,7 +43,7 @@ MonoBehaviour:
         TypingSpeed: 0.08
         EndDelaySeconds: 0.3
         AnswerIds: 
-        PostActionType: 0
+        DialogueActions: []
     - rid: 6598480787560726630
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
       data:
@@ -45,7 +51,7 @@ MonoBehaviour:
         TypingSpeed: 0.1
         EndDelaySeconds: 0.5
         AnswerIds: 
-        PostActionType: 0
+        DialogueActions: []
     - rid: 6598480897316487168
       type: {class: CharacterSpeechRecord, ns: Tables.Records, asm: Assembly-CSharp}
       data:
@@ -53,7 +59,7 @@ MonoBehaviour:
         TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 
-        PostActionType: 0
+        DialogueActions: []
         CharacterLocalKey: 
     - rid: 6598480897316487260
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
@@ -62,7 +68,7 @@ MonoBehaviour:
         TypingSpeed: 0.5
         EndDelaySeconds: 1
         AnswerIds: 
-        PostActionType: 0
+        DialogueActions: []
     - rid: 6598480897316487261
       type: {class: CharacterSpeechRecord, ns: Tables.Records, asm: Assembly-CSharp}
       data:
@@ -70,7 +76,7 @@ MonoBehaviour:
         TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 010000000200000003000000
-        PostActionType: 0
+        DialogueActions: []
         CharacterLocalKey: 
     - rid: 6598480897316487262
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
@@ -79,7 +85,7 @@ MonoBehaviour:
         TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 
-        PostActionType: 0
+        DialogueActions: []
     - rid: 6598480897316487342
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
       data:
@@ -87,7 +93,7 @@ MonoBehaviour:
         TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 
-        PostActionType: 0
+        DialogueActions: []
     - rid: 6598480897316487356
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
       data:
@@ -95,7 +101,15 @@ MonoBehaviour:
         TypingSpeed: 0.2
         EndDelaySeconds: 1
         AnswerIds: 
-        PostActionType: 1
+        DialogueActions:
+        - DialogueActionType: 3
+          Duration: 2
+          StartDelay: 0
+          EndDelay: 3
+        - DialogueActionType: 1
+          Duration: 4
+          StartDelay: 0
+          EndDelay: 5
     - rid: 6598480897316487435
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
       data:
@@ -103,12 +117,50 @@ MonoBehaviour:
         TypingSpeed: 0.2
         EndDelaySeconds: 1
         AnswerIds: 
-        PostActionType: 2
+        DialogueActions:
+        - DialogueActionType: 2
+          Duration: 10
+          StartDelay: 0
+          EndDelay: 0
     - rid: 6598480897316487448
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
       data:
         LocalKey: 10
-        TypingSpeed: 0.05
+        TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 
-        PostActionType: 0
+        DialogueActions: []
+    - rid: 6598480915748356340
+      type: {class: CharacterSpeechRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 11
+        TypingSpeed: 0.1
+        EndDelaySeconds: 1
+        AnswerIds: 
+        DialogueActions: []
+        CharacterLocalKey: 
+    - rid: 6598480915748356342
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 12
+        TypingSpeed: 0.1
+        EndDelaySeconds: 1
+        AnswerIds: 
+        DialogueActions: []
+    - rid: 6598480915748356348
+      type: {class: CharacterSpeechRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 13
+        TypingSpeed: 0.2
+        EndDelaySeconds: 1
+        AnswerIds: 
+        DialogueActions: []
+        CharacterLocalKey: 
+    - rid: 6598480915748356349
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 14
+        TypingSpeed: 0.1
+        EndDelaySeconds: 1
+        AnswerIds: 
+        DialogueActions: []

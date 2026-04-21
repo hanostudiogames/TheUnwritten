@@ -41,6 +41,64 @@ namespace Tables.Containers
 
             return null;
         }
+        
+        public bool HasNextAct(int act, out int nextAct)
+        {
+            nextAct = -1;
+
+            var actRecords = _table?.ActRecords;
+            if (actRecords == null)
+                return false;
+    
+            var sorted = actRecords
+                .Where(x => x != null)
+                .OrderBy(x => x.Index)
+                .ToArray();
+
+            for (int i = 0; i < sorted.Length; ++i)
+            {
+                var record = sorted[i];
+                if(record == null)
+                    continue;
+                
+                if (record.Index > act)
+                {
+                    nextAct = record.Index;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        
+        public bool HasNextScene(int act, int scene, out int nextScene)
+        {
+            nextScene = -1;
+
+            var sceneRecords = GetActRecord(act)?.SceneRecords;
+            if (sceneRecords == null)
+                return false;
+
+            var sorted = sceneRecords
+                .Where(x => x != null)
+                .OrderBy(x => x.Index)
+                .ToArray();
+            
+            for (int i = 0; i < sorted.Length; ++i)
+            {
+                var record = sorted[i];
+                if(record == null)
+                    continue;
+                
+                if (record.Index > scene)
+                {
+                    nextScene = record.Index;
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }
 

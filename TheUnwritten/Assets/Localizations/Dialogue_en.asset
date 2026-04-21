@@ -67,6 +67,27 @@ MonoBehaviour:
       beneath my feet."
     m_Metadata:
       m_Items: []
+  - m_Id: 7930754171396096
+    m_Localized: "      During the fall \u2014 I think this card caught me. \n     
+      Or I caught it.\n      Either way \u2014 this is what brought me here."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7931592923144192
+    m_Localized: "Everything was written. The trees, the sky, the ground. In my hand
+      \u2014 a Flame card."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7933045041520640
+    m_Localized: "      \u2014 I understood where I was. \n      Inside the book.
+      \n      This place \u2014 someone had written it.\n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7933529915645952
+    m_Localized: "There was no one. In this world, only you and the letters remained.
+      Then \u2014 the ground began to blacken. The letters melted. They poured down,
+      gathered, and shaped themselves."
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

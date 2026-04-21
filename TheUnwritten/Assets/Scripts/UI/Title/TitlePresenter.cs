@@ -47,7 +47,7 @@ namespace UI.Title
             if(mainPresenter != null)
                 gameManager.AddSceneListener(mainPresenter);
 
-            gameManager.StartActAsync().Forget();
+            gameManager.StartActAsync(0, 0).Forget();
             
             return UniTask.CompletedTask;
         }

@@ -1,15 +1,25 @@
 
 namespace Common
 {
-    public enum DialoguePostActionType
+    // public enum DialoguePostActionType
+    // {
+    //     None,
+    //     
+    //     DoShearAllTMP,
+    //     DoFoldAllTMP,
+    //     
+    //     DoShear,
+    //     CollapseSingleParagraph,
+    // }
+    
+    public enum DialogueActionType
     {
         None,
         
-        DoShearAllTMP,
-        DoFoldAllTMP,
-        
-        DoShear,
-        CollapseSingleParagraph,
+        Shear,
+        Fold,
+        RandomShake,
+        Shake,
     }
     
     // public enum FoodType

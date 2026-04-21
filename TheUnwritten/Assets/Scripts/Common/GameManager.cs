@@ -13,7 +13,7 @@ namespace Common
     public interface ISceneListener
     {
         UniTask OnStartSceneAsync(int act, int scene);
-        UniTask OnEndSceneAsync();
+        UniTask OnEndSceneAsync(int act, int scene);
     }
 
     public interface IGameManager
@@ -53,40 +53,36 @@ namespace Common
             
         }
 
-        public async UniTask StartActAsync()
+        public async UniTask StartActAsync(int act, int scene)
         {
-            ++_act;
-            ++_scene;
+            var actTableContainer = ActTableContainer.Instance;
+            if (actTableContainer == null)
+                return;
             
-            // if(HasDialogue())
+            var sceneRecord = actTableContainer.GetSceneRecord(act, scene);
+            if (sceneRecord != null)
+            {
+                _act = act;
+                _scene = scene;
             
-            // await UniTask.Delay(TimeSpan.FromSeconds(1f));
-            await NotifyStartSceneAsync();
-            // await _uiManager.FadeInOutAsync(, () => { });
-            // await NotifyStartSceneAsync();
-        }
-        
-        // public async UniTask StartTurnAsync()
-        // {
-        //     ++_turn;
-        //     
-        //     if(HasDialogue(false))
-        //         SetMode(GameMode.Narrative);
-        //
-        //     await UniTask.Delay(TimeSpan.FromSeconds(1f));
-        //     await _uiManager.FadeOutDimmedAsync();
-        //     await NotifyStartTurnAsync();
-        //
-        //
-        //     SetMode(GameMode.Governance);
-        // }
+                await NotifyStartSceneAsync();
+                await NotifyEndSceneAsync();
+            }
 
-        // public async UniTask EndTurnAsync()
-        // {
-        //     if(HasDialogue(true))
-        //         SetMode(GameMode.Narrative);
-        //     // 종료 스토리
-        // }
+            int nextAct = _act;
+            int nextScene = 0;
+            if (!actTableContainer.HasNextScene(nextAct, _scene, out nextScene))
+            {
+                if (!actTableContainer.HasNextAct(act, out nextAct))
+                    return;
+                
+                _scene = 0;
+                if (!actTableContainer.HasNextScene(nextAct, _scene, out nextScene))
+                    return;
+            }
+            
+            StartActAsync(nextAct, nextScene).Forget();
+        }
 
         public void AddSceneListener(ISceneListener listener)
         {
@@ -104,6 +100,13 @@ namespace Common
                 .Where(listener => listener != null)
                 .Select(listener => listener.OnStartSceneAsync(_act, _scene)));
         }
+        
+        private async UniTask NotifyEndSceneAsync()
+        {
+            await UniTask.WhenAll(_sceneListeners
+                .Where(listener => listener != null)
+                .Select(listener => listener.OnEndSceneAsync(_act, _scene)));
+        }
 
         private bool HasDialogue()
         {
@@ -117,29 +120,6 @@ namespace Common
 
             return dialogues.Length > 0;
         }
-
-        // private void SetMode(GameMode mode)
-        // {
-        //     GameMode = mode;
-        //     NotifyModeChanged();
-        // }
-
-        // public void RegisterModeHandler<TType>(Action<GameMode> handler)
-        // {
-        //     if (!_modeHandlers.ContainsKey(typeof(TType)))
-        //         _modeHandlers[typeof(TType)] = handler;
-        // }
-
-        // private void NotifyModeChanged()
-        // {
-        //     if (_modeHandlers == null)
-        //         return;
-        //     
-        //     foreach (var modeHandler in _modeHandlers.Values)
-        //     {
-        //         modeHandler?.Invoke(GameMode);
-        //     }
-        // }
     }
 }
 

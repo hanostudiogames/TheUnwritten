@@ -72,7 +72,6 @@ namespace UI.Main
             await _view.ScrollToAsync(_view.ViewportHalfHeight);
 
             var locale = LocalizationSettings.SelectedLocale;
-
             
             for (int i = 0; i < dialogues.Length; ++i)
             {
@@ -101,27 +100,8 @@ namespace UI.Main
                 
                 await _dialogueCompletionSource.Task;
 
-                await ExecuteDialoguePostActionAsync(dialogueSlot.TMP, act, scene, dialogue.PostActionType);
+                await ExecuteDialoguePostActionAsync(dialogueSlot.TMP, act, scene, dialogue.DialogueActions);
                 await ActiveAnswerAsync(dialogue.AnswerIds);
-                
-                // var answerIds = dialogue.AnswerIds;
-                // if (answerIds != null &&
-                //     answerIds.Length > 0)
-                // {
-                //     Debug.Log(answerIds.Length);
-                //     
-                //     _answerCompletionSource = new UniTaskCompletionSource();
-                //
-                //     await _view.ShowAnswersAsync(answerIds);
-                //     
-                //     await _view.ScrollToAsync(0);
-                //     _view.EnableScrollRect();
-                //     
-                //     await _answerCompletionSource.Task;   
-                //     
-                //     _view.DisableScrollRect();
-                //     await _view.ScrollToAsync(_view.ViewportHalfHeight);
-                // }
             }
             
             await _view.ScrollToAsync(0);
@@ -157,21 +137,21 @@ namespace UI.Main
             return _view.CreateNarrationSlot(_uiFactory, param);
         }
 
-        private async UniTask ExecuteDialoguePostActionAsync(TextMeshProUGUI tmp, int act, int scene, DialoguePostActionType postActionType)
+        private async UniTask ExecuteDialoguePostActionAsync(TextMeshProUGUI tmp, int act, int scene, List<DialogueAction> dialogueActions)
         {
             if (_dialoguePostAction == null)
                 return;
 
             var tmps = new List<TextMeshProUGUI>();
             
-            if (postActionType == DialoguePostActionType.DoShearAllTMP ||
-                postActionType == DialoguePostActionType.DoFoldAllTMP)
+            // if (postActionType == DialoguePostActionType.DoShearAllTMP ||
+            //     postActionType == DialoguePostActionType.DoFoldAllTMP)
                 tmps.AddRange(_view.TMPsInDialogueSlots());
-            else
-                tmps.Add(tmp);
+            // else
+            //     tmps.Add(tmp);
             
             var param = new DialoguePostAction.Param(tmps, act, scene)
-                .WithDialoguePostActionType(postActionType);
+                .WithDialogueActions(dialogueActions);
 
             await _dialoguePostAction.SetParam(param)
                 .ExecuteAsync();
@@ -179,12 +159,9 @@ namespace UI.Main
 
         private async UniTask ActiveAnswerAsync(int[] answerIds)
         {
-            // var answerIds = dialogue.AnswerIds;
             if (answerIds == null || answerIds.Length <= 0)
                 return;
-            
-            Debug.Log(answerIds.Length);
-                    
+
             _answerCompletionSource = new UniTaskCompletionSource();
 
             await _view.ShowAnswersAsync(answerIds);
@@ -229,7 +206,7 @@ namespace UI.Main
             await PlayDialogueAsync(act, scene);
         }
 
-        UniTask ISceneListener.OnEndSceneAsync()
+        UniTask ISceneListener.OnEndSceneAsync(int act, int scene)
         {
             return UniTask.CompletedTask;
         }

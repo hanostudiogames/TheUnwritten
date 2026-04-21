@@ -27,8 +27,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 5775857422426112
-    m_Localized: "      \uC774\uC0C1\uD558\uB2E4. \uC5B4\uC81C\uB3C4 \uC774 \uC790\uB9AC\uB97C
-      \uC9C0\uB098\uCCE4\uB294\uB370.\n"
+    m_Localized: "      <color=#5E5E5E>\uC774\uC0C1\uD558\uB2E4. \uC5B4\uC81C\uB3C4
+      \uC774 \uC790\uB9AC\uB97C \uC9C0\uB098\uCCE4\uB294\uB370.</color>\n"
     m_Metadata:
       m_Items: []
   - m_Id: 5855223066124288
@@ -71,6 +71,34 @@ MonoBehaviour:
       \uC0AC\uC774\uB97C, \uBB38\uC7A5\uB4E4 \uC0AC\uC774\uB97C, \uB2E8\uB77D\uB4E4
       \uC0AC\uC774\uB97C \uCD94\uB77D\uD588\uB2E4. \uADF8\uB9AC\uACE0 \uB545\uC774
       \uC0DD\uACBC\uB2E4. \uBC1C \uBC11\uC5D0, \uAC11\uC790\uAE30.\n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7930754171396096
+    m_Localized: "      \u2014 \uCD94\uB77D\uD558\uB294 \uB3D9\uC548 \u2014 \uC774
+      \uCE74\uB4DC\uAC00 \uB098\uB97C \uBD99\uC7A1\uC740 \uAC83 \uAC19\uB2E4. \n     
+      \uC544\uB2C8\uBA74 \uB0B4\uAC00 \uC774 \uCE74\uB4DC\uB97C \uBD99\uC7A1\uC740
+      \uAC74\uC9C0\uB3C4.\n      \uC5B4\uCA0C\uB4E0 \u2014 \uC774\uAC83\uC774 \uB098\uB97C
+      \uC5EC\uAE30\uB85C \uB370\uB824\uC654\uB2E4.\n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7931592923144192
+    m_Localized: "\uBAA8\uB4E0 \uAC83\uC774 \uC11C\uC220\uB41C \uAC83\uC774\uC5C8\uB2E4.
+      \uB098\uBB34, \uD558\uB298, \uB545. \uC190 \uC548\uC5D0 \uBD88\uAF43 \uCE74\uB4DC\uAC00
+      \uC788\uC5C8\uB2E4."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7933045041520640
+    m_Localized: "      \u2014 \uC5EC\uAE30\uAC00 \uC5B4\uB518\uC9C0 \uC774\uD574\uD588\uB2E4.
+      \uCC45 \uC548\uC774\uB2E4. \n      \uC774 \uACF5\uAC04\uC740 \u2014 \uB204\uAD70\uAC00\uAC00
+      \uC4F4 \uAC83\uC774\uB2E4."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7933529915645952
+    m_Localized: "\uC544\uBB34\uB3C4 \uC5C6\uC5C8\uB2E4. \uC774 \uC138\uACC4\uC5D0\uB294
+      \uB2F9\uC2E0\uACFC \uBB38\uC790\uB4E4\uB9CC \uC788\uC5C8\uB2E4. \uADF8\uB9AC\uACE0
+      \u2014 \uB545\uC774 \uAC80\uC5B4\uC9C0\uAE30 \uC2DC\uC791\uD588\uB2E4. \uAE00\uC790\uB4E4\uC774
+      \uB179\uC544\uB0B4\uB838\uB2E4. \uD758\uB7EC\uB0B4\uB9AC\uACE0, \uBAA8\uC774\uACE0,
+      \uD615\uD0DC\uB97C \uB9CC\uB4E4\uC5B4\uB0C8\uB2E4.\n"
     m_Metadata:
       m_Items: []
   references:

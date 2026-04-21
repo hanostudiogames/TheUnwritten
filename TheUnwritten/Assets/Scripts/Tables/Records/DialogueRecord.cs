@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 using Common;
 using Common.Models;
+using UI;
 
 namespace Tables.Records
 {
@@ -14,8 +16,9 @@ namespace Tables.Records
         public float EndDelaySeconds = 1f;
 
         public int[] AnswerIds = null;
-        
-        public DialoguePostActionType PostActionType = DialoguePostActionType.None;
+
+        public List<DialogueAction> DialogueActions = null;
+        // public DialoguePostActionType PostActionType = DialoguePostActionType.None;
     }
 
     [Serializable]
