@@ -18,9 +18,17 @@ namespace UI.Effects
             public float[] rot;
             public float[] shake;
             public float[] melt;
+            public float[] pulse;
+            public float[] bleed;
+            public float[] converge;
 
             public Vector3[][] originalVertices;
+            public Color32[][] originalColors;
             public int length;
+
+            public Vector2 convergeTarget;
+            public Vector2[] scatterOffset;
+            public Color bleedColor = Color.black;
         }
 
         private static readonly Dictionary<TMP_Text, State> stateMap = new();
@@ -46,15 +54,24 @@ namespace UI.Effects
                 state.rot = new float[count];
                 state.shake = new float[count];
                 state.melt = new float[count];
+                state.pulse = new float[count];
+                state.bleed = new float[count];
+                state.converge = new float[count];
+                state.scatterOffset = new Vector2[count];
                 state.length = count;
 
                 state.originalVertices = new Vector3[textInfo.meshInfo.Length][];
+                state.originalColors = new Color32[textInfo.meshInfo.Length][];
 
                 for (int i = 0; i < textInfo.meshInfo.Length; i++)
                 {
-                    var src = textInfo.meshInfo[i].vertices;
-                    state.originalVertices[i] = new Vector3[src.Length];
-                    Array.Copy(src, state.originalVertices[i], src.Length);
+                    var srcV = textInfo.meshInfo[i].vertices;
+                    state.originalVertices[i] = new Vector3[srcV.Length];
+                    Array.Copy(srcV, state.originalVertices[i], srcV.Length);
+
+                    var srcC = textInfo.meshInfo[i].colors32;
+                    state.originalColors[i] = new Color32[srcC.Length];
+                    Array.Copy(srcC, state.originalColors[i], srcC.Length);
                 }
             }
 
@@ -83,7 +100,9 @@ namespace UI.Effects
                 int vertIndex = charInfo.vertexIndex;
 
                 var vertices = textInfo.meshInfo[matIndex].vertices;
+                var colors = textInfo.meshInfo[matIndex].colors32;
                 var original = state.originalVertices[matIndex];
+                var originalColors = state.originalColors[matIndex];
 
                 float fold = state.fold[i];
                 float shear = state.shear[i];
@@ -91,8 +110,21 @@ namespace UI.Effects
                 float rot = state.rot[i];
                 float shake = state.shake[i];
                 float melt = state.melt[i];
+                float pulse = state.pulse[i];
+                float bleed = state.bleed[i];
+                float converge = state.converge[i];
 
                 Vector3 pivot = (charInfo.bottomLeft + charInfo.topRight) * 0.5f;
+
+                // 🔥 converge (pivot을 target + scatter 지점으로 끌어당김)
+                Vector2 scatter = (state.scatterOffset != null && i < state.scatterOffset.Length)
+                    ? state.scatterOffset[i]
+                    : Vector2.zero;
+                Vector3 convergeDest = new Vector3(
+                    state.convergeTarget.x + scatter.x,
+                    state.convergeTarget.y + scatter.y,
+                    0f);
+                Vector3 convergeOffset = (convergeDest - pivot) * converge;
 
                 // 🔥 melt (글자 상단 고정, 하단이 늘어져 내림)
                 float topY = charInfo.topLeft.y;
@@ -112,6 +144,9 @@ namespace UI.Effects
                 // 🔥 shake (시간 기반)
                 float shakeX = Mathf.Sin(Time.time * 60f + i) * shake;
                 float shakeY = Mathf.Cos(Time.time * 50f + i) * shake;
+
+                // 🔥 pulse (pivot 기준 균일 스케일)
+                float pulseScale = 1f + pulse;
 
                 for (int j = 0; j < 4; j++)
                 {
@@ -143,7 +178,24 @@ namespace UI.Effects
                     ry -= melt * meltWeight * 80f;
                     rx += melt * meltWeight * dripPhase * 6f;
 
-                    vertices[idx] = pivot + new Vector3(rx, ry, 0f);
+                    // pulse (pivot 기준 스케일)
+                    rx *= pulseScale;
+                    ry *= pulseScale;
+
+                    vertices[idx] = pivot + convergeOffset + new Vector3(rx, ry, 0f);
+
+                    // bleed (vertex color를 bleedColor 쪽으로 블렌딩, 알파는 원본 유지)
+                    if (bleed > 0f)
+                    {
+                        Color baseCol = originalColors[idx];
+                        Color target = state.bleedColor;
+                        target.a = baseCol.a;
+                        colors[idx] = Color.Lerp(baseCol, target, bleed);
+                    }
+                    else
+                    {
+                        colors[idx] = originalColors[idx];
+                    }
                 }
             }
 
@@ -151,6 +203,7 @@ namespace UI.Effects
             {
                 var meshInfo = textInfo.meshInfo[i];
                 meshInfo.mesh.vertices = meshInfo.vertices;
+                meshInfo.mesh.colors32 = meshInfo.colors32;
                 text.UpdateGeometry(meshInfo.mesh, i);
             }
         }
@@ -170,6 +223,11 @@ namespace UI.Effects
             Array.Clear(state.rot, 0, state.rot.Length);
             Array.Clear(state.shake, 0, state.shake.Length);
             Array.Clear(state.melt, 0, state.melt.Length);
+            Array.Clear(state.pulse, 0, state.pulse.Length);
+            Array.Clear(state.bleed, 0, state.bleed.Length);
+            Array.Clear(state.converge, 0, state.converge.Length);
+            if (state.scatterOffset != null)
+                Array.Clear(state.scatterOffset, 0, state.scatterOffset.Length);
 
             ApplyAll(text, state);
         }
@@ -233,6 +291,56 @@ namespace UI.Effects
                 current = x;
                 for (int i = 0; i < state.melt.Length; i++)
                     state.melt[i] = x;
+
+                ApplyAll(text, state);
+            }, target, duration).SetEase(Ease.InCubic);
+        }
+
+        public static Tween DoPulse(this TMP_Text text, float target, float duration)
+        {
+            var state = GetState(text);
+            float current = state.pulse.Length > 0 ? state.pulse[0] : 0f;
+
+            return DOTween.To(() => current, x =>
+            {
+                current = x;
+                for (int i = 0; i < state.pulse.Length; i++)
+                    state.pulse[i] = x;
+
+                ApplyAll(text, state);
+            }, target, duration).SetEase(Ease.InOutSine);
+        }
+
+        public static Tween DoBleed(this TMP_Text text, float target, float duration, Color? bleedColor = null)
+        {
+            var state = GetState(text);
+            if (bleedColor.HasValue)
+                state.bleedColor = bleedColor.Value;
+
+            float current = state.bleed.Length > 0 ? state.bleed[0] : 0f;
+
+            return DOTween.To(() => current, x =>
+            {
+                current = x;
+                for (int i = 0; i < state.bleed.Length; i++)
+                    state.bleed[i] = x;
+
+                ApplyAll(text, state);
+            }, target, duration).SetEase(Ease.InOutQuad);
+        }
+
+        public static Tween DoConverge(this TMP_Text text, Vector2 targetLocal, float target, float duration)
+        {
+            var state = GetState(text);
+            state.convergeTarget = targetLocal;
+
+            float current = state.converge.Length > 0 ? state.converge[0] : 0f;
+
+            return DOTween.To(() => current, x =>
+            {
+                current = x;
+                for (int i = 0; i < state.converge.Length; i++)
+                    state.converge[i] = x;
 
                 ApplyAll(text, state);
             }, target, duration).SetEase(Ease.InCubic);
@@ -320,6 +428,59 @@ namespace UI.Effects
 
                 ApplyAll(text, state);
             }, totalDuration, totalDuration);
+        }
+
+        #endregion
+
+        #region ===== INK MONSTER =====
+
+        // 잉크괴물 등장 연출
+        //  Phase 1 (응집): 글자들이 랜덤하게 녹아내리며 중심-하단으로 수렴
+        //  Phase 2 (형성): 검정으로 번지며 팽창 + 떨림 → 덩어리 실루엣이 "숨쉬는" 상태
+        public static Sequence DoInkMonsterAppear(this TMP_Text text, float duration)
+        {
+            var state = GetState(text);
+            var textInfo = text.textInfo;
+
+            Vector2 min = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
+            Vector2 max = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
+            int visibleCount = 0;
+
+            for (int i = 0; i < textInfo.characterCount; i++)
+            {
+                if (!textInfo.characterInfo[i].isVisible) 
+                    continue;
+                
+                visibleCount++;
+
+                var ci = textInfo.characterInfo[i];
+                if (ci.bottomLeft.x < min.x) min.x = ci.bottomLeft.x;
+                if (ci.bottomLeft.y < min.y) min.y = ci.bottomLeft.y;
+                if (ci.topRight.x   > max.x) max.x = ci.topRight.x;
+                if (ci.topRight.y   > max.y) max.y = ci.topRight.y;
+            }
+
+            Vector2 target = visibleCount > 0
+                ? new Vector2((min.x + max.x) * 0.5f, min.y + (max.y - min.y) * 0.3f)
+                : Vector2.zero;
+
+            state.convergeTarget = target;
+
+            float t1 = duration * 0.55f;
+            float t2 = duration * 0.45f;
+
+            var seq = DOTween.Sequence();
+
+            // Phase 1 — 응집
+            seq.Append(text.DORandomMelt(1.2f, t1, 0.025f));
+            seq.Join(text.DoConverge(target, 1f, t1));
+
+            // Phase 2 — 형성 (검정 번짐 + 팽창 + 떨림)
+            seq.Append(text.DoBleed(1f, t2));
+            seq.Join(text.DoPulse(0.3f, t2));
+            seq.Join(text.DoShake(4f, t2));
+
+            return seq;
         }
 
         #endregion

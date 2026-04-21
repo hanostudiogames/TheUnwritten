@@ -144,9 +144,12 @@ namespace UI.Main
 
             var tmps = new List<TextMeshProUGUI>();
             
+            // if(act == 1 && scene)
             // if (postActionType == DialoguePostActionType.DoShearAllTMP ||
             //     postActionType == DialoguePostActionType.DoFoldAllTMP)
-                tmps.AddRange(_view.TMPsInDialogueSlots());
+            tmps.Add(tmp);
+            tmps.AddRange(_view.TMPsInDialogueSlots());
+                
             // else
             //     tmps.Add(tmp);
             

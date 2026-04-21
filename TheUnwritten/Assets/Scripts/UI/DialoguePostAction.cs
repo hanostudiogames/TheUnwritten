@@ -13,6 +13,7 @@ namespace UI
     public class DialogueAction
     {
         public DialogueActionType DialogueActionType = DialogueActionType.None;
+        public int TmpCount = 0;
         public float Duration = 0; 
         // public bool IsAwait = false;
         
@@ -24,8 +25,8 @@ namespace UI
     {
         public class Param
         {
-            // public TMP_Text TMP { get; private set; } = null;
             public List<TextMeshProUGUI> TMPs { get; private set; } = new();
+            
             public int ActIndex { get; private set; }
             public int SceneIndex { get; private set; }
             
@@ -53,15 +54,35 @@ namespace UI
             
             return this;
         }
+
+        private List<TextMeshProUGUI> GetTMPs(int count)
+        {
+            var tmps = _param?.TMPs;
+            if (tmps == null)
+                return null;
+
+            if (count <= 0)
+                return tmps;
+            
+            var resTmps = new List<TextMeshProUGUI>();
+            
+            for (int i = 0; i < tmps.Count; ++i)
+            {
+                var tmp = tmps[i];
+                if (tmp == null)
+                    continue;
+                
+                if(count > resTmps.Count)
+                    resTmps.Add(tmp);
+            }
+
+            return resTmps;
+        }
         
         public async UniTask ExecuteAsync()
         {
             var dialogueActions = _param?.DialogueActions;
             if (dialogueActions == null)
-                return;
-            
-            var tmps = _param?.TMPs;
-            if (tmps == null)
                 return;
 
             for (int i = 0; i < dialogueActions.Count; ++i)
@@ -69,7 +90,11 @@ namespace UI
                 var action = dialogueActions[i];
                 if(action == null)
                     continue;
-
+                
+                var tmps = GetTMPs(action.TmpCount);
+                if (tmps == null)
+                    continue;
+                
                 await UniTask.Delay(TimeSpan.FromSeconds(action.StartDelay));
                 
                 switch (action.DialogueActionType)
@@ -140,7 +165,51 @@ namespace UI
                         {
                             tmp.DORandomCollapse(action.Duration, 0.01f);
                         }
-                        
+
+                        break;
+                    }
+
+                    case DialogueActionType.Pulse:
+                    {
+                        foreach (var tmp in tmps)
+                        {
+                            tmp?.DoPulse(0.25f, action.Duration);
+                        }
+
+                        break;
+                    }
+
+                    case DialogueActionType.Bleed:
+                    {
+                        foreach (var tmp in tmps)
+                        {
+                            tmp?.DoBleed(1f, action.Duration);
+                        }
+
+                        break;
+                    }
+
+                    case DialogueActionType.Converge:
+                    {
+                        foreach (var tmp in tmps)
+                        {
+                            if (tmp == null) continue;
+
+                            var rect = tmp.rectTransform.rect;
+                            var target = new Vector2(rect.center.x, rect.yMin + rect.height * 0.3f);
+                            tmp.DoConverge(target, 1f, action.Duration);
+                        }
+
+                        break;
+                    }
+
+                    case DialogueActionType.InkMonsterAppear:
+                    {
+                        foreach (var tmp in tmps)
+                        {
+                            tmp?.DoInkMonsterAppear(action.Duration);
+                        }
+
                         break;
                     }
                 }
@@ -150,67 +219,6 @@ namespace UI
                 
                 await UniTask.Delay(TimeSpan.FromSeconds(action.EndDelay));
             }
-            
-            
-            // var tmps = _param?.TMPs;
-            // if (tmps == null)
-            //     return;
-            //
-            // switch (_param.ActionType)
-            // {
-            //     case DialoguePostActionType.DoShearAllTMP:
-            //     {
-            //         // await tmp.DORandomShake(10f, 1f, 0.1f).ToUniTask();
-            //         for (int i = 0; i < tmps.Count; ++i)
-            //         {
-            //             var tmp = tmps[i];
-            //             if (tmp == null)
-            //                 continue;
-            //             
-            //             tmp.DORandomShake(7f, 2f, 0.05f);
-            //         }
-            //
-            //         await UniTask.Delay(TimeSpan.FromSeconds(3f));
-            //        
-            //         for (int i = 0; i < tmps.Count; ++i)
-            //         {
-            //             var tmp = tmps[i];
-            //             if (tmp == null)
-            //                 continue;
-            //
-            //             tmp.DoShear(1f, 2f);
-            //         }
-            //         
-            //         // for (int i = 0; i < tmps.Count; i++)
-            //         // {
-            //         //     var tmp = tmps[i];
-            //         //     if (tmp == null)
-            //         //         continue;
-            //         //
-            //         //     tmp.DoFold(0.3f, 2f);
-            //         // }
-            //
-            //         await UniTask.Delay(TimeSpan.FromSeconds(3f));
-            //         
-            //         break;
-            //     }
-            //
-            //     case DialoguePostActionType.DoFoldAllTMP:
-            //     {
-            //         for (int i = 0; i < tmps.Count; ++i)
-            //         {
-            //             var tmp = tmps[i];
-            //             if (tmp == null)
-            //                 continue;
-            //
-            //             tmp.DoFold(0.5f, 5f);
-            //         }
-            //         
-            //         // await UniTask.Delay(TimeSpan.FromSeconds(3f));
-            //         
-            //         break;
-            //     }
-            // }
         }
     }
 }

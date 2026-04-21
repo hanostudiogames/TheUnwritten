@@ -22,8 +22,13 @@ namespace Common
         Shake,
         Melt,
         RandomMelt,
-        
+
         RandomCollapse,
+
+        Pulse,
+        Bleed,
+        Converge,
+        InkMonsterAppear,
     }
     
     // public enum FoodType
