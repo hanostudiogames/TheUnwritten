@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using System.Threading;
+using UnityEngine.UI;
 
 [ExecuteAlways]
 public class CardFanSpread : MonoBehaviour
@@ -17,10 +18,14 @@ public class CardFanSpread : MonoBehaviour
     [Header("애니메이션")]
     [SerializeField] private float duration = 0.25f;
 
+    private readonly List<CardSlot> _activeSlots = new();
+
     private Vector2[] _targetPositions;
     private float[] _targetRotations;
 
     private CancellationTokenSource _cts;
+
+    #region Unity
 
     private async void Start()
     {
@@ -28,40 +33,49 @@ public class CardFanSpread : MonoBehaviour
         
         foreach (var slot in slots)
         {
-            if (slot == null) continue;
-
-            var rt = slot.GetComponent<RectTransform>();
-            rt.anchoredPosition = new Vector2(0, -800f);
+            if (!IsValid(slot)) continue;
+            slot.Rect.anchoredPosition = new Vector2(0, -800f);
         }
-        
-        await UniTask.Yield(); // 슬롯 준비 기다림
 
-        // 👉 초기 카드 리스트 (외부에서 받거나, slots 복사)
-        var initialCards = new List<CardSlot>(slots);
-        await InitializeCards(initialCards);
+        await UniTask.Yield();
+
+        await InitializeCards(new List<CardSlot>(slots));
     }
 
-    void OnValidate()
+    private void OnValidate()
     {
         if (!Application.isPlaying)
             SpreadImmediate();
     }
+    
+    private async void OnEnable()
+    {
+        if (!Application.isPlaying)
+        {
+            await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
+            SpreadImmediate();
+        }
+    }
 
-    void OnDisable()
+    private void OnDisable()
     {
         _cts?.Cancel();
         _cts?.Dispose();
     }
-    
+
+    #endregion
+
+    #region Public
+
     public async UniTask InitializeCards(List<CardSlot> initialCards)
     {
         slots.Clear();
 
         foreach (var slot in initialCards)
         {
-            await AddCardAnimated(slot);
+            if (!IsValid(slot)) continue;
 
-            // 👉 한 장씩 템포 주기 (연출)
+            await AddCardAnimated(slot);
             await UniTask.Delay(10);
         }
     }
@@ -69,105 +83,59 @@ public class CardFanSpread : MonoBehaviour
     public void SetSelectable(bool value)
     {
         foreach (var slot in slots)
-        {
             slot?.SetSelectable(value);
-        }
     }
 
-    // 🔥 카드 추가 (핵심 함수)
     public async UniTask AddCardAnimated(CardSlot newSlot)
     {
+        if (!IsValid(newSlot)) return;
+
         slots.Add(newSlot);
 
-        RectTransform newRt = newSlot.GetComponent<RectTransform>();
+        newSlot.Rect.anchoredPosition = new Vector2(0, -400f);
+        newSlot.Rect.localScale = Vector3.one * 0.8f;
 
-        // 아래에서 등장
-        newRt.anchoredPosition = new Vector2(0, -400f);
-        newRt.localScale = Vector3.one * 0.8f;
-
-        await ShiftExistingCards();   // 기존 카드 밀기
-        await SpreadAnimated();       // 전체 정렬
+        await AnimateAll(0.15f); // 기존 카드 밀기
+        await AnimateAll(duration); // 전체 정렬
     }
 
     public void SpreadImmediate()
     {
-        int count = slots.Count;
-        if (count == 0) return;
+        BuildActiveSlots();
+        if (_activeSlots.Count == 0) 
+            return;
 
-        EnsureCache(count);
-        CalculateTargets(count);
+        EnsureCache(_activeSlots.Count);
+        CalculateTargets(_activeSlots.Count);
 
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < _activeSlots.Count; i++)
         {
-            var slot = slots[i];
-            if (slot == null) continue;
+            var slot = _activeSlots[i];
 
-            RectTransform rt = slot.GetComponent<RectTransform>();
+            slot.Rect.anchoredPosition = _targetPositions[i];
+            slot.Rect.localRotation = Quaternion.Euler(0, 0, _targetRotations[i]);
 
-            Vector2 pos = _targetPositions[i];
-            Quaternion rot = Quaternion.Euler(0, 0, _targetRotations[i]);
-
-            rt.SetSiblingIndex(i);
+            slot.Rect.SetSiblingIndex(i);
 
             if (slot.TryGetComponent<CardHover>(out var hover))
             {
                 hover.ForceExit();
-                hover.SetOrigin(pos, rot);
+                hover.SetOrigin(_targetPositions[i],
+                    Quaternion.Euler(0, 0, _targetRotations[i]));
             }
         }
     }
 
-    // 🔥 기존 카드 밀기
-    private async UniTask ShiftExistingCards()
+    #endregion
+
+    #region Core Animation
+
+    private async UniTask AnimateAll(float animDuration)
     {
-        int count = slots.Count;
-        if (count <= 1) return;
-
-        EnsureCache(count);
-        CalculateTargets(count);
-
-        float shiftDuration = 0.15f;
-
-        Vector2[] startPos = new Vector2[count];
-
-        for (int i = 0; i < count; i++)
-        {
-            var slot = slots[i];
-            if (slot == null) continue;
-
-            RectTransform rt = slot.GetComponent<RectTransform>();
-            startPos[i] = rt.anchoredPosition;
-
-            if (slot.TryGetComponent<CardHover>(out var hover))
-            {
-                hover.ForceExit();
-            }
-        }
-
-        float time = 0f;
-
-        while (time < shiftDuration)
-        {
-            time += Time.deltaTime;
-            float t = time / shiftDuration;
-
-            for (int i = 0; i < count - 1; i++)
-            {
-                var slot = slots[i];
-                if (slot == null) continue;
-
-                RectTransform rt = slot.GetComponent<RectTransform>();
-                rt.anchoredPosition = Vector2.Lerp(startPos[i], _targetPositions[i], t);
-            }
-
-            await UniTask.Yield();
-        }
-    }
-
-    public async UniTask SpreadAnimated()
-    {
-        int count = slots.Count;
-        if (count == 0) return;
+        BuildActiveSlots();
+        int count = _activeSlots.Count;
+        if (count == 0) 
+            return;
 
         _cts?.Cancel();
         _cts = new CancellationTokenSource();
@@ -181,53 +149,58 @@ public class CardFanSpread : MonoBehaviour
 
         for (int i = 0; i < count; i++)
         {
-            RectTransform rt = slots[i].GetComponent<RectTransform>();
-            startPos[i] = rt.anchoredPosition;
-            startRot[i] = rt.localEulerAngles.z;
+            var slot = _activeSlots[i];
+
+            startPos[i] = slot.Rect.anchoredPosition;
+            startRot[i] = slot.Rect.localEulerAngles.z;
+
+            if (slot.TryGetComponent<CardHover>(out var hover))
+                hover.ForceExit();
         }
 
         float time = 0f;
 
-        while (time < duration)
+        while (time < animDuration)
         {
             if (token.IsCancellationRequested) return;
 
             time += Time.deltaTime;
-            float t = 1f - Mathf.Pow(1f - (time / duration), 2f);
+            float t = 1f - Mathf.Pow(1f - (time / animDuration), 2f);
 
             for (int i = 0; i < count; i++)
             {
-                var slot = slots[i];
-                if (slot == null) continue;
+                var slot = _activeSlots[i];
 
-                RectTransform rt = slot.GetComponent<RectTransform>();
-
-                rt.anchoredPosition = Vector2.Lerp(startPos[i], _targetPositions[i], t);
+                slot.Rect.anchoredPosition =
+                    Vector2.Lerp(startPos[i], _targetPositions[i], t);
 
                 float rot = Mathf.LerpAngle(startRot[i], _targetRotations[i], t);
-                rt.localRotation = Quaternion.Euler(0, 0, rot);
+                slot.Rect.localRotation = Quaternion.Euler(0, 0, rot);
             }
 
             await UniTask.Yield(PlayerLoopTiming.Update, token);
         }
 
-        // 🔥 최종 정렬 (ForceExit 없음)
+        // 최종 보정
         for (int i = 0; i < count; i++)
         {
-            var slot = slots[i];
-            if (slot == null) continue;
+            var slot = _activeSlots[i];
 
-            RectTransform rt = slot.GetComponent<RectTransform>();
-
-            rt.anchoredPosition = _targetPositions[i];
-            rt.localRotation = Quaternion.Euler(0, 0, _targetRotations[i]);
+            slot.Rect.anchoredPosition = _targetPositions[i];
+            slot.Rect.localRotation =
+                Quaternion.Euler(0, 0, _targetRotations[i]);
 
             if (slot.TryGetComponent<CardHover>(out var hover))
             {
-                hover.SetOrigin(_targetPositions[i], Quaternion.Euler(0, 0, _targetRotations[i]));
+                hover.SetOrigin(_targetPositions[i],
+                    Quaternion.Euler(0, 0, _targetRotations[i]));
             }
         }
     }
+
+    #endregion
+
+    #region Layout
 
     private void CalculateTargets(int count)
     {
@@ -263,4 +236,26 @@ public class CardFanSpread : MonoBehaviour
             _targetRotations = new float[count];
         }
     }
+
+    #endregion
+
+    #region Helpers
+
+    private void BuildActiveSlots()
+    {
+        _activeSlots.Clear();
+
+        for (int i = 0; i < slots.Count; ++i)
+        {
+            var slot = slots[i];
+            if (IsValid(slot))
+                _activeSlots.Add(slot);
+        }
+    }
+
+    private bool IsValid(CardSlot slot)
+    {
+        return slot != null && slot.isActiveAndEnabled;
+    }
+    #endregion
 }

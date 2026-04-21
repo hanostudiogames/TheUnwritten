@@ -35,6 +35,7 @@ MonoBehaviour:
       - rid: 6598480915748356349
       - rid: 6598480915748356402
       - rid: 6598480915748356401
+      - rid: 6598480915748356465
   references:
     version: 2
     RefIds:
@@ -45,6 +46,7 @@ MonoBehaviour:
         TypingSpeed: 0.08
         EndDelaySeconds: 0.3
         AnswerIds: 
+        CardIds: 
         DialogueActions: []
     - rid: 6598480787560726630
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
@@ -53,6 +55,7 @@ MonoBehaviour:
         TypingSpeed: 0.1
         EndDelaySeconds: 0.5
         AnswerIds: 
+        CardIds: 
         DialogueActions: []
     - rid: 6598480897316487168
       type: {class: CharacterSpeechRecord, ns: Tables.Records, asm: Assembly-CSharp}
@@ -61,6 +64,7 @@ MonoBehaviour:
         TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 
+        CardIds: 
         DialogueActions: []
         CharacterLocalKey: 
     - rid: 6598480897316487260
@@ -70,6 +74,7 @@ MonoBehaviour:
         TypingSpeed: 0.5
         EndDelaySeconds: 1
         AnswerIds: 
+        CardIds: 
         DialogueActions: []
     - rid: 6598480897316487261
       type: {class: CharacterSpeechRecord, ns: Tables.Records, asm: Assembly-CSharp}
@@ -78,6 +83,7 @@ MonoBehaviour:
         TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 010000000200000003000000
+        CardIds: 
         DialogueActions: []
         CharacterLocalKey: 
     - rid: 6598480897316487262
@@ -87,6 +93,7 @@ MonoBehaviour:
         TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 
+        CardIds: 
         DialogueActions: []
     - rid: 6598480897316487342
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
@@ -95,6 +102,7 @@ MonoBehaviour:
         TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 
+        CardIds: 
         DialogueActions: []
     - rid: 6598480897316487356
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
@@ -103,6 +111,7 @@ MonoBehaviour:
         TypingSpeed: 0.2
         EndDelaySeconds: 1
         AnswerIds: 
+        CardIds: 
         DialogueActions:
         - DialogueActionType: 3
           TmpCount: 0
@@ -123,6 +132,7 @@ MonoBehaviour:
         TypingSpeed: 0.2
         EndDelaySeconds: 1
         AnswerIds: 
+        CardIds: 
         DialogueActions:
         - DialogueActionType: 2
           TmpCount: 0
@@ -137,6 +147,7 @@ MonoBehaviour:
         TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 
+        CardIds: 
         DialogueActions: []
     - rid: 6598480915748356340
       type: {class: CharacterSpeechRecord, ns: Tables.Records, asm: Assembly-CSharp}
@@ -145,6 +156,7 @@ MonoBehaviour:
         TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 
+        CardIds: 
         DialogueActions: []
         CharacterLocalKey: 
     - rid: 6598480915748356342
@@ -154,6 +166,7 @@ MonoBehaviour:
         TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 
+        CardIds: 
         DialogueActions: []
     - rid: 6598480915748356348
       type: {class: CharacterSpeechRecord, ns: Tables.Records, asm: Assembly-CSharp}
@@ -162,6 +175,7 @@ MonoBehaviour:
         TypingSpeed: 0.2
         EndDelaySeconds: 0
         AnswerIds: 
+        CardIds: 
         DialogueActions: []
         CharacterLocalKey: 
     - rid: 6598480915748356349
@@ -171,6 +185,7 @@ MonoBehaviour:
         TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 
+        CardIds: 
         DialogueActions:
         - DialogueActionType: 6
           TmpCount: 1
@@ -189,9 +204,22 @@ MonoBehaviour:
       data:
         LocalKey: 16
         TypingSpeed: 0.1
-        EndDelaySeconds: 5
+        EndDelaySeconds: 6
         AnswerIds: 
-        DialogueActions: []
+        CardIds: 
+        DialogueActions:
+        - DialogueActionType: 6
+          TmpCount: 1
+          Duration: 2
+          TargetValue: 1
+          StartDelay: 0
+          EndDelay: 0
+        - DialogueActionType: 2
+          TmpCount: 1
+          Duration: 2
+          TargetValue: 0.6
+          StartDelay: 0
+          EndDelay: 1
         CharacterLocalKey: 
     - rid: 6598480915748356402
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
@@ -200,6 +228,7 @@ MonoBehaviour:
         TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 
+        CardIds: 
         DialogueActions:
         - DialogueActionType: 11
           TmpCount: 1
@@ -207,3 +236,12 @@ MonoBehaviour:
           TargetValue: 0
           StartDelay: 0
           EndDelay: 0
+    - rid: 6598480915748356465
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 17
+        TypingSpeed: 0.1
+        EndDelaySeconds: 1
+        AnswerIds: 
+        CardIds: 00000000
+        DialogueActions: []

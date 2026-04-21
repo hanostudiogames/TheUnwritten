@@ -32,6 +32,7 @@ namespace UI.Main
         
         private UniTaskCompletionSource _dialogueCompletionSource = null;
         private UniTaskCompletionSource _answerCompletionSource = null;
+        private UniTaskCompletionSource _cardCompletionSource = null;
         private DialoguePostAction _dialoguePostAction = null;
         
         public MainPresenter(MainView view, MainModel model, IGameManager gameManager, UIManager uiManager) : base (view, model)
@@ -102,6 +103,7 @@ namespace UI.Main
 
                 await ExecuteDialoguePostActionAsync(dialogueSlot.TMP, act, scene, dialogue.DialogueActions);
                 await ActiveAnswerAsync(dialogue.AnswerIds);
+                await ActiveCardAsync(dialogue.CardIds);
             }
             
             await _view.ScrollToAsync(0);
@@ -143,16 +145,10 @@ namespace UI.Main
                 return;
 
             var tmps = new List<TextMeshProUGUI>();
-            
-            // if(act == 1 && scene)
-            // if (postActionType == DialoguePostActionType.DoShearAllTMP ||
-            //     postActionType == DialoguePostActionType.DoFoldAllTMP)
+ 
             tmps.Add(tmp);
             tmps.AddRange(_view.TMPsInDialogueSlots());
-                
-            // else
-            //     tmps.Add(tmp);
-            
+
             var param = new DialoguePostAction.Param(tmps, act, scene)
                 .WithDialogueActions(dialogueActions);
 
@@ -176,6 +172,19 @@ namespace UI.Main
                     
             _view.DisableScrollRect();
             await _view.ScrollToAsync(_view.ViewportHalfHeight);
+        }
+
+        private async UniTask ActiveCardAsync(int[] cardIds)
+        {
+            if (cardIds == null || cardIds.Length <= 0)
+                return;
+
+            _cardCompletionSource = new  UniTaskCompletionSource();
+            
+            _view.ShowCards();
+            await _view.ScrollToAsync(0);
+            
+            await _cardCompletionSource.Task;
         }
         
         #region CharacterSpeechSlot.Listener

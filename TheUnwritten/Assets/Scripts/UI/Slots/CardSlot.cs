@@ -6,7 +6,11 @@ public class CardSlot : MonoBehaviour,
     IPointerExitHandler,
     IPointerClickHandler
 {
+    [SerializeField] private RectTransform rectTr = null;
+    
     private CardHover _hover;
+
+    public RectTransform Rect => rectTr;
 
     public bool IsSelectable { get; private set; }
 

@@ -18,24 +18,25 @@ namespace UI.Main
     public class MainView : Common.View<MainPresenter>
     {
         [SerializeField] private RectTransform bgRectTr = null;
+        [SerializeField] private CardFanSpread cardFanSpread = null;
         
         [Header("Narrative")]
         [SerializeField] private ScrollRect narrativeScrollRect = null;
         [SerializeField] private RectTransform narrativeRootRectTr = null;
         [SerializeField] private RectTransform answersRootRectTr = null;
         
-        [Header("Governance")]
-        [SerializeField] private RectTransform actionsRootRectTr = null;
-        [SerializeField] private RectTransform charactersRootRectTr = null;
+        // [Header("Governance")]
+        // [SerializeField] private RectTransform actionsRootRectTr = null;
+        // [SerializeField] private RectTransform charactersRootRectTr = null;
 
         // private UIFactory _uiFactory = null;
         // private List<ICharacterSlot> _characterSlots = null;
         private List<IAnswerSlot> _answerSlots = null; 
         private List<IDialogueSlot> _dialogueSlots = null;
         
-        private Vector2 _actionsOriginalMin;
-        private Vector2 _actionsOriginalMax;
-        private Vector2 _charactersOriginalMin;
+        // private Vector2 _actionsOriginalMin;
+        // private Vector2 _actionsOriginalMax;
+        // private Vector2 _charactersOriginalMin;
         
         public float ViewportHalfHeight
         {
@@ -54,9 +55,9 @@ namespace UI.Main
 
             _dialogueSlots = new();
             
-            _actionsOriginalMin = actionsRootRectTr.offsetMin;
-            _actionsOriginalMax = actionsRootRectTr.offsetMax;
-            _charactersOriginalMin = charactersRootRectTr.offsetMin;
+            // _actionsOriginalMin = actionsRootRectTr.offsetMin;
+            // _actionsOriginalMax = actionsRootRectTr.offsetMax;
+            // _charactersOriginalMin = charactersRootRectTr.offsetMin;
         }
         
         public override void Activate()
@@ -65,47 +66,6 @@ namespace UI.Main
             
             
         }
-
-        // public void InitializeCharacterSlots()
-        // {
-        //     var characterSlots = charactersRootRectTr.GetComponentsInChildren<CharacterSlot>();
-        //     if (characterSlots == null)
-        //         return;
-        //
-        //     var characterRecords = CharacterTableContainer.Instance?.CharacterRecords;
-        //     if (characterRecords == null)
-        //         return;
-        //     
-        //     if(_characterSlots == null)
-        //         _characterSlots = new();
-        //     
-        //     for (int i = 0; i < characterSlots.Length; ++i)
-        //     {
-        //         var characterSlot = characterSlots[i];
-        //         if(characterSlot == null)
-        //             continue;
-        //
-        //         if (characterRecords.Count <= i)
-        //         {
-        //             characterSlot.Deactivate();
-        //             continue;
-        //         }
-        //
-        //         var characterEntry = characterRecords[i]?.CharacterEntry;
-        //         if (characterEntry == null)
-        //         {
-        //             characterSlot.Deactivate();
-        //             continue;
-        //         }
-        //
-        //         var param = new CharacterSlot.Param(characterRecords[i])
-        //             .WithRelationship(characterEntry.Relationship);
-        //         
-        //         characterSlot.Initialize(param);
-        //         
-        //         _characterSlots?.Add(characterSlot);
-        //     }
-        // }
 
         public void InitializeAnswerSlots(AnswerSlot.IListener listener)
         {
@@ -182,68 +142,33 @@ namespace UI.Main
                 narrativeScrollRect.enabled = false;
         }
 
-        // public void OnModeChanged(GameMode mode)
+        // private async UniTask ShowNarrativePanelAsync()
         // {
-        //     switch (mode)
-        //     {
-        //         case GameMode.Narrative:
-        //             ShowNarrativePanelAsync().Forget();
-        //             break;
-        //             
-        //         case GameMode.Governance:
-        //             // ShowGovernancePanelAsync(0.3f).Forget();
-        //             break;
-        //     }
-        // }
-
-        private async UniTask ShowNarrativePanelAsync()
-        {
-            HideAnswersAsync().Forget();
-            await HideGovernancePanelAsync(0.3f);
-            
-            narrativeRootRectTr.gameObject.SetActive(true);
-        }
-
-        // private async UniTask HideNarrativePanelAsync()
-        // {
-        //     narrativeRootRectTr.gameObject.SetActive(false);
-        // }
-
-        // private async UniTask ShowGovernancePanelAsync(float duration)
-        // {
-        //     await HideNarrativePanelAsync();
+        //     HideAnswersAsync().Forget();
+        //     await HideGovernancePanelAsync(0.3f);
         //     
+        //     narrativeRootRectTr.gameObject.SetActive(true);
+        // }
+
+        // private async UniTask HideGovernancePanelAsync(float duration)
+        // {
         //     if (actionsRootRectTr == null)
         //         return;
         //
         //     if (charactersRootRectTr == null)
         //         return;
         //     
+        //     var offsetX = 200f;
+        //
+        //     var actionsMoveX = _actionsOriginalMin.x - (_actionsOriginalMax.x + actionsRootRectTr.rect.width) - offsetX;
+        //     var charactersMoveX =
+        //         _charactersOriginalMin.x + (charactersRootRectTr.rect.width - _charactersOriginalMin.x) + offsetX;
+        //     
         //     await UniTask.WhenAll(
-        //         actionsRootRectTr.DoOffsetMoveX(_actionsOriginalMin.x, duration),
-        //         charactersRootRectTr.DoOffsetMoveX(_charactersOriginalMin.x, duration)
+        //         actionsRootRectTr.DoOffsetMoveX(actionsMoveX, duration),
+        //         charactersRootRectTr.DoOffsetMoveX(charactersMoveX, duration)
         //     );
         // }
-
-        private async UniTask HideGovernancePanelAsync(float duration)
-        {
-            if (actionsRootRectTr == null)
-                return;
-
-            if (charactersRootRectTr == null)
-                return;
-            
-            var offsetX = 200f;
-
-            var actionsMoveX = _actionsOriginalMin.x - (_actionsOriginalMax.x + actionsRootRectTr.rect.width) - offsetX;
-            var charactersMoveX =
-                _charactersOriginalMin.x + (charactersRootRectTr.rect.width - _charactersOriginalMin.x) + offsetX;
-            
-            await UniTask.WhenAll(
-                actionsRootRectTr.DoOffsetMoveX(actionsMoveX, duration),
-                charactersRootRectTr.DoOffsetMoveX(charactersMoveX, duration)
-            );
-        }
 
         public List<TextMeshProUGUI> TMPsInDialogueSlots()
         {
@@ -314,27 +239,27 @@ namespace UI.Main
         }
         #endregion
 
+        public void ShowCards()
+        {
+            if (cardFanSpread == null)
+                return;
+            
+            cardFanSpread.gameObject.SetActive(true);
+        }
+
         public void OnDimensionChanged(bool isPortrait, UniTaskStatus answerStatus)
         {
             if(bgRectTr)
                 bgRectTr.localRotation = isPortrait ? Quaternion.identity : Quaternion.Euler(0, 0, 90f);
             
             // if (mode == GameMode.Narrative)
-                HideGovernancePanelAsync(0).Forget();
+                // HideGovernancePanelAsync(0).Forget();
 
             float scrollPositionY = 0;
             if (answerStatus != UniTaskStatus.Pending)
                 scrollPositionY = ViewportHalfHeight;
                 
             ScrollToAsync(scrollPositionY).Forget();
-
-            // if (_characterSlots != null)
-            // {
-            //     foreach (var characterSlot in _characterSlots)
-            //     {
-            //         characterSlot?.OnDimensionChanged(isPortrait);
-            //     }
-            // }
         }
     }
 }

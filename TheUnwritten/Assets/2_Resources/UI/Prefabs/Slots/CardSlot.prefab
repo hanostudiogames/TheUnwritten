@@ -188,6 +188,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1690975564ee476a888076019ad3c3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardSlot
+  rectTr: {fileID: 3867462257892393861}
 --- !u!114 &6018694827896047208
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -202,7 +203,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CardHover
   rectTr: {fileID: 3867462257892393861}
   hoverScale: 1.2
-  hoverHeight: 80
+  hoverHeight: 120
   duration: 0.15
 --- !u!1 &3932305822216793463
 GameObject:
