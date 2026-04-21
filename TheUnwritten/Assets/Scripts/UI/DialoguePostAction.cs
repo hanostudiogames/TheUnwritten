@@ -4,23 +4,12 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 using Common;
+using DG.Tweening;
 using TMPro;
 using UI.Effects;
 
 namespace UI
 {
-    [Serializable]
-    public class DialogueAction
-    {
-        public DialogueActionType DialogueActionType = DialogueActionType.None;
-        public int TmpCount = 0;
-        public float Duration = 0; 
-        // public bool IsAwait = false;
-        
-        public float StartDelay = 0;
-        public float EndDelay = 0;
-    }
-    
     public class DialoguePostAction
     {
         public class Param
@@ -95,7 +84,7 @@ namespace UI
                 if (tmps == null)
                     continue;
                 
-                await UniTask.Delay(TimeSpan.FromSeconds(action.StartDelay));
+                // await UniTask.Delay(TimeSpan.FromSeconds(action.StartDelay));
                 
                 switch (action.DialogueActionType)
                 {
@@ -103,7 +92,8 @@ namespace UI
                     {
                         foreach (var tmp in tmps)
                         {
-                            tmp?.DoShear(1f, action.Duration);
+                            tmp?.DoShear(1f, action.Duration)?
+                                .SetDelay(action.StartDelay);
                         }
 
                         break;
@@ -113,7 +103,8 @@ namespace UI
                     {
                         foreach (var tmp in tmps)
                         {
-                            tmp?.DoFold(0.5f, action.Duration);
+                            tmp?.DoFold(action.TargetValue, action.Duration)?
+                                .SetDelay(action.StartDelay);
                         }
        
                         break;
@@ -133,7 +124,8 @@ namespace UI
                     {
                         foreach (var tmp in tmps)
                         {
-                            tmp?.DoMelt(1f, action.Duration);
+                            tmp?.DoMelt(1f, action.Duration)?
+                                .SetDelay(action.StartDelay);
                         }
 
                         break;
@@ -143,7 +135,8 @@ namespace UI
                     {
                         foreach (var tmp in tmps)
                         {
-                            tmp?.DORandomMelt(1f, action.Duration, 0.05f);
+                            tmp?.DORandomMelt(action.TargetValue, action.Duration, 0.05f)?
+                                .SetDelay(action.StartDelay);
                         }
 
                         break;
@@ -193,7 +186,8 @@ namespace UI
                     {
                         foreach (var tmp in tmps)
                         {
-                            if (tmp == null) continue;
+                            if (tmp == null) 
+                                continue;
 
                             var rect = tmp.rectTransform.rect;
                             var target = new Vector2(rect.center.x, rect.yMin + rect.height * 0.3f);

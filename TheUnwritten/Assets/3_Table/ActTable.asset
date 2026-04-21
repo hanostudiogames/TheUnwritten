@@ -105,15 +105,17 @@ MonoBehaviour:
         AnswerIds: 
         DialogueActions:
         - DialogueActionType: 3
-          Duration: 2
-          StartDelay: 0
-          EndDelay: 3
           TmpCount: 0
+          Duration: 2
+          TargetValue: 0
+          StartDelay: 0
+          EndDelay: 2.5
         - DialogueActionType: 1
+          TmpCount: 0
           Duration: 4
+          TargetValue: 0
           StartDelay: 0
           EndDelay: 5
-          TmpCount: 0
     - rid: 6598480897316487435
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
       data:
@@ -123,10 +125,11 @@ MonoBehaviour:
         AnswerIds: 
         DialogueActions:
         - DialogueActionType: 2
+          TmpCount: 0
           Duration: 10
+          TargetValue: 0.5
           StartDelay: 0
           EndDelay: 0
-          TmpCount: 0
     - rid: 6598480897316487448
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
       data:
@@ -157,7 +160,7 @@ MonoBehaviour:
       data:
         LocalKey: 13
         TypingSpeed: 0.2
-        EndDelaySeconds: 1
+        EndDelaySeconds: 0
         AnswerIds: 
         DialogueActions: []
         CharacterLocalKey: 
@@ -170,21 +173,23 @@ MonoBehaviour:
         AnswerIds: 
         DialogueActions:
         - DialogueActionType: 6
-          Duration: 5
-          StartDelay: 0
-          EndDelay: 0
           TmpCount: 1
+          Duration: 5
+          TargetValue: 1.2
+          StartDelay: 2.5
+          EndDelay: 0
         - DialogueActionType: 2
-          Duration: 5
-          StartDelay: 0
-          EndDelay: 0
           TmpCount: 1
+          Duration: 5
+          TargetValue: 0.65
+          StartDelay: 2.5
+          EndDelay: 0
     - rid: 6598480915748356401
       type: {class: CharacterSpeechRecord, ns: Tables.Records, asm: Assembly-CSharp}
       data:
         LocalKey: 16
         TypingSpeed: 0.1
-        EndDelaySeconds: 1
+        EndDelaySeconds: 5
         AnswerIds: 
         DialogueActions: []
         CharacterLocalKey: 
@@ -192,12 +197,13 @@ MonoBehaviour:
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
       data:
         LocalKey: 15
-        TypingSpeed: 0.2
+        TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 
         DialogueActions:
         - DialogueActionType: 11
+          TmpCount: 1
           Duration: 10
+          TargetValue: 0
           StartDelay: 0
           EndDelay: 0
-          TmpCount: 1

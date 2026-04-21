@@ -155,9 +155,6 @@ namespace UI.Effects
                     Vector3 v = original[idx];
                     Vector3 dir = v - pivot;
 
-                    // fold
-                    dir.y *= (1f - ft);
-
                     // shear
                     dir.x += dir.y * shear;
 
@@ -177,6 +174,9 @@ namespace UI.Effects
                     float meltWeight = fromTop * fromTop;
                     ry -= melt * meltWeight * 80f;
                     rx += melt * meltWeight * dripPhase * 6f;
+
+                    // fold — melt를 포함한 최종 수직 변위를 압축 (녹은 글자가 바닥으로 깔림)
+                    ry *= (1f - ft);
 
                     // pulse (pivot 기준 스케일)
                     rx *= pulseScale;
@@ -266,7 +266,7 @@ namespace UI.Effects
             }, target, duration).SetEase(Ease.InOutSine);
         }
 
-        public static Tween DoShake(this TMP_Text text, float strength, float duration)
+        public static Tween DoShake(this TMP_Text text, float target, float duration)
         {
             var state = GetState(text);
             float current = 0f;
@@ -278,7 +278,7 @@ namespace UI.Effects
                     state.shake[i] = x;
 
                 ApplyAll(text, state);
-            }, strength, duration).SetEase(Ease.InOutSine);
+            }, target, duration).SetEase(Ease.InOutSine);
         }
 
         public static Tween DoMelt(this TMP_Text text, float target, float duration)
@@ -473,7 +473,7 @@ namespace UI.Effects
 
             // Phase 1 — 응집
             seq.Append(text.DORandomMelt(1.2f, t1, 0.025f));
-            seq.Join(text.DoConverge(target, 1f, t1));
+            seq.Join(text.DoConverge(target, 0.75f, t1));
 
             // Phase 2 — 형성 (검정 번짐 + 팽창 + 떨림)
             seq.Append(text.DoBleed(1f, t2));

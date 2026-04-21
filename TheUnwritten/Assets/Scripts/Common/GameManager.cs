@@ -47,11 +47,6 @@ namespace Common
             _gameInfoService = gameInfoService;
             _uiManager = uiManager;
         }
-        
-        public void Initialize()
-        {
-            
-        }
 
         public async UniTask StartActAsync(int act, int scene)
         {

@@ -105,7 +105,7 @@ namespace UI.Main
             }
             
             await _view.ScrollToAsync(0);
-            await UniTask.Delay(TimeSpan.FromSeconds(5f));
+            // await UniTask.Delay(TimeSpan.FromSeconds(5f));
             
             _view.EnableScrollRect();
         }

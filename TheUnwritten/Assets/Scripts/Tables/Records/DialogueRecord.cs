@@ -16,9 +16,9 @@ namespace Tables.Records
         public float EndDelaySeconds = 1f;
 
         public int[] AnswerIds = null;
+        public int[] CardIds = null;
 
         public List<DialogueAction> DialogueActions = null;
-        // public DialoguePostActionType PostActionType = DialoguePostActionType.None;
     }
 
     [Serializable]
