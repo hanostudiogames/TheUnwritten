@@ -311,7 +311,8 @@ namespace UI.Effects
                 for (int order = 0; order < count; order++)
                 {
                     int i = indices[order];
-                    if (!textInfo.characterInfo[i].isVisible) continue;
+                    if (!textInfo.characterInfo[i].isVisible) 
+                        continue;
 
                     float t = Mathf.Clamp01((time - order * delayStep) / duration);
                     state.melt[i] = t * t * target;
