@@ -64,45 +64,62 @@ namespace UI.Components
             string wrappedText = await PreWrapAsync(text);
 
             typingText?.SetText(string.Empty);
+
+            // 타이핑 중에는 auto word-wrap 을 꺼서 이미 삽입된 \n 만으로 줄이 나뉘도록 한다.
+            // 그렇지 않으면 증분 SetText 도중 TMP 가 임시 길이로 재 wrap 을 시도해
+            // 단어가 다시 튀는 현상이 생긴다.
+            bool prevWordWrapping = true;
             if (typingText != null)
-                typingText.maxVisibleCharacters = int.MaxValue;
-
-            if (_param != null)
-                await UniTask.Delay(TimeSpan.FromSeconds(_param.StartDelaySeconds));
-
-            string currentText = "";
-            float typingSpeed = _param?.TypingSpeed ?? 0.05f;
-
-            // 정규식을 통해 태그와 텍스트 분리
-            MatchCollection matches = Regex.Matches(wrappedText, @"(<[^>]+>|[ \t]+\n|\n|[^<])");
-
-            for (int i = 0; i < matches.Count; i++)
             {
-                if (_isEnd)
-                {
-                    typingText?.SetText(wrappedText);
-                    return;
-                }
-
-                string part = matches[i].Value;
-                currentText += part;
-
-                typingText?.SetText(currentText);
-
-                bool isTag = part.StartsWith("<");
-                bool isSpriteTag = part.StartsWith("<sprite");
-
-                // sprite는 딜레이 포함
-                if (!isTag || isSpriteTag)
-                    await UniTask.Delay(TimeSpan.FromSeconds(typingSpeed));
+                prevWordWrapping = typingText.enableWordWrapping;
+                typingText.enableWordWrapping = false;
+                typingText.maxVisibleCharacters = int.MaxValue;
             }
 
-            typingText?.SetText(wrappedText);
-
-            if (_param != null)
+            try
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(_param.EndDelaySeconds));
-                _param.CompleteAction?.Invoke();
+                if (_param != null)
+                    await UniTask.Delay(TimeSpan.FromSeconds(_param.StartDelaySeconds));
+
+                string currentText = "";
+                float typingSpeed = _param?.TypingSpeed ?? 0.05f;
+
+                // 정규식을 통해 태그와 텍스트 분리
+                MatchCollection matches = Regex.Matches(wrappedText, @"(<[^>]+>|[ \t]+\n|\n|[^<])");
+
+                for (int i = 0; i < matches.Count; i++)
+                {
+                    if (_isEnd)
+                    {
+                        typingText?.SetText(wrappedText);
+                        return;
+                    }
+
+                    string part = matches[i].Value;
+                    currentText += part;
+
+                    typingText?.SetText(currentText);
+
+                    bool isTag = part.StartsWith("<");
+                    bool isSpriteTag = part.StartsWith("<sprite");
+
+                    // sprite는 딜레이 포함
+                    if (!isTag || isSpriteTag)
+                        await UniTask.Delay(TimeSpan.FromSeconds(typingSpeed));
+                }
+
+                typingText?.SetText(wrappedText);
+
+                if (_param != null)
+                {
+                    await UniTask.Delay(TimeSpan.FromSeconds(_param.EndDelaySeconds));
+                    _param.CompleteAction?.Invoke();
+                }
+            }
+            finally
+            {
+                if (typingText != null)
+                    typingText.enableWordWrapping = prevWordWrapping;
             }
         }
 
@@ -131,12 +148,15 @@ namespace UI.Components
                     continue;
 
                 int srcIdx = info.characterInfo[lastCharIdx].index;
+                int insertPos = srcIdx + 1;
 
-                // 이미 \n 으로 끝난 라인은 스킵.
+                // 삽입 위치 양옆이 이미 \n 이면 스킵(이중 개행 방지).
                 if (srcIdx >= 0 && srcIdx < text.Length && text[srcIdx] == '\n')
                     continue;
+                if (insertPos < text.Length && text[insertPos] == '\n')
+                    continue;
 
-                insertPositions.Add(srcIdx + 1);
+                insertPositions.Add(insertPos);
             }
 
             if (insertPositions.Count == 0)
