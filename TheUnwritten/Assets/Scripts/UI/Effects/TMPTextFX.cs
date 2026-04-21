@@ -17,6 +17,7 @@ namespace UI.Effects
             public float[] fall;
             public float[] rot;
             public float[] shake;
+            public float[] melt;
 
             public Vector3[][] originalVertices;
             public int length;
@@ -44,6 +45,7 @@ namespace UI.Effects
                 state.fall = new float[count];
                 state.rot = new float[count];
                 state.shake = new float[count];
+                state.melt = new float[count];
                 state.length = count;
 
                 state.originalVertices = new Vector3[textInfo.meshInfo.Length][];
@@ -88,8 +90,15 @@ namespace UI.Effects
                 float fall = state.fall[i];
                 float rot = state.rot[i];
                 float shake = state.shake[i];
+                float melt = state.melt[i];
 
                 Vector3 pivot = (charInfo.bottomLeft + charInfo.topRight) * 0.5f;
+
+                // 🔥 melt (글자 상단 고정, 하단이 늘어져 내림)
+                float topY = charInfo.topLeft.y;
+                float bottomY = charInfo.bottomLeft.y;
+                float charHeight = Mathf.Max(topY - bottomY, 0.0001f);
+                float dripPhase = Mathf.Sin(i * 1.37f) + Mathf.Sin(i * 0.53f) * 0.5f;
 
                 // 🔥 fold ease
                 float ft = 1f - Mathf.Pow(1f - fold, 3f);
@@ -128,6 +137,12 @@ namespace UI.Effects
                     rx += shakeX;
                     ry += shakeY;
 
+                    // melt (상단=0, 하단=1 인 비선형 가중치로 늘어트림)
+                    float fromTop = Mathf.Clamp01((topY - v.y) / charHeight);
+                    float meltWeight = fromTop * fromTop;
+                    ry -= melt * meltWeight * 80f;
+                    rx += melt * meltWeight * dripPhase * 6f;
+
                     vertices[idx] = pivot + new Vector3(rx, ry, 0f);
                 }
             }
@@ -154,6 +169,7 @@ namespace UI.Effects
             Array.Clear(state.fall, 0, state.fall.Length);
             Array.Clear(state.rot, 0, state.rot.Length);
             Array.Clear(state.shake, 0, state.shake.Length);
+            Array.Clear(state.melt, 0, state.melt.Length);
 
             ApplyAll(text, state);
         }
@@ -207,6 +223,21 @@ namespace UI.Effects
             }, strength, duration).SetEase(Ease.InOutSine);
         }
 
+        public static Tween DoMelt(this TMP_Text text, float target, float duration)
+        {
+            var state = GetState(text);
+            float current = state.melt.Length > 0 ? state.melt[0] : 0f;
+
+            return DOTween.To(() => current, x =>
+            {
+                current = x;
+                for (int i = 0; i < state.melt.Length; i++)
+                    state.melt[i] = x;
+
+                ApplyAll(text, state);
+            }, target, duration).SetEase(Ease.InCubic);
+        }
+
         #endregion
 
         #region ===== RANDOM COLLAPSE =====
@@ -247,6 +278,46 @@ namespace UI.Effects
 
                 ApplyAll(text, state);
             }, totalDuration, totalDuration).SetEase(Ease.OutCubic);
+        }
+
+        #endregion
+
+        #region ===== RANDOM MELT =====
+
+        public static Tween DORandomMelt(this TMP_Text text, float target, float duration, float delayStep)
+        {
+            var state = GetState(text);
+            var textInfo = text.textInfo;
+
+            int count = textInfo.characterCount;
+
+            int[] indices = new int[count];
+            for (int i = 0; i < count; i++) indices[i] = i;
+
+            for (int i = 0; i < count; i++)
+            {
+                int rand = UnityEngine.Random.Range(i, count);
+                (indices[i], indices[rand]) = (indices[rand], indices[i]);
+            }
+
+            float time = 0f;
+            float totalDuration = duration + delayStep * (count - 1);
+
+            return DOTween.To(() => time, x =>
+            {
+                time = x;
+
+                for (int order = 0; order < count; order++)
+                {
+                    int i = indices[order];
+                    if (!textInfo.characterInfo[i].isVisible) continue;
+
+                    float t = Mathf.Clamp01((time - order * delayStep) / duration);
+                    state.melt[i] = t * t * target;
+                }
+
+                ApplyAll(text, state);
+            }, totalDuration, totalDuration);
         }
 
         #endregion

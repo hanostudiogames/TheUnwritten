@@ -100,7 +100,27 @@ namespace UI
                         {
                             tmp.DORandomShake(7f, action.Duration, 0.05f);
                         }
-                        
+
+                        break;
+                    }
+
+                    case DialogueActionType.Melt:
+                    {
+                        foreach (var tmp in tmps)
+                        {
+                            tmp?.DoMelt(1f, action.Duration);
+                        }
+
+                        break;
+                    }
+
+                    case DialogueActionType.RandomMelt:
+                    {
+                        foreach (var tmp in tmps)
+                        {
+                            tmp?.DORandomMelt(1f, action.Duration, 0.05f);
+                        }
+
                         break;
                     }
                 }

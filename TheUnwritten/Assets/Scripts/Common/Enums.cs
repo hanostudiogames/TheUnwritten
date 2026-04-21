@@ -15,11 +15,13 @@ namespace Common
     public enum DialogueActionType
     {
         None,
-        
+
         Shear,
         Fold,
         RandomShake,
         Shake,
+        Melt,
+        RandomMelt,
     }
     
     // public enum FoodType
