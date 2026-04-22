@@ -1,14 +1,11 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Localization.Settings;
 using UnityEngine.Localization;
 
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 
 using Common;
-using Data;
 using Tables.Containers;
 using Tables.Records;
 using TMPro;
@@ -16,59 +13,64 @@ using UI.Slots;
 
 namespace UI.Main
 {
-    public interface IMainPresenter
-    {
-        
-    }
-    
-    public class MainPresenter : Presenter<MainView, MainModel>, IMainPresenter,
+    /// <summary>
+    /// 전투 씬 전용 오케스트레이터.
+    /// MainPresenter 와 형제 계층으로 동작하며, SceneRecord.IsBattle 이 true 인
+    /// 씬에서만 Dialogue/Card 진행을 담당한다. 일반 씬은 MainPresenter 가 처리한다.
+    ///
+    /// v1 범위:
+    /// - 전투 씬 판별 후 DialogueRecord 들을 순차 재생 (기존 DialogueSlot/Typer 재사용)
+    /// - 몬스터 등장 연출은 DialoguePostAction (InkMonsterAppear 등) 재사용
+    /// - 카드 선택은 CardFanSpread 재사용
+    /// - 실시간 서술 개입(빈칸 [ ]) 은 후속 단계에서 추가 예정
+    /// </summary>
+    public class BattleManager :
         CharacterSpeechSlot.IListener,
         NarrationSlot.IListener,
-        AnswerSlot.IListener,
         ISceneListener
     {
+        private readonly MainView _view = null;
+        private readonly MainModel _model = null;
         private readonly UIFactory _uiFactory = null;
         private readonly IGameManager _gameManager = null;
 
         private UniTaskCompletionSource _dialogueCompletionSource = null;
-        private UniTaskCompletionSource _answerCompletionSource = null;
         private UniTaskCompletionSource _cardCompletionSource = null;
         private DialoguePostAction _dialoguePostAction = null;
 
-        // BattleManager 같은 형제 계층이 동일 View/Model 을 공유할 수 있도록 노출.
-        public MainView View => _view;
-        public MainModel Model => _model;
-        public UIFactory UIFactory => _uiFactory;
-        
-        public MainPresenter(MainView view, MainModel model, IGameManager gameManager, UIManager uiManager) : base (view, model)
+        public BattleManager(MainView view, MainModel model, IGameManager gameManager, UIFactory uiFactory)
         {
             _view = view;
-
+            _model = model;
             _gameManager = gameManager;
-            _uiFactory = new UIFactory(uiManager);
-            
-            // gameManager?.RegisterModeHandler<MainPresenter>(OnModeChanged);
-            uiManager?.RegisterDimensionHandler<MainPresenter>(OnDimensionChanged);
-            
-            view?.InitializeAnswerSlots(this);
+            _uiFactory = uiFactory;
         }
 
-        public override void Activate()
+        #region ISceneListener
+
+        async UniTask ISceneListener.OnStartSceneAsync(int act, int scene)
         {
-            base.Activate();
+            await RunBattleSceneIfApplicableAsync(act, scene);
         }
 
-        private async UniTask PlayDialogueAsync(int act, int scene)
+        UniTask ISceneListener.OnEndSceneAsync(int act, int scene)
         {
-            if (_view == null)
-                return;
+            return UniTask.CompletedTask;
+        }
 
+        #endregion
+
+        private async UniTask RunBattleSceneIfApplicableAsync(int act, int scene)
+        {
             var sceneRecord = ActTableContainer.Instance?.GetSceneRecord(act, scene);
             if (sceneRecord == null)
                 return;
 
-            // 전투 씬은 BattleManager 가 처리하므로 여기서는 무시한다.
-            if (sceneRecord.IsBattle)
+            // 전투 씬이 아니면 본 매니저는 아무것도 하지 않는다 (MainPresenter 담당).
+            if (!sceneRecord.IsBattle)
+                return;
+
+            if (_view == null)
                 return;
 
             var dialogues = sceneRecord.DialogueRecords;
@@ -82,42 +84,35 @@ namespace UI.Main
             await _view.ScrollToAsync(_view.ViewportHalfHeight);
 
             var locale = LocalizationSettings.SelectedLocale;
-            
+
             for (int i = 0; i < dialogues.Length; ++i)
             {
                 var dialogue = dialogues[i];
-                if(dialogue == null) 
+                if (dialogue == null)
                     continue;
 
                 IDialogueSlot dialogueSlot = null;
                 switch (dialogue)
                 {
                     case CharacterSpeechRecord characterSpeech:
-                    {
                         dialogueSlot = CreateCharacterSpeechSlot(characterSpeech, locale);
                         break;
-                    }
 
                     case NarrationRecord narration:
-                    { 
                         dialogueSlot = CreateNarrationSlot(narration, locale);
                         break;
-                    }
                 }
 
-                if(dialogueSlot == null)
+                if (dialogueSlot == null)
                     continue;
-                
+
                 await _dialogueCompletionSource.Task;
 
                 await ExecuteDialoguePostActionAsync(dialogueSlot.TMP, act, scene, dialogue.DialogueActions);
-                await ActiveAnswerAsync(dialogue.AnswerIds);
                 await ActiveCardAsync(dialogue.CardIds);
             }
-            
+
             await _view.ScrollToAsync(0);
-            // await UniTask.Delay(TimeSpan.FromSeconds(5f));
-            
             _view.EnableScrollRect();
         }
 
@@ -125,14 +120,13 @@ namespace UI.Main
         {
             if (record == null)
                 return null;
-            
+
             _dialogueCompletionSource = new();
-                        
-            // var characterNameLocalText = LocalizationSettings.StringDatabase.GetLocalizedString("Character", "messenger", locale);
+
             var localText = LocalizationSettings.StringDatabase.GetLocalizedString("Dialogue", record.LocalKey, locale);
             var param = new CharacterSpeechSlot.Param(this, localText, record.TypingSpeed)
                 .WithCharacterName(string.Empty);
-                        
+
             return _view.CreateCharacterSpeechSlot(_uiFactory, param);
         }
 
@@ -140,21 +134,21 @@ namespace UI.Main
         {
             if (record == null)
                 return null;
-            
+
             _dialogueCompletionSource = new();
             var localText = LocalizationSettings.StringDatabase.GetLocalizedString("Dialogue", record.LocalKey, locale);
             var param = new NarrationSlot.Param(this, localText, record.TypingSpeed);
-            
+
             return _view.CreateNarrationSlot(_uiFactory, param);
         }
 
-        private async UniTask ExecuteDialoguePostActionAsync(TextMeshProUGUI tmp, int act, int scene, List<DialogueAction> dialogueActions)
+        private async UniTask ExecuteDialoguePostActionAsync(TextMeshProUGUI tmp, int act, int scene,
+            List<DialogueAction> dialogueActions)
         {
             if (_dialoguePostAction == null)
                 return;
 
             var tmps = new List<TextMeshProUGUI>();
- 
             tmps.Add(tmp);
             tmps.AddRange(_view.TMPsInDialogueSlots());
 
@@ -165,42 +159,30 @@ namespace UI.Main
                 .ExecuteAsync();
         }
 
-        private async UniTask ActiveAnswerAsync(int[] answerIds)
-        {
-            if (answerIds == null || answerIds.Length <= 0)
-                return;
-
-            _answerCompletionSource = new UniTaskCompletionSource();
-
-            await _view.ShowAnswersAsync(answerIds);
-                    
-            await _view.ScrollToAsync(0);
-            _view.EnableScrollRect();
-                    
-            await _answerCompletionSource.Task;   
-                    
-            _view.DisableScrollRect();
-            await _view.ScrollToAsync(_view.ViewportHalfHeight);
-        }
-
         private async UniTask ActiveCardAsync(int[] cardIds)
         {
             if (cardIds == null || cardIds.Length <= 0)
                 return;
 
-            _cardCompletionSource = new  UniTaskCompletionSource();
-            
+            _cardCompletionSource = new UniTaskCompletionSource();
+
             _view.ShowCards();
             await _view.ScrollToAsync(0);
-            
+
+            // v1 에서는 카드 선택 후속 로직이 아직 없으므로 바로 완료.
+            // TODO: CardSlot 클릭 리스너를 통해 선택된 카드 ID 로 전투 결과 분기.
+            _cardCompletionSource.TrySetResult();
+
             await _cardCompletionSource.Task;
         }
-        
-        #region CharacterSpeechSlot.Listener
+
+        #region CharacterSpeechSlot.IListener
+
         void CharacterSpeechSlot.IListener.End()
         {
             _dialogueCompletionSource?.TrySetResult();
         }
+
         #endregion
 
         #region NarrationSlot.IListener
@@ -209,40 +191,7 @@ namespace UI.Main
         {
             _dialogueCompletionSource?.TrySetResult();
         }
-        #endregion
-        
-        #region AnswerSlot.IListener
 
-        void AnswerSlot.IListener.OnSelectedAnswer(int id)
-        {
-            _view?.HideAnswersAsync();
-            _answerCompletionSource?.TrySetResult();
-        }
         #endregion
-        
-        #region ISceneListener
-
-        async UniTask ISceneListener.OnStartSceneAsync(int act, int scene)
-        {
-            await PlayDialogueAsync(act, scene);
-        }
-
-        UniTask ISceneListener.OnEndSceneAsync(int act, int scene)
-        {
-            return UniTask.CompletedTask;
-        }
-        #endregion
-        
-        protected override void OnDimensionChanged(bool isPortrait)
-        {
-            base.OnDimensionChanged(isPortrait);
-            
-            var answerStatus = UniTaskStatus.Canceled;
-            if (_answerCompletionSource?.Task != null)
-                answerStatus = _answerCompletionSource.Task.Status;
-            
-            _view?.OnDimensionChanged(isPortrait, answerStatus);
-        }
     }
 }
-
