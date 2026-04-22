@@ -25,18 +25,8 @@ namespace UI.Main
         [SerializeField] private RectTransform narrativeRootRectTr = null;
         [SerializeField] private RectTransform answersRootRectTr = null;
         
-        // [Header("Governance")]
-        // [SerializeField] private RectTransform actionsRootRectTr = null;
-        // [SerializeField] private RectTransform charactersRootRectTr = null;
-
-        // private UIFactory _uiFactory = null;
-        // private List<ICharacterSlot> _characterSlots = null;
         private List<IAnswerSlot> _answerSlots = null; 
         private List<IDialogueSlot> _dialogueSlots = null;
-        
-        // private Vector2 _actionsOriginalMin;
-        // private Vector2 _actionsOriginalMax;
-        // private Vector2 _charactersOriginalMin;
         
         public float ViewportHalfHeight
         {
@@ -45,7 +35,7 @@ namespace UI.Main
                 if (narrativeScrollRect?.viewport == null)
                     return 0;
 
-                return narrativeScrollRect.viewport.rect.height * 0.5f - 100f;
+                return narrativeScrollRect.viewport.rect.height * 0.5f - 120f;
             }
         }
 
@@ -54,10 +44,6 @@ namespace UI.Main
             base.Initialize(presenter);
 
             _dialogueSlots = new();
-            
-            // _actionsOriginalMin = actionsRootRectTr.offsetMin;
-            // _actionsOriginalMax = actionsRootRectTr.offsetMax;
-            // _charactersOriginalMin = charactersRootRectTr.offsetMin;
         }
         
         public override void Activate()
@@ -142,34 +128,6 @@ namespace UI.Main
                 narrativeScrollRect.enabled = false;
         }
 
-        // private async UniTask ShowNarrativePanelAsync()
-        // {
-        //     HideAnswersAsync().Forget();
-        //     await HideGovernancePanelAsync(0.3f);
-        //     
-        //     narrativeRootRectTr.gameObject.SetActive(true);
-        // }
-
-        // private async UniTask HideGovernancePanelAsync(float duration)
-        // {
-        //     if (actionsRootRectTr == null)
-        //         return;
-        //
-        //     if (charactersRootRectTr == null)
-        //         return;
-        //     
-        //     var offsetX = 200f;
-        //
-        //     var actionsMoveX = _actionsOriginalMin.x - (_actionsOriginalMax.x + actionsRootRectTr.rect.width) - offsetX;
-        //     var charactersMoveX =
-        //         _charactersOriginalMin.x + (charactersRootRectTr.rect.width - _charactersOriginalMin.x) + offsetX;
-        //     
-        //     await UniTask.WhenAll(
-        //         actionsRootRectTr.DoOffsetMoveX(actionsMoveX, duration),
-        //         charactersRootRectTr.DoOffsetMoveX(charactersMoveX, duration)
-        //     );
-        // }
-
         public List<TextMeshProUGUI> TMPsInDialogueSlots()
         {
             if (_dialogueSlots == null)
@@ -251,10 +209,7 @@ namespace UI.Main
         {
             if(bgRectTr)
                 bgRectTr.localRotation = isPortrait ? Quaternion.identity : Quaternion.Euler(0, 0, 90f);
-            
-            // if (mode == GameMode.Narrative)
-                // HideGovernancePanelAsync(0).Forget();
-
+   
             float scrollPositionY = 0;
             if (answerStatus != UniTaskStatus.Pending)
                 scrollPositionY = ViewportHalfHeight;

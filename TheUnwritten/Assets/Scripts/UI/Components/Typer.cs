@@ -43,8 +43,7 @@ namespace UI.Components
         [SerializeField] private TextMeshProUGUI typingText = null;
 
         // private float _typingSpeed = 0.05f;
-        private bool _isEnd = false;
-
+        // private bool _isEnd = false;
         private Param _param = null;
         
         public TextMeshProUGUI TMP => typingText;
@@ -53,58 +52,93 @@ namespace UI.Components
         {
             _param = param;
         }
-        
+
         public async UniTask TypeTextAsync(string text)
         {
-            _isEnd = false;
-            typingText?.SetText(string.Empty);
+            if (typingText == null)
+                return;
             
-            await UniTask.Yield(PlayerLoopTiming.PostLateUpdate);
-           
-            if(_param != null)
-                await UniTask.Delay(TimeSpan.FromSeconds(_param.StartDelaySeconds));
+            // _isEnd = false;
             
-            string currentText = "";
-            float typingSpeed = _param?.TypingSpeed ?? 0.05f;
-
-            // 정규식을 통해 태그와 텍스트 분리
-            MatchCollection matches = Regex.Matches(text, @"(<[^>]+>|[ \t]+\n|\n|[^<])");
-
-            for (int i = 0; i < matches.Count; i++)
+            if (typingText.alignment == TextAlignmentOptions.Center)
             {
-                if (_isEnd)
+                
+                typingText?.SetText(string.Empty);
+        
+                await UniTask.Yield(PlayerLoopTiming.PostLateUpdate);
+        
+                if(_param != null)
+                    await UniTask.Delay(TimeSpan.FromSeconds(_param.StartDelaySeconds));
+        
+                string currentText = "";
+                float typingSpeed = _param?.TypingSpeed ?? 0.05f;
+        
+                // 정규식을 통해 태그와 텍스트 분리
+                MatchCollection matches = Regex.Matches(text, @"(<[^>]+>|[ \t]+\n|\n|[^<])");
+        
+                for (int i = 0; i < matches.Count; ++i)
                 {
-                    typingText?.SetText(text);
-                    return;
+                    // if (_isEnd)
+                    // {
+                    //     typingText?.SetText(text);
+                    //     return;
+                    // }
+        
+                    string part = matches[i].Value;
+                    currentText += part;
+        
+                    // 🔥 이거 반드시 있어야 함
+                    typingText?.SetText(currentText);
+        
+                    bool isTag = part.StartsWith("<");
+                    bool isSpriteTag = part.StartsWith("<sprite");
+        
+                    // sprite는 딜레이 포함
+                    if (!isTag || isSpriteTag)
+                        await UniTask.Delay(TimeSpan.FromSeconds(typingSpeed));
                 }
-
-                string part = matches[i].Value;
-                currentText += part;
-
-                // 🔥 이거 반드시 있어야 함
-                typingText?.SetText(currentText);
-
-                bool isTag = part.StartsWith("<");
-                bool isSpriteTag = part.StartsWith("<sprite");
-
-                // sprite는 딜레이 포함
-                if (!isTag || isSpriteTag)
-                    await UniTask.Delay(TimeSpan.FromSeconds(typingSpeed));
+        
+                typingText?.SetText(text);
             }
-
-            typingText?.SetText(text);
-
+            else
+            {
+                typingText.SetText(text);
+                typingText.maxVisibleCharacters = 0;
+                
+                await UniTask.Yield(PlayerLoopTiming.PostLateUpdate);
+                typingText?.ForceMeshUpdate();
+                
+                if (_param != null)
+                    await UniTask.Delay(TimeSpan.FromSeconds(_param.StartDelaySeconds));
+                
+                int total = typingText?.textInfo?.characterCount ?? 0;
+                float typingSpeed = _param?.TypingSpeed ?? 0.05f;
+            
+                for (int i = 1; i <= total; i++)
+                {
+                    // if (_isEnd)
+                    // {
+                    //     if (typingText != null)
+                    //         typingText.maxVisibleCharacters = total;
+                    //
+                    //     return;
+                    // }
+            
+                    if (typingText != null)
+                        typingText.maxVisibleCharacters = i;
+            
+                    await UniTask.Delay(TimeSpan.FromSeconds(typingSpeed));
+                }
+            
+                if (typingText != null)
+                    typingText.maxVisibleCharacters = total;
+            }
+            
             if (_param != null)
             {
                 await UniTask.Delay(TimeSpan.FromSeconds(_param.EndDelaySeconds));
                 _param.CompleteAction?.Invoke();
             }
         }
-
-        // public void End(string text)
-        // {
-        //     _isEnd = true;
-        //     tmpTMP?.SetText(text);
-        // }
     }
 }

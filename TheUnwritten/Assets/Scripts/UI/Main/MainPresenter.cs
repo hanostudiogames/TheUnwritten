@@ -181,8 +181,9 @@ namespace UI.Main
 
             _cardCompletionSource = new  UniTaskCompletionSource();
             
-            _view.ShowCards();
             await _view.ScrollToAsync(0);
+            await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
+            _view.ShowCards();
             
             await _cardCompletionSource.Task;
         }
