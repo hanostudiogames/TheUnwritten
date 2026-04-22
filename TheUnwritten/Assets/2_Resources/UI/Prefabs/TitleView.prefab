@@ -66,7 +66,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: <sprite name="T"><sprite name="?">A
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d60aa230415a34e2080d91162cf13575, type: 2}
   m_sharedMaterial: {fileID: 4514950864122628782, guid: d60aa230415a34e2080d91162cf13575, type: 2}
@@ -75,7 +75,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281411364
+    rgba: 4279376683
   m_fontColor: {r: 0.16862746, g: 0.105882354, b: 0.07058824, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -85,7 +85,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 11400000, guid: 0fa1aef59a30a4f58a756a657e0fbcc1, type: 2}
+  m_spriteAsset: {fileID: 11400000, guid: 3072b907933104acd8138960dfade955, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -675,7 +675,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 10b623150171047239a6a19a783bb9a7, type: 3}
+  m_Sprite: {fileID: 21300000, guid: f33cd3e1ead55478bb515fa9116e991d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

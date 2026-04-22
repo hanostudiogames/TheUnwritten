@@ -655,7 +655,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.7058824}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.5882353}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -763,6 +763,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UI.Main.MainView
   bgRectTr: {fileID: 3293659118485187048}
   cardFanSpread: {fileID: 361928654469577938}
+  libraryImg: {fileID: 2496655875611260297}
   narrativeScrollRect: {fileID: 4069362279484595752}
   narrativeRootRectTr: {fileID: 8176802030334089996}
   answersRootRectTr: {fileID: 3685128905228395550}

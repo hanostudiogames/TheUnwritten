@@ -55,6 +55,8 @@ namespace UI.Main
         public override void Activate()
         {
             base.Activate();
+            
+            _view.FadeLibraryAsync(0, 0).Forget();
         }
 
         private async UniTask PlayDialogueAsync(int act, int scene)
@@ -223,12 +225,16 @@ namespace UI.Main
 
         async UniTask ISceneListener.OnStartSceneAsync(int act, int scene)
         {
+            if (act == 1 && scene < 3)
+                await _view.FadeLibraryAsync(0.4f, 3f);
+            
             await PlayDialogueAsync(act, scene);
         }
 
-        UniTask ISceneListener.OnEndSceneAsync(int act, int scene)
+        async UniTask ISceneListener.OnEndSceneAsync(int act, int scene)
         {
-            return UniTask.CompletedTask;
+            if (act == 1 && scene == 1)
+                await _view.FadeLibraryAsync(0, 3f);
         }
         #endregion
         

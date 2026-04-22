@@ -202,8 +202,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardHover
   rectTr: {fileID: 3867462257892393861}
-  hoverScale: 1.2
-  hoverHeight: 140
+  hoverScale: 1.1
+  hoverHeight: 150
   duration: 0.15
 --- !u!1 &3932305822216793463
 GameObject:

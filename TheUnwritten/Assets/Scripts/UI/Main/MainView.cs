@@ -21,6 +21,7 @@ namespace UI.Main
     {
         [SerializeField] private RectTransform bgRectTr = null;
         [SerializeField] private CardFanSpread cardFanSpread = null;
+        [SerializeField] private Image libraryImg = null;
         
         [Header("Narrative")]
         [SerializeField] private ScrollRect narrativeScrollRect = null;
@@ -200,6 +201,14 @@ namespace UI.Main
             answersRootRectTr.gameObject.SetActive(false);
         }
         #endregion
+
+        public async UniTask FadeLibraryAsync(float value, float duration)
+        {
+            if (libraryImg == null)
+                return;
+            
+            await libraryImg.DOFade(value, duration);
+        }
 
         public void OnDimensionChanged(bool isPortrait, UniTaskStatus answerStatus)
         {
