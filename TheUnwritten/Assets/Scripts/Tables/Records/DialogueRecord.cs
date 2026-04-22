@@ -16,8 +16,10 @@ namespace Tables.Records
         public float EndDelaySeconds = 1f;
 
         public int[] AnswerIds = null;
-        public int[] CardIds = null;
+        // public int[] CardIds = null;
 
+        public int SlotId = 0;
+        
         public List<DialogueAction> DialogueActions = null;
     }
 

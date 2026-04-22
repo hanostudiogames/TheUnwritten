@@ -76,7 +76,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4281411364
-  m_fontColor: {r: 0.14117648, g: 0.15294118, b: 0.19215687, a: 1}
+  m_fontColor: {r: 0.16862746, g: 0.105882354, b: 0.07058824, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -645,7 +645,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 160}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4797175275885089544
 CanvasRenderer:
@@ -675,7 +675,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: a2e2a83536d4eef45ace93d156eab562, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 10b623150171047239a6a19a783bb9a7, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -750,7 +750,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f2e0f9095df55435b91cc8183d07e887, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 284a932c3bc444fbb836eb77b1eb3c63, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -812,6 +812,8 @@ MonoBehaviour:
   bgRectTr: {fileID: 38570537066714977}
   titleTextTyper: {fileID: 6818755394978862099}
   startBtn: {fileID: 1494100156450179150}
+  startBtnBg: {fileID: 1894449371801472925}
+  startTMP: {fileID: 3063888643752592848}
 --- !u!1 &5935215571231804414
 GameObject:
   m_ObjectHideFlags: 0

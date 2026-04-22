@@ -5,6 +5,8 @@ using UnityEngine.Localization.Settings;
 using TMPro;
 
 using Common;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using UnityEngine.UI;
 
 namespace UI.Slots
@@ -53,6 +55,7 @@ namespace UI.Slots
         [SerializeField] private TextMeshProUGUI indexText = null;
         [SerializeField] private TextMeshProUGUI answerText = null;
         [SerializeField] private Button btn = null;
+        [SerializeField] private Image btnBgImg = null;
         
         public override void Initialize(Param param)
         {
@@ -60,6 +63,30 @@ namespace UI.Slots
             
             btn?.onClick.RemoveAllListeners();
             btn?.onClick.AddListener(OnClick);
+        }
+
+        public override void Activate()
+        {
+            base.Activate();
+            
+            ActivateAsync().Forget();
+        }
+
+        private async UniTask ActivateAsync()
+        {
+            if (btnBgImg == null)
+                return;
+            
+            btn?.gameObject.SetActive(false);
+            btnBgImg.DOFade(0, 0);
+            answerText?.DOFade(0, 0);
+
+            float duration = 1f;
+            
+            answerText?.DOFade(0.6f, duration);
+            await btnBgImg.DOFade(1, duration);
+            
+            btn?.gameObject.SetActive(true);
         }
 
         private void SetIndexText()

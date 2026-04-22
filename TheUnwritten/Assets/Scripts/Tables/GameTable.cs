@@ -6,7 +6,7 @@ using Tables.Records;
 
 namespace Tables
 {
-    [CreateAssetMenu(fileName = "GameTable", menuName = "Scriptable Objects/GameTable")]
+    [CreateAssetMenu(fileName = "GameTable", menuName = "Tables/GameTable")]
     public class GameTable : ScriptableObject
     {
         public TurnRecord[] TurnRecords = null;

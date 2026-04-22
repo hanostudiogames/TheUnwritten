@@ -9,7 +9,9 @@ using DG.Tweening;
 
 using Common;
 using Tables.Containers;
+
 using TMPro;
+using UI.Cards;
 using UI.Slots;
 using Vector2 = UnityEngine.Vector2;
 
@@ -27,6 +29,8 @@ namespace UI.Main
         
         private List<IAnswerSlot> _answerSlots = null; 
         private List<IDialogueSlot> _dialogueSlots = null;
+
+        public CardFanSpread CardFanSpread => cardFanSpread;
         
         public float ViewportHalfHeight
         {
@@ -196,14 +200,6 @@ namespace UI.Main
             answersRootRectTr.gameObject.SetActive(false);
         }
         #endregion
-
-        public void ShowCards()
-        {
-            if (cardFanSpread == null)
-                return;
-            
-            cardFanSpread.gameObject.SetActive(true);
-        }
 
         public void OnDimensionChanged(bool isPortrait, UniTaskStatus answerStatus)
         {

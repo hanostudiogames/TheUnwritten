@@ -21,6 +21,8 @@ namespace UI.Title
         [SerializeField] private RectTransform bgRectTr = null;
         [SerializeField] private Typer titleTextTyper = null;
         [SerializeField] private Button startBtn = null;
+        [SerializeField] private Image startBtnBg = null;
+        [SerializeField] private TextMeshProUGUI startTMP = null;
         
         public override void Initialize(TitlePresenter presenter)
         {
@@ -29,7 +31,7 @@ namespace UI.Title
             startBtn?.onClick?.RemoveAllListeners();
             startBtn?.onClick?.AddListener(() => { _presenter?.OpenMainView(); });
             
-            ActiveStartBtn(false);
+            ActiveStartBtnAsync(false).Forget();
             
             titleTextTyper?.Initialize(new Typer.Param(OnCompleteTitleText)
                 .WithStartDelaySeconds(1f)
@@ -47,11 +49,22 @@ namespace UI.Title
             titleTextTyper?.TypeTextAsync(text);
         }
 
-        private void ActiveStartBtn(bool isActive)
+        private async UniTask ActiveStartBtnAsync(bool isActive)
         {
-            if (startBtn != null)
-                startBtn.transform.parent.gameObject.SetActive(isActive);
+            if (startBtnBg == null)
+                return;
+            
+            startBtn?.gameObject.SetActive(false);
+            startTMP?.DOFade(0, 0);
+            startBtnBg?.DOFade(0, 0);
 
+            if (isActive)
+            {
+                startTMP?.DOFade(0.6f, 1f);
+                await startBtnBg.DOFade(1f, 1f);
+                
+                startBtn?.gameObject.SetActive(true);
+            }
         }
 
         private void OnCompleteTitleText()
@@ -80,7 +93,7 @@ namespace UI.Title
             }
 
             await UniTask.Delay(TimeSpan.FromSeconds(1f));
-            ActiveStartBtn(true);
+            await ActiveStartBtnAsync(true);
             
             // tmp.DOShear(0.01f, 5f);
             // tmp.DOSequentialFold(0.5f, 2f, 0.5f);

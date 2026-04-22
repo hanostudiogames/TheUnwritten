@@ -1,10 +1,11 @@
+using Tables.Records;
 using UnityEngine;
 
 namespace Tables
 {
-    [CreateAssetMenu(fileName = "CardTable", menuName = "Scriptable Objects/CardTable")]
+    [CreateAssetMenu(fileName = "CardTable", menuName = "Tables/CardTable")]
     public class CardTable : ScriptableObject
     {
-        // public AnswerRecord[]  AnswerRecords = null;
+        public CardRecord[] CardRecords = null;
     }
 }

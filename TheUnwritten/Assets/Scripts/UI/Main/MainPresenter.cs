@@ -6,12 +6,14 @@ using UnityEngine.Localization;
 
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using TMPro;
 
 using Common;
 using Data;
+using Tables;
 using Tables.Containers;
 using Tables.Records;
-using TMPro;
+using UI.Cards;
 using UI.Slots;
 
 namespace UI.Main
@@ -29,6 +31,7 @@ namespace UI.Main
     {
         private readonly UIFactory _uiFactory = null;
         private readonly IGameManager _gameManager = null;
+        private readonly CardController _cardController = null;
         
         private UniTaskCompletionSource _dialogueCompletionSource = null;
         private UniTaskCompletionSource _answerCompletionSource = null;
@@ -41,6 +44,7 @@ namespace UI.Main
 
             _gameManager = gameManager;
             _uiFactory = new UIFactory(uiManager);
+            _cardController = new(view.CardFanSpread);
             
             // gameManager?.RegisterModeHandler<MainPresenter>(OnModeChanged);
             uiManager?.RegisterDimensionHandler<MainPresenter>(OnDimensionChanged);
@@ -103,7 +107,7 @@ namespace UI.Main
 
                 await ExecuteDialoguePostActionAsync(dialogueSlot.TMP, act, scene, dialogue.DialogueActions);
                 await ActiveAnswerAsync(dialogue.AnswerIds);
-                await ActiveCardAsync(dialogue.CardIds);
+                await ActiveCardAsync(dialogue.SlotId);
             }
             
             await _view.ScrollToAsync(0);
@@ -174,16 +178,19 @@ namespace UI.Main
             await _view.ScrollToAsync(_view.ViewportHalfHeight);
         }
 
-        private async UniTask ActiveCardAsync(int[] cardIds)
+        private async UniTask ActiveCardAsync(int slotId)
         {
-            if (cardIds == null || cardIds.Length <= 0)
+            var slotRecord = SlotTableContainer.Instance?.GetSlotRecord(slotId);
+            if (slotRecord == null)
                 return;
 
+            await _cardController.SetCardsAsync(slotRecord.AllowedCardIds);
+            
             _cardCompletionSource = new  UniTaskCompletionSource();
             
             await _view.ScrollToAsync(0);
             await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
-            _view.ShowCards();
+            _cardController.ShowCards();
             
             await _cardCompletionSource.Task;
         }
