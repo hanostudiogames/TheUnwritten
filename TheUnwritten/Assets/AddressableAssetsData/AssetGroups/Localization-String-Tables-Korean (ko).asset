@@ -15,6 +15,12 @@ MonoBehaviour:
   m_GroupName: Localization-String-Tables-Korean (ko)
   m_GUID: 1ec9e12aafa124200b526ad10821b337
   m_SerializeEntries:
+  - m_GUID: 1a8c8a2eeb23c4ce296853a6a43ec730
+    m_Address: Slot_ko
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-ko
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2686dc39a6e21469b90090b62eabf4e3
     m_Address: Answer_ko
     m_ReadOnly: 1
@@ -23,6 +29,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4ac503e902486461db3329d22a3d113b
     m_Address: Dialogue_ko
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-ko
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4f64480583d8645708c1834b31e8e544
+    m_Address: Card_ko
     m_ReadOnly: 1
     m_SerializedLabels:
     - Locale-ko

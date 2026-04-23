@@ -182,7 +182,7 @@ namespace UI.Components
             float typingSpeed = _param?.TypingSpeed ?? 0.05f;
 
             _slotValues[slotName] = string.Empty;
-            typingText.SetText(RenderTemplate());
+            RefreshVisibleText();
             await UniTask.Yield(PlayerLoopTiming.PostLateUpdate);
 
             var matches = PartRegex.Matches(text);
@@ -192,7 +192,7 @@ namespace UI.Components
                 string part = matches[i].Value;
                 current += part;
                 _slotValues[slotName] = current;
-                typingText.SetText(RenderTemplate());
+                RefreshVisibleText();
 
                 bool isTag = part.StartsWith("<");
                 bool isSpriteTag = part.StartsWith("<sprite");
@@ -201,7 +201,17 @@ namespace UI.Components
             }
 
             _slotValues[slotName] = text;
+            RefreshVisibleText();
+        }
+
+        private void RefreshVisibleText()
+        {
+            if (typingText == null)
+                return;
+
             typingText.SetText(RenderTemplate());
+            typingText.ForceMeshUpdate();
+            typingText.maxVisibleCharacters = typingText.textInfo.characterCount;
         }
 
         private string RenderTemplate()

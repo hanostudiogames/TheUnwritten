@@ -3,7 +3,9 @@ using UnityEngine.EventSystems;
 
 using Common;
 using Tables.Records;
+using TMPro;
 using UI.Slots;
+using UnityEditor.Rendering;
 
 namespace UI.Cards
 {
@@ -35,6 +37,7 @@ namespace UI.Cards
         }
 
         [SerializeField] private RectTransform rectTr = null;
+        [SerializeField] private TextMeshProUGUI nameTMP = null;
 
         private CardHover _hover;
 
@@ -48,6 +51,13 @@ namespace UI.Cards
             _hover = GetComponent<CardHover>();
         }
 
+        public override void Activate()
+        {
+            base.Activate();
+
+            SetCardNameText();
+        }
+
         public void SetSelectable(bool value)
         {
             IsSelectable = value;
@@ -57,6 +67,18 @@ namespace UI.Cards
 
             if (!value && _hover != null && _hover.IsHovering)
                 _hover.ForceExit();
+        }
+
+        private void SetCardNameText()
+        {
+            nameTMP?.SetText(string.Empty);
+            
+            var cardRecord = _param?.CardRecord;
+            if (cardRecord == null)
+                return;
+            
+            var resText = UI.Utilities.TextSpriteUtility.ConvertToSpriteText(cardRecord.Key);
+            nameTMP?.SetText(resText);
         }
 
         public void OnPointerEnter(PointerEventData eventData)
@@ -72,7 +94,8 @@ namespace UI.Cards
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (!IsSelectable) return;
+            if (!IsSelectable) 
+                return;
 
             _param?.Listener?.OnCardSelected(_param.CardRecord);
         }

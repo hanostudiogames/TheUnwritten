@@ -31,6 +31,7 @@ MonoBehaviour:
       - rid: 6598480915748356342
       - rid: 6598480915748356348
     - Index: 3
+      IsBattle: 1
       DialogueRecords:
       - rid: 6598480915748356349
       - rid: 6598480915748356402

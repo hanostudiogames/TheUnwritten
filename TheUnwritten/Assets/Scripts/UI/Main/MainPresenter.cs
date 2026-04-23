@@ -32,35 +32,29 @@ namespace UI.Main
         private readonly UIFactory _uiFactory = null;
         private readonly IGameManager _gameManager = null;
         private readonly CardController _cardController = null;
-
+        private readonly ICardSelectionHandler _cardSelectionHandler = null;
+        private readonly IBattleController _battleController = null;
+        
         private UniTaskCompletionSource _dialogueCompletionSource = null;
         private UniTaskCompletionSource _answerCompletionSource = null;
-        private UniTaskCompletionSource _cardCompletionSource = null;
         private DialoguePostAction _dialoguePostAction = null;
-        private ICardSelectionHandler _cardSelectionHandler = null;
-
-        public MainView View => _view;
-        public MainModel Model => _model;
-        public UIFactory UIFactory => _uiFactory;
-        public CardController CardController => _cardController;
-
-        public void SetCardSelectionHandler(ICardSelectionHandler handler)
-        {
-            _cardSelectionHandler = handler;
-        }
         
-        public MainPresenter(MainView view, MainModel model, IGameManager gameManager, UIManager uiManager) : base (view, model)
+        public MainPresenter(MainView view, MainModel model, IGameManager gameManager, UIManager uiManager, 
+            SlotInteractionHandler slotInteractionHandler,
+            IBattleController battleController) : base (view, model)
         {
             _view = view;
 
             _gameManager = gameManager;
             _uiFactory = new UIFactory(uiManager);
             _cardController = new(view.CardFanSpread);
+            _cardSelectionHandler = slotInteractionHandler;
+            _battleController = battleController;
             
-            // gameManager?.RegisterModeHandler<MainPresenter>(OnModeChanged);
+            _cardController?.SetListener(slotInteractionHandler);
             uiManager?.RegisterDimensionHandler<MainPresenter>(OnDimensionChanged);
             
-            view?.InitializeAnswerSlots(this);
+            view.InitializeAnswerSlots(this);
         }
 
         public override void Activate()
@@ -93,12 +87,12 @@ namespace UI.Main
             
             for (int i = 0; i < dialogues.Length; ++i)
             {
-                var dialogue = dialogues[i];
-                if(dialogue == null) 
+                var dialogueRecord = dialogues[i];
+                if(dialogueRecord == null) 
                     continue;
 
                 IDialogueSlot dialogueSlot = null;
-                switch (dialogue)
+                switch (dialogueRecord)
                 {
                     case CharacterSpeechRecord characterSpeech:
                     {
@@ -115,12 +109,15 @@ namespace UI.Main
 
                 if(dialogueSlot == null)
                     continue;
+
+                if (dialogueRecord.IsMonster)
+                    _battleController?.SetTargetTMP(dialogueSlot.TMP);
                 
                 await _dialogueCompletionSource.Task;
 
-                await ExecuteDialoguePostActionAsync(dialogueSlot.TMP, act, scene, dialogue.DialogueActions);
-                await ActiveAnswerAsync(dialogue.AnswerIds);
-                await ActiveCardAsync(dialogue.SlotId, dialogueSlot);
+                await ExecuteDialoguePostActionAsync(dialogueSlot.TMP, act, scene, dialogueRecord.DialogueActions);
+                await ActiveAnswerAsync(dialogueRecord.AnswerIds);
+                await TriggerEventAsync(dialogueRecord.EventId, dialogueRecord.SlotId, dialogueSlot);
             }
             
             await _view.ScrollToAsync(0);
@@ -156,16 +153,16 @@ namespace UI.Main
             return _view.CreateNarrationSlot(_uiFactory, param);
         }
 
-        private async UniTask ExecuteDialoguePostActionAsync(TextMeshProUGUI tmp, int act, int scene, List<DialogueAction> dialogueActions)
+        private async UniTask ExecuteDialoguePostActionAsync(TextMeshProUGUI tmp, int act, int scene, 
+            List<DialogueAction> dialogueActions)
         {
             if (_dialoguePostAction == null)
                 return;
-
+            
             var tmps = new List<TextMeshProUGUI>();
- 
             tmps.Add(tmp);
             tmps.AddRange(_view.TMPsInDialogueSlots());
-
+            
             var param = new DialoguePostAction.Param(tmps, act, scene)
                 .WithDialogueActions(dialogueActions);
 
@@ -191,6 +188,24 @@ namespace UI.Main
             await _view.ScrollToAsync(_view.ViewportHalfHeight);
         }
 
+        private async UniTask TriggerEventAsync(int eventId, int slotId, IDialogueSlot dialogueSlot)
+        {
+            if (eventId <= 0)
+                return;
+
+            if (eventId == 1)
+            {
+                if (_battleController != null)
+                {
+                    await _view.ScrollToAsync(100f);
+                    
+                    ActiveCardAsync(slotId, dialogueSlot).Forget();
+                    
+                    _battleController.SetDialogueTMP(dialogueSlot?.TMP);
+                    await _battleController.PlayBattleAsync();
+                }
+            }
+        }
         private async UniTask ActiveCardAsync(int slotId, IDialogueSlot activeSlot)
         {
             var slotRecord = SlotTableContainer.Instance?.GetSlotRecord(slotId);
@@ -198,21 +213,14 @@ namespace UI.Main
                 return;
 
             await _cardController.SetCardsAsync(slotRecord.AllowedCardIds);
-
-            await _view.ScrollToAsync(0);
+            
             await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
             _cardController.ShowCards();
 
             if (_cardSelectionHandler != null)
             {
                 _cardSelectionHandler.BeginSelection(activeSlot);
-                await _cardSelectionHandler.AwaitCompletionAsync();
-            }
-            else
-            {
-                _cardCompletionSource = new UniTaskCompletionSource();
-                _cardCompletionSource.TrySetResult();
-                await _cardCompletionSource.Task;
+                // await _cardSelectionHandler.AwaitCompletionAsync();
             }
         }
         
@@ -256,16 +264,35 @@ namespace UI.Main
                 await _view.FadeLibraryAsync(0, 3f);
         }
         #endregion
+
+        private float ScrollPositionY
+        {
+            get
+            {
+                var answerStatus = UniTaskStatus.Canceled;
+                if (_answerCompletionSource?.Task != null)
+                    answerStatus = _answerCompletionSource.Task.Status;
+            
+                float scrollPositionY = 0;
+                if (answerStatus != UniTaskStatus.Pending)
+                    scrollPositionY = _view.ViewportHalfHeight;
+            
+                if(_cardController != null &&
+                   _cardController.IsActiveCards)
+                    scrollPositionY = 100f;
+                
+                return scrollPositionY;
+            }
+        }
         
         protected override void OnDimensionChanged(bool isPortrait)
         {
             base.OnDimensionChanged(isPortrait);
+
+            if (_view == null)
+                return;
             
-            var answerStatus = UniTaskStatus.Canceled;
-            if (_answerCompletionSource?.Task != null)
-                answerStatus = _answerCompletionSource.Task.Status;
-            
-            _view?.OnDimensionChanged(isPortrait, answerStatus);
+            _view?.OnDimensionChanged(isPortrait, ScrollPositionY);
         }
     }
 }

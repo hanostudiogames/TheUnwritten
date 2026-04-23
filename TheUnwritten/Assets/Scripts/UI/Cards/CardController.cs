@@ -52,6 +52,17 @@ namespace UI.Cards
             await UniTask.CompletedTask;
         }
 
+        public bool IsActiveCards
+        {
+            get
+            {
+                if (_cardFanSpread == null)
+                    return false;
+                
+                return _cardFanSpread.gameObject.activeSelf;
+            }
+        }
+        
         public void ShowCards()
         {
             if (_cardFanSpread == null)

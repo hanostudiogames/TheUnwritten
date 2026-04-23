@@ -208,9 +208,6 @@ namespace UI
                     }
                 }
                 
-                // if (action.IsAwait)
-                //     await UniTask.Delay(TimeSpan.FromSeconds(action.Duration));
-                
                 await UniTask.Delay(TimeSpan.FromSeconds(action.EndDelay));
             }
         }

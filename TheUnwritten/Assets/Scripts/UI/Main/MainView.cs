@@ -210,14 +210,12 @@ namespace UI.Main
             await libraryImg.DOFade(value, duration);
         }
 
-        public void OnDimensionChanged(bool isPortrait, UniTaskStatus answerStatus)
+        public void OnDimensionChanged(bool isPortrait, float scrollPositionY)
         {
             if(bgRectTr)
                 bgRectTr.localRotation = isPortrait ? Quaternion.identity : Quaternion.Euler(0, 0, 90f);
    
-            float scrollPositionY = 0;
-            if (answerStatus != UniTaskStatus.Pending)
-                scrollPositionY = ViewportHalfHeight;
+            
                 
             ScrollToAsync(scrollPositionY).Forget();
         }

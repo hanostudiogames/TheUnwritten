@@ -9,7 +9,7 @@ namespace Tables.Records
     {
         public int Index = 0;
 
-        public bool IsBattle = false;
+        // public bool IsBattle = false;
 
         [SerializeReference, SubclassSelector]
         public DialogueRecord[] DialogueRecords = null;

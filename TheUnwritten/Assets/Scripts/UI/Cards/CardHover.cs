@@ -31,7 +31,8 @@ namespace UI.Cards
 
         public void Enter()
         {
-            if (!IsSelectable || !_hasOrigin) return;
+            if (!IsSelectable || !_hasOrigin) 
+                return;
 
             _isHovering = true;
             Play(true).Forget();
@@ -39,7 +40,8 @@ namespace UI.Cards
 
         public void Exit()
         {
-            if (!_isHovering || !_hasOrigin) return;
+            if (!_isHovering || !_hasOrigin) 
+                return;
 
             _isHovering = false;
             Play(false).Forget();
@@ -63,7 +65,7 @@ namespace UI.Cards
             }
         }
 
-        public void SnapToOrigin()
+        private void SnapToOrigin()
         {
             rectTr.anchoredPosition = _originPos;
             rectTr.localRotation = _originRot;
@@ -88,15 +90,14 @@ namespace UI.Cards
             Quaternion targetRot = enter ? Quaternion.identity : _originRot;
 
             if (enter)
-            {
                 rectTr.SetAsLastSibling();
-            }
 
             float time = 0f;
 
             while (time < duration)
             {
-                if (token.IsCancellationRequested) return;
+                if (token.IsCancellationRequested) 
+                    return;
 
                 time += Time.deltaTime;
                 float t = 1f - Mathf.Pow(1f - (time / duration), 2f);

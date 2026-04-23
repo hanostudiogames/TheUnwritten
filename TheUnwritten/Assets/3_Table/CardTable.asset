@@ -15,7 +15,10 @@ MonoBehaviour:
   CardRecords:
   - Id: 1
     Key: flame
-    LocalKey: 
+    LocalKey: flame
   - Id: 2
     Key: shadow
-    LocalKey: 
+    LocalKey: shadow
+  - Id: 3
+    Key: seal
+    LocalKey: seal

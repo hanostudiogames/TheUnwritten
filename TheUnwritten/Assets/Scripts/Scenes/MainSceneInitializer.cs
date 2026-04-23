@@ -41,14 +41,7 @@ namespace Scenes
             var factory = new MainPresenterFactory(gameManager, _uiManager);
             var mainPresenter = factory.Create();
             if (mainPresenter != null)
-            {
                 gameManager.AddSceneListener(mainPresenter);
-
-                // ⑤ 실시간 서술 개입 전담 핸들러. 활성 다이얼로그의 <slot_N> 에 선택된 카드 이름을 채워넣는다.
-                var slotInteractionHandler = new SlotInteractionHandler();
-                mainPresenter.SetCardSelectionHandler(slotInteractionHandler);
-                mainPresenter.CardController.SetListener(slotInteractionHandler);
-            }
 
             gameManager.StartActAsync(actIndex, sceneIndex).Forget();
 

@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Tables.SlotTable
   SlotRecords:
   - Id: 1
-    AllowedCardIds: 01000000
+    AllowedCardIds: 0100000003000000

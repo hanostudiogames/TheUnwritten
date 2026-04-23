@@ -20,7 +20,12 @@ namespace UI.Main
         {
             var model = OnCreateModel<MainModel>();
         
-            var presenter = new MainPresenter(_view, model, _gameManager, _uiManager);
+            var battleController = new BattleController(_gameManager);
+            
+            var presenter = new MainPresenter(_view, model, _gameManager, _uiManager, 
+                new SlotInteractionHandler(),
+                battleController);
+            
             presenter.Activate();
 
             return presenter as TPresenter;

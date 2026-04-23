@@ -164,7 +164,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Scenes.MainScene
   actIndex: 1
-  sceneIndex: 1
+  sceneIndex: 3
 --- !u!1 &309454962
 GameObject:
   m_ObjectHideFlags: 0
