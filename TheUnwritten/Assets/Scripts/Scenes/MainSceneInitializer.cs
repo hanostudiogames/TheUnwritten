@@ -40,19 +40,14 @@ namespace Scenes
             var gameManager = new GameManager(_serviceLocator.Get<GameInfoService>(), _uiManager);
             var factory = new MainPresenterFactory(gameManager, _uiManager);
             var mainPresenter = factory.Create();
-            if(mainPresenter != null)
+            if (mainPresenter != null)
             {
                 gameManager.AddSceneListener(mainPresenter);
 
-                // BattleManager 는 MainPresenter 와 형제 계층으로 동작하며 동일 View/Model/UIFactory/CardController 를 공유한다.
-                // 전투 씬(SceneRecord.IsBattle == true) 에서만 실제 동작하고, 일반 씬에서는 조기 반환한다.
-                var battleManager = new BattleManager(
-                    mainPresenter.View,
-                    mainPresenter.Model,
-                    gameManager,
-                    mainPresenter.UIFactory,
-                    mainPresenter.CardController);
-                gameManager.AddSceneListener(battleManager);
+                // ⑤ 실시간 서술 개입 전담 핸들러. 활성 다이얼로그의 <slot_N> 에 선택된 카드 이름을 채워넣는다.
+                var slotInteractionHandler = new SlotInteractionHandler();
+                mainPresenter.SetCardSelectionHandler(slotInteractionHandler);
+                mainPresenter.CardController.SetListener(slotInteractionHandler);
             }
 
             gameManager.StartActAsync(actIndex, sceneIndex).Forget();

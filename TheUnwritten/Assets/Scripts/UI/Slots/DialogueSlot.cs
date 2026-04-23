@@ -13,8 +13,9 @@ namespace UI.Slots
     public interface IDialogueSlot
     {
         TextMeshProUGUI TMP { get; }
+        Typer Typer { get; }
     }
-    
+
     public abstract class DialogueSlot<TParam> : Slot<TParam>, IDialogueSlot
         where TParam : ElementParam
     {
@@ -43,6 +44,7 @@ namespace UI.Slots
         protected RectTransform _rectTr = null;
 
         public TextMeshProUGUI TMP => typer?.TMP;
+        public Typer Typer => typer;
         
         public override void Initialize(TParam param)
         {

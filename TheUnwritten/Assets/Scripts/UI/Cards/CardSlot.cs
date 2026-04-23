@@ -12,27 +12,39 @@ namespace UI.Cards
         IPointerExitHandler,
         IPointerClickHandler
     {
+        public interface IListener
+        {
+            void OnCardSelected(CardRecord cardRecord);
+        }
+
         public class Param : ElementParam
         {
             public CardRecord CardRecord { get; private set; } = null;
+            public IListener Listener { get; private set; } = null;
 
             public Param(CardRecord cardRecord)
             {
                 CardRecord = cardRecord;
             }
+
+            public Param WithListener(IListener listener)
+            {
+                Listener = listener;
+                return this;
+            }
         }
-        
+
         [SerializeField] private RectTransform rectTr = null;
-    
+
         private CardHover _hover;
 
         public RectTransform Rect => rectTr;
         public bool IsSelectable { get; private set; }
-        
+
         public override void Initialize(Param param)
         {
             base.Initialize(param);
-            
+
             _hover = GetComponent<CardHover>();
         }
 
@@ -62,9 +74,7 @@ namespace UI.Cards
         {
             if (!IsSelectable) return;
 
-            Debug.Log($"카드 클릭: {name}");
-
-            // TODO: 카드 사용 로직 연결
+            _param?.Listener?.OnCardSelected(_param.CardRecord);
         }
     }
 }

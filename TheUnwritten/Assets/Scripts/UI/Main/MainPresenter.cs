@@ -37,12 +37,17 @@ namespace UI.Main
         private UniTaskCompletionSource _answerCompletionSource = null;
         private UniTaskCompletionSource _cardCompletionSource = null;
         private DialoguePostAction _dialoguePostAction = null;
+        private ICardSelectionHandler _cardSelectionHandler = null;
 
-        // BattleManager 같은 형제 계층이 동일 View/Model 을 공유할 수 있도록 노출.
         public MainView View => _view;
         public MainModel Model => _model;
         public UIFactory UIFactory => _uiFactory;
         public CardController CardController => _cardController;
+
+        public void SetCardSelectionHandler(ICardSelectionHandler handler)
+        {
+            _cardSelectionHandler = handler;
+        }
         
         public MainPresenter(MainView view, MainModel model, IGameManager gameManager, UIManager uiManager) : base (view, model)
         {
@@ -72,10 +77,6 @@ namespace UI.Main
 
             var sceneRecord = ActTableContainer.Instance?.GetSceneRecord(act, scene);
             if (sceneRecord == null)
-                return;
-
-            // 전투 씬은 BattleManager 가 처리하므로 여기서는 무시한다.
-            if (sceneRecord.IsBattle)
                 return;
 
             var dialogues = sceneRecord.DialogueRecords;
@@ -119,7 +120,7 @@ namespace UI.Main
 
                 await ExecuteDialoguePostActionAsync(dialogueSlot.TMP, act, scene, dialogue.DialogueActions);
                 await ActiveAnswerAsync(dialogue.AnswerIds);
-                await ActiveCardAsync(dialogue.SlotId);
+                await ActiveCardAsync(dialogue.SlotId, dialogueSlot);
             }
             
             await _view.ScrollToAsync(0);
@@ -190,21 +191,29 @@ namespace UI.Main
             await _view.ScrollToAsync(_view.ViewportHalfHeight);
         }
 
-        private async UniTask ActiveCardAsync(int slotId)
+        private async UniTask ActiveCardAsync(int slotId, IDialogueSlot activeSlot)
         {
             var slotRecord = SlotTableContainer.Instance?.GetSlotRecord(slotId);
             if (slotRecord == null)
                 return;
 
             await _cardController.SetCardsAsync(slotRecord.AllowedCardIds);
-            
-            _cardCompletionSource = new  UniTaskCompletionSource();
-            
+
             await _view.ScrollToAsync(0);
             await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
             _cardController.ShowCards();
-            
-            await _cardCompletionSource.Task;
+
+            if (_cardSelectionHandler != null)
+            {
+                _cardSelectionHandler.BeginSelection(activeSlot);
+                await _cardSelectionHandler.AwaitCompletionAsync();
+            }
+            else
+            {
+                _cardCompletionSource = new UniTaskCompletionSource();
+                _cardCompletionSource.TrySetResult();
+                await _cardCompletionSource.Task;
+            }
         }
         
         #region CharacterSpeechSlot.Listener
