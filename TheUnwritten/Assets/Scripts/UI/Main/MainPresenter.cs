@@ -57,7 +57,11 @@ namespace UI.Main
             cardController.SetListener(slotInteractionHandler);
             // _cardSelectionHandler = slotInteractionHandler;
             // _battleController = battleController;
-            _sceneModeContext = new SceneModeContext(_view, slotInteractionHandler, cardController, _uiFactory);
+
+            var eventDispatcher = new SceneEventDispatcher()
+                .Register(new BattleEventHandler());
+
+            _sceneModeContext = new SceneModeContext(_view, slotInteractionHandler, cardController, _uiFactory, eventDispatcher);
 
             _sceneModes = new();
             

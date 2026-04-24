@@ -15,11 +15,18 @@ namespace Common
     public enum SceneModeType
     {
         None,
-        
+
         Normal,
         Battle,
     }
-    
+
+    public enum SceneEventType
+    {
+        None = 0,
+
+        Battle = 1,
+    }
+
     public enum DialogueActionType
     {
         None,

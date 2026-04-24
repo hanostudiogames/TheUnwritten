@@ -30,19 +30,22 @@ namespace UI.Main
         public CardController CardController { get; }
         public UIFactory UIFactory { get; }
         // public IBattleCardInput BattleCardInput { get; }
-        
+        public SceneEventDispatcher EventDispatcher { get; }
+
         private readonly Dictionary<SceneModeType, ISceneModePayload> _payloads = new();
 
         public SceneModeContext(
             MainView view,
             ICardSelectionHandler cardSelectionHandler,
             CardController cardController,
-            UIFactory uiFactory)
+            UIFactory uiFactory,
+            SceneEventDispatcher eventDispatcher)
         {
             View = view;
             CardSelectionHandler = cardSelectionHandler;
             CardController = cardController;
             UIFactory = uiFactory;
+            EventDispatcher = eventDispatcher;
         }
 
         public void SetPayload<T>(SceneModeType sceneModeType, T payload) where T : class, ISceneModePayload

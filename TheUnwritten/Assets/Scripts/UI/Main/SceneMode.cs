@@ -68,8 +68,16 @@ namespace UI.Main
             _dialogueCompletionSource = new();
             var localText = LocalizationSettings.StringDatabase.GetLocalizedString("Dialogue", localKey, locale);
             var param = new NarrationSlot.Param(this, localText, typingSpeed);
-            
+
             return _context?.View.CreateNarrationSlot(_context?.UIFactory, param);
+        }
+
+        protected void DispatchEvent(EventRecord record, IDialogueSlot slot)
+        {
+            if (_context == null)
+                return;
+
+            _context.EventDispatcher?.Dispatch(record, _context, slot, _act, _scene);
         }
         
         protected async UniTask ExecuteDialoguePostActionAsync(TextMeshProUGUI tmp, List<DialogueAction> dialogueActions)

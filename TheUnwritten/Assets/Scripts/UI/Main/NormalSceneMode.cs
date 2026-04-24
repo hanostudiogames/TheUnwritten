@@ -57,20 +57,7 @@ namespace UI.Main
                     case EventRecord eventRecord:
                     {
                         dialogueSlot = CreateNarrationSlot(eventRecord.LocalKey, eventRecord.TypingSpeed, locale);
-                        if (eventRecord.EventId == 1)
-                        {
-                            _context?.SetPayload(SceneModeType.Battle,
-                                new BattleModePayload
-                                {
-                                    Act = _act,
-                                    Scene = _scene,
-                                    EventId = eventRecord.EventId,
-                                    SlotId = eventRecord.SlotId,
-                                    DialogueSlot = dialogueSlot,
-                                    MonsterTMP = eventRecord.IsMonster ? dialogueSlot.TMP : null
-                                });
-                        }
-                        
+                        DispatchEvent(eventRecord, dialogueSlot);
                         break;
                     }
                 }
