@@ -13,6 +13,7 @@ namespace UI.Slots
 {
     public interface IAnswerSlot
     {
+        void Initialize(AnswerSlot.Param param);
         void Activate();
         void Deactivate();
         

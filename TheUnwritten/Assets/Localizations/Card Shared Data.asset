@@ -23,6 +23,18 @@ MonoBehaviour:
     m_Key: shadow
     m_Metadata:
       m_Items: []
+  - m_Id: 44296869765120
+    m_Key: flame_effect_20
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44877692788736
+    m_Key: flame_effect_50
+    m_Metadata:
+      m_Items: []
+  - m_Id: 45103786745856
+    m_Key: flame_effect_100
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

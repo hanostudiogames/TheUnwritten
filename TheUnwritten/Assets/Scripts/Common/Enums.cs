@@ -11,6 +11,14 @@ namespace Common
     //     DoShear,
     //     CollapseSingleParagraph,
     // }
+
+    public enum SceneModeType
+    {
+        None,
+        
+        Normal,
+        Battle,
+    }
     
     public enum DialogueActionType
     {

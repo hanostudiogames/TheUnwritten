@@ -83,6 +83,22 @@ MonoBehaviour:
     m_Key: 17
     m_Metadata:
       m_Items: []
+  - m_Id: 8658564787724288
+    m_Key: 18
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8659217266237440
+    m_Key: 19_flame
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8659316344086528
+    m_Key: 18_seal
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8659961260269568
+    m_Key: 19_seal
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

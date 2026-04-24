@@ -21,25 +21,25 @@ namespace UI.Main
     public interface ICardSelectionHandler
     {
         void BeginSelection(IDialogueSlot activeSlot);
-        UniTask AwaitCompletionAsync();
+        UniTask<CardRecord> AwaitCompletionAsync();
     }
 
     public class SlotInteractionHandler : ICardSelectionHandler, CardSlot.IListener
     {
         private IDialogueSlot _activeSlot = null;
-        private UniTaskCompletionSource _completionSource = null;
+        private UniTaskCompletionSource<CardRecord> _completionSource = null;
         private bool _filling = false;
 
         public void BeginSelection(IDialogueSlot activeSlot)
         {
             _activeSlot = activeSlot;
-            _completionSource = new UniTaskCompletionSource();
+            _completionSource = new UniTaskCompletionSource<CardRecord>();
             _filling = false;
         }
 
-        public UniTask AwaitCompletionAsync()
+        public UniTask<CardRecord> AwaitCompletionAsync()
         {
-            return _completionSource?.Task ?? UniTask.CompletedTask;
+            return _completionSource?.Task ?? UniTask.FromResult<CardRecord>(null);
         }
 
         void CardSlot.IListener.OnCardSelected(CardRecord cardRecord)
@@ -66,7 +66,7 @@ namespace UI.Main
                 await typer.TypeIntoSlotAsync(slotName, cardName);
             }
 
-            _completionSource?.TrySetResult();
+            _completionSource?.TrySetResult(cardRecord);
         }
     }
 }

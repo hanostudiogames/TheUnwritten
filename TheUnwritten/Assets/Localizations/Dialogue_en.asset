@@ -99,6 +99,10 @@ MonoBehaviour:
     m_Localized: The Ink Creature pushes through the [ <slot_1> ].
     m_Metadata:
       m_Items: []
+  - m_Id: 8658564787724288
+    m_Localized: 
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

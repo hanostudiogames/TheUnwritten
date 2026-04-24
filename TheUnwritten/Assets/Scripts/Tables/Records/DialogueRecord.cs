@@ -12,7 +12,7 @@ namespace Tables.Records
     public abstract class DialogueRecord
     {
         public string LocalKey = string.Empty;
-        public float TypingSpeed = 0.05f;
+        public float TypingSpeed = 0.1f;
         public float EndDelaySeconds = 1f;
 
         public int[] AnswerIds = null;
@@ -20,9 +20,6 @@ namespace Tables.Records
         public int SlotId = 0;
         
         public List<DialogueAction> DialogueActions = null;
-
-        public bool IsMonster = false;
-        public int EventId = 0;
     }
 
     [Serializable]
@@ -35,5 +32,12 @@ namespace Tables.Records
     public class CharacterSpeechRecord : DialogueRecord
     {
         public string CharacterLocalKey = string.Empty;
+    }
+    
+    [Serializable]
+    public class EventRecord : DialogueRecord
+    {
+        public int EventId = 0;
+        public bool IsMonster = false;
     }
 }

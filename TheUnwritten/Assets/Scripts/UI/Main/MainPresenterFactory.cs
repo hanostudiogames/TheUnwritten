@@ -23,8 +23,9 @@ namespace UI.Main
             var battleController = new BattleController(_gameManager);
             
             var presenter = new MainPresenter(_view, model, _gameManager, _uiManager, 
-                new SlotInteractionHandler(),
-                battleController);
+                new SlotInteractionHandler());
+
+            battleController.BindCardInput(presenter);
             
             presenter.Activate();
 
@@ -32,4 +33,3 @@ namespace UI.Main
         }
     }
 }
-

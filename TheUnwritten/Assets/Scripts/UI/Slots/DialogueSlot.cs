@@ -14,6 +14,8 @@ namespace UI.Slots
     {
         TextMeshProUGUI TMP { get; }
         Typer Typer { get; }
+        
+        void Initialize();
     }
 
     public abstract class DialogueSlot<TParam> : Slot<TParam>, IDialogueSlot
@@ -50,7 +52,8 @@ namespace UI.Slots
         {
             base.Initialize(param);
             
-            _rectTr = GetComponent<RectTransform>();
+            if(!_rectTr)
+                _rectTr = GetComponent<RectTransform>();
 
             InitializeTyper();
         }
@@ -83,14 +86,17 @@ namespace UI.Slots
             // _rectTr.localScale = Vector3.one * 1.1f;
         }
         
-        protected async UniTask RestoreScaleAsync(Action completeAction)
+        protected UniTask RestoreScaleAsync(Action completeAction)
         {
             if (!_rectTr)
-                return;
+                return UniTask.CompletedTask;
+            
             completeAction?.Invoke();
             // await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
             // await _rectTr.DOScale(Vector3.one, 0.5f)
             //     .OnComplete(() => completeAction?.Invoke());
+            
+            return UniTask.CompletedTask;
         }
 
         protected virtual void OnCompleteDialogue()

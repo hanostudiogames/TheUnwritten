@@ -18,16 +18,12 @@ namespace Common
 
     public interface IGameManager
     {
-        // GameMode GameMode { get; }
-        
         void AddSceneListener(ISceneListener listener);
-        // void RegisterModeHandler<TType>(Action<GameMode> action);
     }
     
     public class GameManager : IGameManager
     {
-        // private readonly ManagementManager _managementManager = null;
-        private readonly EventManager _eventManager = null;
+        // private readonly EventManager _eventManager = null;
         private readonly IGameInfoService _gameInfoService = null;
         private readonly IUIManager _uiManager = null;
 
@@ -35,14 +31,10 @@ namespace Common
         private int _scene = 0;
         private readonly HashSet<ISceneListener> _sceneListeners = new();
 
-        // private readonly Dictionary<Type, Action<GameMode>> _modeHandlers = new();
-        
-        // public GameMode GameMode { get; private set; } = GameMode.None;
-        
         public GameManager(IGameInfoService gameInfoService, IUIManager uiManager)
         {
             // _managementManager = new ManagementManager();
-            _eventManager = new();
+            // _eventManager = new();
             
             _gameInfoService = gameInfoService;
             _uiManager = uiManager;

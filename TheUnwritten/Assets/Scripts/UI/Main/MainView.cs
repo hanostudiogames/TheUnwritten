@@ -49,6 +49,15 @@ namespace UI.Main
             base.Initialize(presenter);
 
             _dialogueSlots = new();
+            
+            var answerSlots = answersRootRectTr.GetComponentsInChildren<AnswerSlot>();
+            if (answerSlots != null)
+            {
+                if(_answerSlots == null)
+                    _answerSlots = new ();
+                
+                _answerSlots?.AddRange(answerSlots);
+            }
         }
         
         public override void Activate()
@@ -60,22 +69,16 @@ namespace UI.Main
 
         public void InitializeAnswerSlots(AnswerSlot.IListener listener)
         {
-            var answerSlots = answersRootRectTr.GetComponentsInChildren<AnswerSlot>();
-            if (answerSlots == null)
+            if (_answerSlots == null)
                 return;
-            
-            if(_answerSlots == null)
-                _answerSlots = new ();
-            
-            for (int i = 0; i < answerSlots.Length; ++i)
+
+            for (int i = 0; i < _answerSlots.Count; ++i)
             {
-                var answerSlot = answerSlots[i];
+                var answerSlot = _answerSlots[i];
                 if(answerSlot == null)
                     continue;
                 
                 answerSlot.Initialize(new AnswerSlot.Param(listener));
-                
-                _answerSlots?.Add(answerSlot);
             }
         }
         
@@ -214,9 +217,7 @@ namespace UI.Main
         {
             if(bgRectTr)
                 bgRectTr.localRotation = isPortrait ? Quaternion.identity : Quaternion.Euler(0, 0, 90f);
-   
             
-                
             ScrollToAsync(scrollPositionY).Forget();
         }
     }

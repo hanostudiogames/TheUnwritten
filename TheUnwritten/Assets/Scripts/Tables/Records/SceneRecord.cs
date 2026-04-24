@@ -1,6 +1,8 @@
-using System;
-using Tables.Records;
 using UnityEngine;
+using System;
+
+using Common;
+using Tables.Records;
 
 namespace Tables.Records
 {
@@ -10,6 +12,7 @@ namespace Tables.Records
         public int Index = 0;
 
         // public bool IsBattle = false;
+        public SceneModeType SceneModeType = SceneModeType.None;
 
         [SerializeReference, SubclassSelector]
         public DialogueRecord[] DialogueRecords = null;

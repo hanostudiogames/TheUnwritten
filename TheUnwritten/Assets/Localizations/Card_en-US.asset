@@ -26,6 +26,10 @@ MonoBehaviour:
     m_Localized: shadow
     m_Metadata:
       m_Items: []
+  - m_Id: 44296869765120
+    m_Localized: "\uB728\uAC81\uB2E4"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []
