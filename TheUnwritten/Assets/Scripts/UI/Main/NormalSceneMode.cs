@@ -84,7 +84,7 @@ namespace UI.Main
                 if(dialogueActions != null && dialogueActions.Count > 0)
                     await ExecuteDialoguePostActionAsync(dialogueSlot.TMP, dialogueRecord.DialogueActions);
                 
-                await ActiveAnswerAsync(dialogueRecord.AnswerIds);
+                await ShowAnswerAsync(dialogueRecord.AnswerIds);
                 // await TriggerEventAsync(eventId, dialogueRecord.SlotId, dialogueSlot);
             }
             

@@ -27,13 +27,12 @@ namespace UI.Main
         // CharacterSpeechSlot.IListener,
         // NarrationSlot.IListener,
         // AnswerSlot.IListener,
-        ISceneListener,
-        IBattleCardInput
+        ISceneListener
     {
         private readonly UIFactory _uiFactory = null;
         private readonly IGameManager _gameManager = null;
-        private readonly CardController _cardController = null;
-        private readonly ICardSelectionHandler _cardSelectionHandler = null;
+        // private readonly CardController _cardController = null;
+        // private readonly ICardSelectionHandler _cardSelectionHandler = null;
         // private readonly IBattleController _battleController = null;
         
         // private UniTaskCompletionSource _dialogueCompletionSource = null;
@@ -53,14 +52,16 @@ namespace UI.Main
 
             _gameManager = gameManager;
             _uiFactory = new UIFactory(uiManager);
-            _cardController = new(view.CardFanSpread);
-            _cardSelectionHandler = slotInteractionHandler;
+            
+            var cardController = new CardController(view.CardFanSpread);
+            cardController.SetListener(slotInteractionHandler);
+            // _cardSelectionHandler = slotInteractionHandler;
             // _battleController = battleController;
-            _sceneModeContext = new SceneModeContext(_view, _cardSelectionHandler, _cardController, _uiFactory, this);
+            _sceneModeContext = new SceneModeContext(_view, slotInteractionHandler, cardController, _uiFactory);
 
             _sceneModes = new();
             
-            _cardController?.SetListener(slotInteractionHandler);
+            
             uiManager?.RegisterDimensionHandler<MainPresenter>(OnDimensionChanged);
         }
 
@@ -260,34 +261,6 @@ namespace UI.Main
         //         }
         //     }
         // }
-
-        public UniTask<CardRecord> RequestCardAsync(int slotId, IDialogueSlot activeSlot)
-        {
-            return ActiveCardAsync(slotId, activeSlot);
-        }
-
-        private async UniTask<CardRecord> ActiveCardAsync(int slotId, IDialogueSlot activeSlot)
-        {
-            var slotRecord = SlotTableContainer.Instance?.GetSlotRecord(slotId);
-            if (slotRecord == null)
-                return null;
-
-            await _cardController.SetCardsAsync(slotRecord.AllowedCardIds);
-            
-            await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
-            _cardController.ShowCards();
-
-            if (_cardSelectionHandler != null)
-            {
-                _cardSelectionHandler.BeginSelection(activeSlot);
-                var selectedCard = await _cardSelectionHandler.AwaitCompletionAsync();
-                _cardController.HideCards();
-                return selectedCard;
-            }
-
-            _cardController.HideCards();
-            return null;
-        }
         
         // #region CharacterSpeechSlot.Listener
         // void CharacterSpeechSlot.IListener.End()

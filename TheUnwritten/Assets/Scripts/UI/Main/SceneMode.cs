@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -7,6 +8,7 @@ using UnityEngine.Localization.Settings;
 using TMPro;
 
 using Common;
+using Tables.Containers;
 using UI.Cards;
 using UI.Slots;
 using Tables.Records;
@@ -90,7 +92,7 @@ namespace UI.Main
                 .ExecuteAsync();
         }
         
-        protected async UniTask ActiveAnswerAsync(int[] answerIds)
+        protected async UniTask ShowAnswerAsync(int[] answerIds)
         {
             var view = _context?.View;
             if (view == null)
@@ -110,6 +112,43 @@ namespace UI.Main
                     
             view.DisableScrollRect();
             await view.ScrollToAsync(view.ViewportHalfHeight);
+        }
+        
+        // public UniTask<CardRecord> RequestCardAsync(int slotId, IDialogueSlot activeSlot)
+        // {
+        //     return ActiveCardAsync(slotId, activeSlot);
+        // }
+
+        protected async UniTask<CardRecord> ShowCardAsync(int slotId, IDialogueSlot activeSlot)
+        {
+            var cardController = _context?.CardController;
+            if (cardController == null)
+                return null;
+
+            var cardSelectionHandler = _context?.CardSelectionHandler;
+            if (cardSelectionHandler == null)
+                return null;
+            
+            var slotRecord = SlotTableContainer.Instance?.GetSlotRecord(slotId);
+            if (slotRecord == null)
+                return null;
+
+            await cardController.SetCardsAsync(slotRecord.AllowedCardIds);
+            
+            await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
+            cardController.ShowCards();
+
+            if (_context?.CardSelectionHandler != null)
+            {
+                cardSelectionHandler.BeginSelection(activeSlot);
+                var selectedCard = await cardSelectionHandler.AwaitCompletionAsync();
+                cardController.HideCards();
+                
+                return selectedCard;
+            }
+
+            cardController.HideCards();
+            return null;
         }
 
         public virtual void End()

@@ -29,7 +29,7 @@ namespace UI.Main
         public ICardSelectionHandler CardSelectionHandler { get; }
         public CardController CardController { get; }
         public UIFactory UIFactory { get; }
-        public IBattleCardInput BattleCardInput { get; }
+        // public IBattleCardInput BattleCardInput { get; }
         
         private readonly Dictionary<SceneModeType, ISceneModePayload> _payloads = new();
 
@@ -37,14 +37,12 @@ namespace UI.Main
             MainView view,
             ICardSelectionHandler cardSelectionHandler,
             CardController cardController,
-            UIFactory uiFactory,
-            IBattleCardInput battleCardInput)
+            UIFactory uiFactory)
         {
             View = view;
             CardSelectionHandler = cardSelectionHandler;
             CardController = cardController;
             UIFactory = uiFactory;
-            BattleCardInput = battleCardInput;
         }
 
         public void SetPayload<T>(SceneModeType sceneModeType, T payload) where T : class, ISceneModePayload

@@ -26,7 +26,7 @@ namespace UI.Main
             if (view == null)
                 return;
 
-            var cardInput = _context?.BattleCardInput;
+            // var cardInput = _context?.BattleCardInput;
             
             var dialogueRecords = _sceneRecord.DialogueRecords;
             if (dialogueRecords == null)
@@ -36,8 +36,8 @@ namespace UI.Main
 
             // var slotId = dialogueRecord.SlotId > 0 ? dialogueRecord.SlotId : _slotId;
             // if (slotId > 0 && _cardInput != null)
-            if(cardInput != null)
-                await cardInput.RequestCardAsync(1, _dialogueSlot);
+            // if(cardInput != null)
+                await ShowCardAsync(1, _dialogueSlot);
             
             var payload = _context?.GetPayload<BattleModePayload>(Common.SceneModeType.Battle);
             if (payload == null)
@@ -63,6 +63,8 @@ namespace UI.Main
                 if (dialogueRecord == null)
                     continue;
 
+                // await cardInput.Await
+                
                 var localText = LocalizationSettings.StringDatabase
                     .GetLocalizedString("Dialogue", dialogueRecord.LocalKey, locale);
 
