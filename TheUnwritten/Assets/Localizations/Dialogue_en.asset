@@ -92,7 +92,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 7982791412146176
-    m_Localized: "      No one. This card \u2014 I just have to trust it."
+    m_Localized: "      \u2014 In this world\u2026 to write is to obtain?\n      A name
+      I haven't yet read rests in my hand."
     m_Metadata:
       m_Items: []
   - m_Id: 8008572364382208
@@ -100,7 +101,33 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 8658564787724288
-    m_Localized: 
+    m_Localized:
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9000000000000001
+    m_Localized: "A thread of the black current \u2014 leapt to your fingertip. It
+      was cold. And, familiar.\nOn your palm, it became a single card."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9000000000000002
+    m_Localized: through its own darkness
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9000000000000003
+    m_Localized: through the flame
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9000000000000004
+    m_Localized: "      \u2014 Stopped by what you yourself gave."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9000000000000005
+    m_Localized: "      \u2014 That black card just now\u2026 I'll read it later."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9000000000000006
+    m_Localized: "The creature stepped back. Its black outline thinned between the
+      letters.\n\u2014 The next sentence was yours to write."
     m_Metadata:
       m_Items: []
   references:

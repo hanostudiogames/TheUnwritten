@@ -24,22 +24,13 @@ namespace UI.Main
     }
     
     public class MainPresenter : Presenter<MainView, MainModel>, IMainPresenter,
-        // CharacterSpeechSlot.IListener,
-        // NarrationSlot.IListener,
-        // AnswerSlot.IListener,
         ISceneListener
     {
         private readonly UIFactory _uiFactory = null;
         private readonly IGameManager _gameManager = null;
-        // private readonly CardController _cardController = null;
-        // private readonly ICardSelectionHandler _cardSelectionHandler = null;
-        // private readonly IBattleController _battleController = null;
-        
-        // private UniTaskCompletionSource _dialogueCompletionSource = null;
-        // private UniTaskCompletionSource _answerCompletionSource = null;
-        private DialoguePostAction _dialoguePostAction = null;
-
         private readonly SceneModeContext _sceneModeContext = null;
+        
+        private DialoguePostAction _dialoguePostAction = null;
         private Dictionary<SceneModeType, SceneMode> _sceneModes = null;
         private SceneMode _sceneMode = null;
         
@@ -55,13 +46,13 @@ namespace UI.Main
             
             var cardController = new CardController(view.CardFanSpread);
             cardController.SetListener(slotInteractionHandler);
-            // _cardSelectionHandler = slotInteractionHandler;
-            // _battleController = battleController;
 
-            var eventDispatcher = new SceneEventDispatcher()
-                .Register(new BattleEventHandler());
+            var cardInventory = new CardInventory();
+            // TEMP: 기존 씬 회귀 테스트용 시드. 추후 Scene 1-1~1-3 에 CardGrant 이벤트를 저작해 대체.
+            cardInventory.AddCard(1); // flame
+            cardInventory.AddCard(3); // seal
 
-            _sceneModeContext = new SceneModeContext(_view, slotInteractionHandler, cardController, _uiFactory, eventDispatcher);
+            _sceneModeContext = new SceneModeContext(_view, slotInteractionHandler, cardController, _uiFactory, cardInventory);
 
             _sceneModes = new();
             
@@ -95,67 +86,6 @@ namespace UI.Main
             _sceneMode = sceneMode;
 
             await sceneMode.PlayAsync(act, scene, sceneRecord, _dialoguePostAction);
-            
-            // var dialogues = sceneRecord.DialogueRecords;
-            // if (dialogues == null)
-            //     return;
-            //
-      
-            //
-            // _view.DisableScrollRect();
-            // await _view.ScrollToAsync(_view.ViewportHalfHeight);
-            //
-            // var locale = LocalizationSettings.SelectedLocale;
-            //                     
-            // for (int i = 0; i < dialogues.Length; ++i)
-            // {
-            //     var dialogueRecord = dialogues[i];
-            //     if(dialogueRecord == null) 
-            //         continue;
-            //
-            //     IDialogueSlot dialogueSlot = null;
-            //     int eventId = 0;
-            //     
-            //     switch (dialogueRecord)
-            //     {
-            //         case CharacterSpeechRecord characterSpeechRecord:
-            //         {
-            //             dialogueSlot = CreateCharacterSpeechSlot(characterSpeechRecord, locale);
-            //             break;
-            //         }
-            //
-            //         case NarrationRecord narrationRecord:
-            //         { 
-            //             dialogueSlot = CreateNarrationSlot(narrationRecord.LocalKey, narrationRecord.TypingSpeed, locale);
-            //             break;
-            //         }
-            //
-            //         case EventRecord eventRecord:
-            //         {
-            //             dialogueSlot = CreateNarrationSlot(eventRecord.LocalKey, eventRecord.TypingSpeed, locale);
-            //             eventId = eventRecord.EventId;
-            //             
-            //             if (eventRecord.IsMonster)
-            //                 _battleController?.SetTargetTMP(dialogueSlot?.TMP);
-            //             
-            //             break;
-            //         }
-            //     }
-            //
-            //     if(dialogueSlot == null)
-            //         continue;
-            //
-            //     await _dialogueCompletionSource.Task;
-            //
-            //     await ExecuteDialoguePostActionAsync(dialogueSlot.TMP, act, scene, dialogueRecord.DialogueActions);
-            //     await ActiveAnswerAsync(dialogueRecord.AnswerIds);
-            //     // await TriggerEventAsync(eventId, dialogueRecord.SlotId, dialogueSlot);
-            // }
-            //
-            // await _view.ScrollToAsync(0);
-            // // await UniTask.Delay(TimeSpan.FromSeconds(5f));
-            //
-            // _view.EnableScrollRect();
         }
 
         private SceneMode CreateSceneMode(SceneModeType sceneModeType)
@@ -190,106 +120,6 @@ namespace UI.Main
             return sceneMode;
         }
 
-        // private IDialogueSlot CreateCharacterSpeechSlot(CharacterSpeechRecord record, Locale locale)
-        // {
-        //     if (record == null)
-        //         return null;
-        //     
-        //     _dialogueCompletionSource = new();
-        //                 
-        //     // var characterNameLocalText = LocalizationSettings.StringDatabase.GetLocalizedString("Character", "messenger", locale);
-        //     var localText = LocalizationSettings.StringDatabase.GetLocalizedString("Dialogue", record.LocalKey, locale);
-        //     var param = new CharacterSpeechSlot.Param(this, localText, record.TypingSpeed)
-        //         .WithCharacterName(string.Empty);
-        //                 
-        //     return _view.CreateCharacterSpeechSlot(_uiFactory, param);
-        // }
-        //
-        // private IDialogueSlot CreateNarrationSlot(string localKey, float typingSpeed, Locale locale)
-        // {
-        //     _dialogueCompletionSource = new();
-        //     var localText = LocalizationSettings.StringDatabase.GetLocalizedString("Dialogue", localKey, locale);
-        //     var param = new NarrationSlot.Param(this, localText, typingSpeed);
-        //     
-        //     return _view.CreateNarrationSlot(_uiFactory, param);
-        // }
-
-        // private async UniTask ExecuteDialoguePostActionAsync(TextMeshProUGUI tmp, int act, int scene, 
-        //     List<DialogueAction> dialogueActions)
-        // {
-        //     if (_dialoguePostAction == null)
-        //         return;
-        //     
-        //     var tmps = new List<TextMeshProUGUI>();
-        //     tmps.Add(tmp);
-        //     tmps.AddRange(_view.TMPsInDialogueSlots());
-        //     
-        //     var param = new DialoguePostAction.Param(tmps, act, scene)
-        //         .WithDialogueActions(dialogueActions);
-        //
-        //     await _dialoguePostAction.SetParam(param)
-        //         .ExecuteAsync();
-        // }
-        //
-        // private async UniTask ActiveAnswerAsync(int[] answerIds)
-        // {
-        //     if (answerIds == null || answerIds.Length <= 0)
-        //         return;
-        //
-        //     _answerCompletionSource = new UniTaskCompletionSource();
-        //
-        //     await _view.ShowAnswersAsync(answerIds);
-        //             
-        //     await _view.ScrollToAsync(0);
-        //     _view.EnableScrollRect();
-        //             
-        //     await _answerCompletionSource.Task;   
-        //             
-        //     _view.DisableScrollRect();
-        //     await _view.ScrollToAsync(_view.ViewportHalfHeight);
-        // }
-
-        // private async UniTask TriggerEventAsync(int eventId, int slotId, IDialogueSlot dialogueSlot)
-        // {
-        //     if (eventId <= 0)
-        //         return;
-        //
-        //     if (eventId == 1)
-        //     {
-        //         if (_battleController != null)
-        //         {
-        //             await _view.ScrollToAsync(100f);
-        //             
-        //             _battleController.SetDialogueTMP(dialogueSlot?.TMP);
-        //             await _battleController.PlayBattleAsync(eventId, slotId, dialogueSlot);
-        //         }
-        //     }
-        // }
-        
-        // #region CharacterSpeechSlot.Listener
-        // void CharacterSpeechSlot.IListener.End()
-        // {
-        //     _dialogueCompletionSource?.TrySetResult();
-        // }
-        // #endregion
-        //
-        // #region NarrationSlot.IListener
-        //
-        // void NarrationSlot.IListener.End()
-        // {
-        //     _dialogueCompletionSource?.TrySetResult();
-        // }
-        // #endregion
-        
-        // #region AnswerSlot.IListener
-        //
-        // void AnswerSlot.IListener.OnSelectedAnswer(int id)
-        // {
-        //     _view?.HideAnswersAsync();
-        //     _answerCompletionSource?.TrySetResult();
-        // }
-        // #endregion
-        
         #region ISceneListener
 
         async UniTask ISceneListener.OnStartSceneAsync(int act, int scene)
@@ -306,8 +136,6 @@ namespace UI.Main
                 await _view.FadeLibraryAsync(0, 3f);
         }
         #endregion
-
-        
         
         protected override void OnDimensionChanged(bool isPortrait)
         {

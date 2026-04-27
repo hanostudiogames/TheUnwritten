@@ -164,9 +164,12 @@ namespace UI
 
                     case DialogueActionType.Pulse:
                     {
+                        // TargetValue >0: 글자 확대 펄스. =0: 원상복귀.
+                        // <0: 축소(예: -1 → pulseScale 1+(-1)=0 → 글자가 점으로 응축돼 사라짐).
                         foreach (var tmp in tmps)
                         {
-                            tmp?.DoPulse(0.25f, action.Duration);
+                            tmp?.DoPulse(action.TargetValue, action.Duration)
+                                ?.SetDelay(action.StartDelay);
                         }
 
                         break;

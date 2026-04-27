@@ -35,14 +35,18 @@ MonoBehaviour:
       SceneModeType: 1
       DialogueRecords:
       - rid: 6598480915748356349
+      - rid: 6598480974526550000
       - rid: 6598480960729383065
       - rid: 6598480915748356401
       - rid: 6598480960729383064
     - Index: 4
       SceneModeType: 2
       DialogueRecords:
+      - rid: 6598480974526550001
+      - rid: 6598480974526550002
       - rid: 6598480974526546024
       - rid: 6598480974526546025
+      - rid: 6598480974526550003
   references:
     version: 2
     RefIds:
@@ -54,6 +58,7 @@ MonoBehaviour:
         EndDelaySeconds: 0.3
         AnswerIds: 
         SlotId: 0
+        RequiredCardId: 0
         DialogueActions: []
     - rid: 6598480787560726630
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
@@ -63,6 +68,7 @@ MonoBehaviour:
         EndDelaySeconds: 0.5
         AnswerIds: 
         SlotId: 0
+        RequiredCardId: 0
         DialogueActions: []
     - rid: 6598480897316487168
       type: {class: CharacterSpeechRecord, ns: Tables.Records, asm: Assembly-CSharp}
@@ -72,6 +78,7 @@ MonoBehaviour:
         EndDelaySeconds: 1
         AnswerIds: 
         SlotId: 0
+        RequiredCardId: 0
         DialogueActions: []
         CharacterLocalKey: 
     - rid: 6598480897316487260
@@ -82,6 +89,7 @@ MonoBehaviour:
         EndDelaySeconds: 1
         AnswerIds: 
         SlotId: 0
+        RequiredCardId: 0
         DialogueActions: []
     - rid: 6598480897316487261
       type: {class: CharacterSpeechRecord, ns: Tables.Records, asm: Assembly-CSharp}
@@ -91,6 +99,7 @@ MonoBehaviour:
         EndDelaySeconds: 1
         AnswerIds: 010000000200000003000000
         SlotId: 0
+        RequiredCardId: 0
         DialogueActions: []
         CharacterLocalKey: 
     - rid: 6598480897316487262
@@ -101,6 +110,7 @@ MonoBehaviour:
         EndDelaySeconds: 1
         AnswerIds: 
         SlotId: 0
+        RequiredCardId: 0
         DialogueActions: []
     - rid: 6598480897316487342
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
@@ -110,6 +120,7 @@ MonoBehaviour:
         EndDelaySeconds: 1
         AnswerIds: 
         SlotId: 0
+        RequiredCardId: 0
         DialogueActions: []
     - rid: 6598480897316487356
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
@@ -119,6 +130,7 @@ MonoBehaviour:
         EndDelaySeconds: 1
         AnswerIds: 
         SlotId: 0
+        RequiredCardId: 0
         DialogueActions:
         - DialogueActionType: 3
           TmpCount: 0
@@ -140,6 +152,7 @@ MonoBehaviour:
         EndDelaySeconds: 1
         AnswerIds: 
         SlotId: 0
+        RequiredCardId: 0
         DialogueActions:
         - DialogueActionType: 2
           TmpCount: 0
@@ -155,6 +168,7 @@ MonoBehaviour:
         EndDelaySeconds: 1
         AnswerIds: 
         SlotId: 0
+        RequiredCardId: 0
         DialogueActions: []
     - rid: 6598480915748356340
       type: {class: CharacterSpeechRecord, ns: Tables.Records, asm: Assembly-CSharp}
@@ -164,6 +178,7 @@ MonoBehaviour:
         EndDelaySeconds: 1
         AnswerIds: 
         SlotId: 0
+        RequiredCardId: 0
         DialogueActions: []
         CharacterLocalKey: 
     - rid: 6598480915748356342
@@ -174,6 +189,7 @@ MonoBehaviour:
         EndDelaySeconds: 1
         AnswerIds: 
         SlotId: 0
+        RequiredCardId: 0
         DialogueActions: []
     - rid: 6598480915748356348
       type: {class: CharacterSpeechRecord, ns: Tables.Records, asm: Assembly-CSharp}
@@ -183,6 +199,7 @@ MonoBehaviour:
         EndDelaySeconds: 0
         AnswerIds: 
         SlotId: 0
+        RequiredCardId: 0
         DialogueActions: []
         CharacterLocalKey: 
     - rid: 6598480915748356349
@@ -193,6 +210,7 @@ MonoBehaviour:
         EndDelaySeconds: 1
         AnswerIds: 
         SlotId: 0
+        RequiredCardId: 0
         DialogueActions:
         - DialogueActionType: 6
           TmpCount: 1
@@ -214,6 +232,7 @@ MonoBehaviour:
         EndDelaySeconds: 6
         AnswerIds: 
         SlotId: 0
+        RequiredCardId: 0
         DialogueActions:
         - DialogueActionType: 6
           TmpCount: 1
@@ -229,24 +248,25 @@ MonoBehaviour:
           EndDelay: 1
         CharacterLocalKey: 
     - rid: 6598480960729383064
-      type: {class: EventRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      type: {class: BattleEventRecord, ns: Tables.Records, asm: Assembly-CSharp}
       data:
         LocalKey: 17
         TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 
         SlotId: 1
+        RequiredCardId: 0
         DialogueActions: []
-        EventId: 1
         IsMonster: 0
     - rid: 6598480960729383065
-      type: {class: EventRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      type: {class: BattleEventRecord, ns: Tables.Records, asm: Assembly-CSharp}
       data:
         LocalKey: 15
         TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 
         SlotId: 0
+        RequiredCardId: 0
         DialogueActions:
         - DialogueActionType: 11
           TmpCount: 1
@@ -254,7 +274,6 @@ MonoBehaviour:
           TargetValue: 0
           StartDelay: 0
           EndDelay: 0
-        EventId: 0
         IsMonster: 1
     - rid: 6598480974526546024
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
@@ -264,13 +283,75 @@ MonoBehaviour:
         EndDelaySeconds: 1
         AnswerIds: 
         SlotId: 0
+        RequiredCardId: 1
         DialogueActions: []
     - rid: 6598480974526546025
       type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
       data:
-        LocalKey: 19
+        LocalKey: 19_flame
         TypingSpeed: 0.1
         EndDelaySeconds: 1
         AnswerIds: 
         SlotId: 0
+        RequiredCardId: 1
+        DialogueActions: []
+    - rid: 6598480974526550000
+      type: {class: CardGrantEventRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 14_grant
+        TypingSpeed: 0.1
+        EndDelaySeconds: 1
+        AnswerIds:
+        SlotId: 0
+        RequiredCardId: 0
+        DialogueActions:
+        - DialogueActionType: 9
+          TmpCount: 1
+          Duration: 1.5
+          TargetValue: 1
+          StartDelay: 0
+          EndDelay: 1
+        - DialogueActionType: 10
+          TmpCount: 1
+          Duration: 1.8
+          TargetValue: 1
+          StartDelay: 0
+          EndDelay: 1.5
+        - DialogueActionType: 8
+          TmpCount: 1
+          Duration: 0.6
+          TargetValue: -1
+          StartDelay: 0
+          EndDelay: 0.4
+        IsMonster: 0
+        CardIds: 02000000
+    - rid: 6598480974526550001
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 16_after_shadow
+        TypingSpeed: 0.1
+        EndDelaySeconds: 1
+        AnswerIds: 
+        SlotId: 0
+        RequiredCardId: 2
+        DialogueActions: []
+    - rid: 6598480974526550002
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 16_after_flame
+        TypingSpeed: 0.1
+        EndDelaySeconds: 1
+        AnswerIds: 
+        SlotId: 0
+        RequiredCardId: 1
+        DialogueActions: []
+    - rid: 6598480974526550003
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 1_4_end
+        TypingSpeed: 0.1
+        EndDelaySeconds: 2
+        AnswerIds: 
+        SlotId: 0
+        RequiredCardId: 0
         DialogueActions: []

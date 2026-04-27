@@ -99,6 +99,30 @@ MonoBehaviour:
     m_Key: 19_seal
     m_Metadata:
       m_Items: []
+  - m_Id: 9000000000000001
+    m_Key: 14_grant
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9000000000000002
+    m_Key: slot_1_shadow
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9000000000000003
+    m_Key: slot_1_flame
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9000000000000004
+    m_Key: 16_after_shadow
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9000000000000005
+    m_Key: 16_after_flame
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9000000000000006
+    m_Key: 1_4_end
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

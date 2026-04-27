@@ -329,6 +329,38 @@ namespace UI.Effects
             }, target, duration).SetEase(Ease.InOutQuad);
         }
 
+        // 불꽃이 글자들을 *부분부분* 핥는 듯한 효과. globalStrength 가 0↔maxStrength 로
+        // yoyo 진동하고, 각 글자는 인덱스+시간 기반 sin 노이즈에 따라 [0, globalStrength]
+        // 범위로 흩어진다 → 어떤 글자는 진하게, 어떤 글자는 옅게, 시간에 따라 패턴 이동.
+        // 일반 DoBleed 가 uniform fill 인 반면 이쪽은 항상 partial.
+        public static Tween DoBleedFlame(this TMP_Text text, float maxStrength, float duration, Color? bleedColor = null)
+        {
+            var state = GetState(text);
+            if (bleedColor.HasValue)
+                state.bleedColor = bleedColor.Value;
+
+            float globalStrength = 0f;
+
+            var tween = DOTween.To(() => globalStrength, x => globalStrength = x, maxStrength, duration)
+                .SetEase(Ease.InOutSine)
+                .SetLoops(-1, LoopType.Yoyo)
+                .OnUpdate(() =>
+                {
+                    float t = Time.time;
+                    for (int i = 0; i < state.bleed.Length; i++)
+                    {
+                        // 글자별 위상차 sin 노이즈 — 시간에 따라 패턴 이동.
+                        float n1 = Mathf.Sin(i * 1.7f + t * 3.5f);
+                        float n2 = Mathf.Sin(i * 0.7f + t * 5.2f) * 0.5f;
+                        float perChar = Mathf.Clamp01((n1 + n2 + 1.5f) / 3f);
+                        state.bleed[i] = perChar * globalStrength;
+                    }
+                    ApplyAll(text, state);
+                });
+
+            return tween;
+        }
+
         public static Tween DoConverge(this TMP_Text text, Vector2 targetLocal, float target, float duration)
         {
             var state = GetState(text);

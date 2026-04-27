@@ -34,9 +34,12 @@ namespace UI.Main
             for (int i = 0; i < dialogues.Length; ++i)
             {
                 var dialogueRecord = dialogues[i];
-                if(dialogueRecord == null) 
+                if(dialogueRecord == null)
                     continue;
-        
+
+                if (!ShouldPlayRecord(dialogueRecord))
+                    continue;
+
                 IDialogueSlot dialogueSlot = null;
                 // int eventId = 0;
                 
@@ -56,16 +59,37 @@ namespace UI.Main
         
                     case EventRecord eventRecord:
                     {
+                        // LocalKey 가 비어있는 EventRecord 는 화면에 출력하지 않고
+                        // 사이드이펙트(CardGrant 등) 만 실행한다. 인벤토리/상태 변경은
+                        // 즉시 처리되고, 다음 다이얼로그로 바로 진행한다.
+                        if (string.IsNullOrEmpty(eventRecord.LocalKey))
+                        {
+                            DispatchEvent(eventRecord, null);
+                            continue;
+                        }
+
                         dialogueSlot = CreateNarrationSlot(eventRecord.LocalKey, eventRecord.TypingSpeed, locale);
                         DispatchEvent(eventRecord, dialogueSlot);
                         break;
                     }
                 }
-        
+
                 if(dialogueSlot == null)
                     continue;
-        
+
                 await _dialogueCompletionSource.Task;
+
+                // 타이핑이 끝난 후에 IsMonster TMP 캡처 + 호흡 시작.
+                // 타이핑 *전* 에 호출하면 vertex/characterCount 가 0 이라 DoPulse 가 NRE.
+                // BattleSceneMode 의 호흡/불꽃 효과 대상이 된다.
+                if (dialogueRecord is EventRecord ev && ev.IsMonster)
+                {
+                    var payload = _context.GetPayload<BattleModePayload>(SceneModeType.Battle) ??
+                                  new BattleModePayload();
+                    
+                    payload.MonsterTMP = dialogueSlot.TMP;
+                    _context.SetPayload(SceneModeType.Battle, payload);
+                }
 
                 var dialogueActions = dialogueRecord.DialogueActions;
                 if(dialogueActions != null && dialogueActions.Count > 0)
@@ -80,29 +104,5 @@ namespace UI.Main
             //
             // view.EnableScrollRect();
         }
-        
-        // private IDialogueSlot CreateCharacterSpeechSlot(CharacterSpeechRecord record, Locale locale)
-        // {
-        //     if (record == null)
-        //         return null;
-        //     
-        //     _dialogueCompletionSource = new();
-        //                 
-        //     // var characterNameLocalText = LocalizationSettings.StringDatabase.GetLocalizedString("Character", "messenger", locale);
-        //     var localText = LocalizationSettings.StringDatabase.GetLocalizedString("Dialogue", record.LocalKey, locale);
-        //     var param = new CharacterSpeechSlot.Param(this, localText, record.TypingSpeed)
-        //         .WithCharacterName(string.Empty);
-        //                 
-        //     return _context?.View?.CreateCharacterSpeechSlot(_context?.UIFactory, param);
-        // }
-        //
-        // private IDialogueSlot CreateNarrationSlot(string localKey, float typingSpeed, Locale locale)
-        // {
-        //     _dialogueCompletionSource = new();
-        //     var localText = LocalizationSettings.StringDatabase.GetLocalizedString("Dialogue", localKey, locale);
-        //     var param = new NarrationSlot.Param(this, localText, typingSpeed);
-        //     
-        //     return _view.CreateNarrationSlot(_uiFactory, param);
-        // }
     }
 }

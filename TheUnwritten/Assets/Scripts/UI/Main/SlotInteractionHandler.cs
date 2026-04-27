@@ -20,19 +20,21 @@ namespace UI.Main
     /// </summary>
     public interface ICardSelectionHandler
     {
-        void BeginSelection(IDialogueSlot activeSlot);
+        void BeginSelection(IDialogueSlot activeSlot, SlotRecord slotRecord);
         UniTask<CardRecord> AwaitCompletionAsync();
     }
 
     public class SlotInteractionHandler : ICardSelectionHandler, CardSlot.IListener
     {
         private IDialogueSlot _activeSlot = null;
+        private SlotRecord _slotRecord = null;
         private UniTaskCompletionSource<CardRecord> _completionSource = null;
         private bool _filling = false;
 
-        public void BeginSelection(IDialogueSlot activeSlot)
+        public void BeginSelection(IDialogueSlot activeSlot, SlotRecord slotRecord)
         {
             _activeSlot = activeSlot;
+            _slotRecord = slotRecord;
             _completionSource = new UniTaskCompletionSource<CardRecord>();
             _filling = false;
         }
@@ -59,14 +61,40 @@ namespace UI.Main
 
             if (!string.IsNullOrEmpty(slotName))
             {
-                var locale = LocalizationSettings.SelectedLocale;
-                var cardName = LocalizationSettings.StringDatabase
-                    .GetLocalizedString("Card", cardRecord.LocalKey, locale);
-
-                await typer.TypeIntoSlotAsync(slotName, cardName);
+                var text = ResolveSlotResultText(cardRecord);
+                await typer.TypeIntoSlotAsync(slotName, text);
             }
 
             _completionSource?.TrySetResult(cardRecord);
+        }
+
+        // SlotRecord.SlotResults 에 카드 매핑이 있으면 그 ResultLocalKey 를 Dialogue 테이블에서 해석,
+        // 없으면 카드 이름(Card 테이블)으로 폴백한다.
+        private string ResolveSlotResultText(CardRecord cardRecord)
+        {
+            var locale = LocalizationSettings.SelectedLocale;
+
+            var results = _slotRecord?.SlotResults;
+            if (results != null)
+            {
+                for (int i = 0; i < results.Length; ++i)
+                {
+                    var result = results[i];
+                    if (result == null || result.CardId != cardRecord.Id)
+                        continue;
+
+                    if (!string.IsNullOrEmpty(result.ResultLocalKey))
+                    {
+                        return LocalizationSettings.StringDatabase
+                            .GetLocalizedString("Dialogue", result.ResultLocalKey, locale);
+                    }
+
+                    break;
+                }
+            }
+
+            return LocalizationSettings.StringDatabase
+                .GetLocalizedString("Card", cardRecord.LocalKey, locale);
         }
     }
 }
