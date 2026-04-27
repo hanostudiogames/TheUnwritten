@@ -50,7 +50,7 @@ namespace UI
         }
     }
     
-    public abstract class UIFactory<TView, TPresenter> : UIFactory where TView : Element where TPresenter : class
+    public abstract class UIFactory<TView, TPresenter> : UIFactory where TView : Element where TPresenter : Presenter
     {
         protected TView _view = null;
         
@@ -67,8 +67,9 @@ namespace UI
             if (initialize && _view is View<TPresenter> view)
                 view.Initialize(presenter);
 
+            presenter?.Activate();
+            
             return presenter;
         }
     }
 }
-

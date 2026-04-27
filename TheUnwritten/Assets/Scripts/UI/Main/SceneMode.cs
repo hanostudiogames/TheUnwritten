@@ -58,17 +58,17 @@ namespace UI.Main
                         
             // var characterNameLocalText = LocalizationSettings.StringDatabase.GetLocalizedString("Character", "messenger", locale);
             var localText = LocalizationSettings.StringDatabase.GetLocalizedString("Dialogue", record.LocalKey, locale);
-            var param = new CharacterSpeechSlot.Param(this, localText, record.TypingSpeed)
+            var param = new CharacterSpeechSlot.Param(this, localText, record.TypingSpeed, record.TextRevealMode)
                 .WithCharacterName(string.Empty);
                         
             return _context?.View?.CreateCharacterSpeechSlot(_context?.UIFactory, param);
         }
 
-        protected IDialogueSlot CreateNarrationSlot(string localKey, float typingSpeed, Locale locale)
+        protected IDialogueSlot CreateNarrationSlot(string localKey, float typingSpeed, TextRevealMode revealMode, Locale locale)
         {
             _dialogueCompletionSource = new();
             var localText = LocalizationSettings.StringDatabase.GetLocalizedString("Dialogue", localKey, locale);
-            var param = new NarrationSlot.Param(this, localText, typingSpeed);
+            var param = new NarrationSlot.Param(this, localText, revealMode, typingSpeed);
 
             return _context?.View.CreateNarrationSlot(_context?.UIFactory, param);
         }
@@ -278,7 +278,7 @@ namespace UI.Main
             
                 if(cardController != null &&
                    cardController.IsActiveCards)
-                    scrollPositionY = 100f;
+                    scrollPositionY = 70f;
                 
                 return scrollPositionY;
             }

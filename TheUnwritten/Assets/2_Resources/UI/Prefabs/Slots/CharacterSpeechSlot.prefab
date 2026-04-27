@@ -59,6 +59,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UI.Typer
   typingText: {fileID: 6155794798588654307}
+  smoothRevealFadeCharacters: 6
 --- !u!114 &6155794798588654307
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -306,7 +307,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4280796635
-  m_fontColor: {r: 0.21635813, g: 0.2875376, b: 0.3207547, a: 1}
+  m_fontColor: {r: 0.18431373, g: 0.37254903, b: 0.40784314, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -381,3 +382,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UI.Typer
   typingText: {fileID: 902938720035362165}
+  smoothRevealFadeCharacters: 6

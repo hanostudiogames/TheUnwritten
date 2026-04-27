@@ -92,16 +92,16 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 7982791412146176
-    m_Localized: "      \u2014 In this world\u2026 to write is to obtain?\n      A name
-      I haven't yet read rests in my hand."
+    m_Localized: "      \u2014 In this world\u2026 to write is to obtain?\n     
+      A name I haven't yet read rests in my hand."
     m_Metadata:
       m_Items: []
   - m_Id: 8008572364382208
-    m_Localized: The Ink Creature pushes through the [ <slot_1> ].
+    m_Localized: The Ink Creature pushes<slot_1>.
     m_Metadata:
       m_Items: []
   - m_Id: 8658564787724288
-    m_Localized:
+    m_Localized: 
     m_Metadata:
       m_Items: []
   - m_Id: 9000000000000001
@@ -110,19 +110,20 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9000000000000002
-    m_Localized: through its own darkness
+    m_Localized: ' its own darkness '
     m_Metadata:
       m_Items: []
   - m_Id: 9000000000000003
-    m_Localized: through the flame
+    m_Localized: ' the flame '
     m_Metadata:
       m_Items: []
   - m_Id: 9000000000000004
-    m_Localized: "      \u2014 Stopped by what you yourself gave."
+    m_Localized: "      <color=#374952>\u2014 Stopped by what you yourself gave.</color>"
     m_Metadata:
       m_Items: []
   - m_Id: 9000000000000005
-    m_Localized: "      \u2014 That black card just now\u2026 I'll read it later."
+    m_Localized: "      <color=#374952>\u2014 That black card just now\u2026 I'll
+      read it later.</color>"
     m_Metadata:
       m_Items: []
   - m_Id: 9000000000000006

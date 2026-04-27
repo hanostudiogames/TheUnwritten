@@ -14,7 +14,7 @@ namespace UI.Slots
         {
             public IListener Listener { get; } = null;
             
-            public Param(IListener listener, string text, float typingSpeed) : base(text, typingSpeed)
+            public Param(IListener listener, string text, TextRevealMode revealMode, float typingSpeed) : base(text, typingSpeed, revealMode)
             {
                 Listener = listener;
             }

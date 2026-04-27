@@ -163,8 +163,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f7ed14d44ab447b4a0315d61f8307e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Scenes.MainScene
-  actIndex: 1
-  sceneIndex: 3
+  actIndex: 0
+  sceneIndex: 0
 --- !u!1 &309454962
 GameObject:
   m_ObjectHideFlags: 0

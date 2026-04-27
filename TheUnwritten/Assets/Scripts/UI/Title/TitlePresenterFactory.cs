@@ -4,7 +4,6 @@ using Cysharp.Threading.Tasks;
 
 using Common;
 using Services;
-using UI.View;
 
 namespace UI.Title
 {
@@ -24,7 +23,6 @@ namespace UI.Title
             // var model = OnCreateModel<MainModel>();
         
             var presenter = new TitlePresenter(_view, null, _uiManager, _gameInfoService);
-            presenter.Activate();
 
             return presenter as TPresenter;
         }

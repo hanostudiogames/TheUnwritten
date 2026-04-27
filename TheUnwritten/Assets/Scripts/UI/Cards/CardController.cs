@@ -18,6 +18,11 @@ namespace UI.Cards
             _listener = listener;
         }
 
+        public void SetSelectable(bool value)
+        {
+            _cardFanSpread?.SetSelectable(value);
+        }
+
         public async UniTask SetCardsAsync(int[] cardIds)
         {
             if (cardIds == null || cardIds.Length == 0)

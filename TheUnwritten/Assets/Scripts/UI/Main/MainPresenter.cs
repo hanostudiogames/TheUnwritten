@@ -45,6 +45,7 @@ namespace UI.Main
             _uiFactory = new UIFactory(uiManager);
             
             var cardController = new CardController(view.CardFanSpread);
+            slotInteractionHandler?.SetCardController(cardController);
             cardController.SetListener(slotInteractionHandler);
 
             var cardInventory = new CardInventory();
@@ -125,7 +126,7 @@ namespace UI.Main
         async UniTask ISceneListener.OnStartSceneAsync(int act, int scene)
         {
             if (act == 1 && scene < 3)
-                await _view.FadeLibraryAsync(0.4f, 3f);
+                await _view.FadeLibraryAsync(0.45f, 3f);
             
             await PlayAsync(act, scene);
         }

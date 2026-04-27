@@ -8,7 +8,6 @@ using TMPro.Examples;
 using UI;
 using UI.Main;
 using UI.Title;
-using UI.View;
 
 namespace Scenes
 {

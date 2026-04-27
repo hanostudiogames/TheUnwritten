@@ -37,7 +37,7 @@ namespace UI.Main
             if (dialogueRecords == null)
                 return;
             
-            await view.ScrollToAsync(100f);
+            await view.ScrollToAsync(70f);
 
             // payload 를 먼저 읽어 이전 씬에서 만든 다이얼로그 슬롯/Typer 를 확보해야
             // ShowCardAsync 가 <slot_N> 자리를 정상적으로 채울 수 있다.
@@ -58,17 +58,31 @@ namespace UI.Main
 
             await ShowCardAsync(_slotId > 0 ? _slotId : 1, _dialogueSlot);
 
-            // 불꽃 카드(Id=1) 선택 시 — 괴물 텍스트에 주황색 번짐 + 미세 떨림으로
-            // "불꽃이 핥는" 느낌. DoBleedFlame 은 글자마다 다른 강도로 노이즈 흩뿌리며
-            // yoyo 진동 — 일부 글자는 진하게, 일부는 옅게, 시간에 따라 패턴 이동한다.
-            // Shake 는 sin(time + i) 라 이미 글자별 위상차가 있어 부분 떨림.
+            // 카드 선택에 따른 괴물 연출 분기.
+            // - 불꽃(Id=1): 외부 공격, burning. 주황 bleed 깜빡임 + 떨림 — 격렬·아프게.
+            // - 그림자(Id=2): 내부 잠식, melting. 깊은 보라 bleed + 글자별 랜덤 melt —
+            //   잉크가 응고를 잃고 액체로 회귀하는 정적·내면적 dissolution.
             var lastCardId = _context?.CardInventory?.LastSelectedCardId ?? 0;
             Tween flameBleedTween = null;
+            Tween shadowBleedTween = null;
+            Tween shadowMeltTween = null;
+
             if (lastCardId == 1 && _monsterTMP != null)
             {
+                // 불꽃 — Bleed 가 글자마다 다른 강도로 yoyo 노이즈 (DoBleedFlame),
+                // Shake 는 sin(time+i) 라 글자별 위상차로 부분 떨림.
                 var flameColor = new Color(1f, 0.42f, 0.08f, 1f);
                 flameBleedTween = _monsterTMP.DoBleedFlame(0.85f, 1.4f, flameColor);
                 _monsterTMP.DoShake(3f, 1.8f);
+            }
+            else if (lastCardId == 2 && _monsterTMP != null)
+            {
+                // 그림자 — 색이 검정보다 더 깊은 보라로 잠기고, 글자들이 랜덤 타이밍으로
+                // 천천히 늘어져 흘러내린다. delayStep 0.04 로 글자 사이 약간씩 시차를
+                // 두면 "녹는 파장" 이 글자열을 따라 번져가는 느낌이 살아난다.
+                var shadowColor = new Color(0.1f, 0.05f, 0.2f, 1f);
+                shadowBleedTween = _monsterTMP.DoBleed(0.85f, 2.5f, shadowColor);
+                shadowMeltTween = _monsterTMP.DORandomMelt(0.5f, 2.5f, 0.04f);
             }
 
             await UniTask.Delay(TimeSpan.FromSeconds(3));
@@ -99,14 +113,21 @@ namespace UI.Main
                 }
             }
 
-            // 전투 종료 — 몬스터 죽음. 호흡/불꽃 정지 후 원상태로 부드럽게 복귀.
+            // 전투 종료 — 몬스터 죽음. 호흡/불꽃/그림자 정지 후 원상태로 부드럽게 복귀.
             _breathingTween?.Kill();
             flameBleedTween?.Kill();
+            shadowBleedTween?.Kill();
+            shadowMeltTween?.Kill();
             if (_monsterTMP != null)
             {
                 _monsterTMP.DoPulse(0f, 0.6f);
                 if (lastCardId == 1)
                     _monsterTMP.DoBleed(0f, 0.8f);
+                else if (lastCardId == 2)
+                {
+                    _monsterTMP.DoBleed(0f, 0.8f);
+                    _monsterTMP.DoMelt(0f, 0.8f);
+                }
             }
 
             await UniTask.CompletedTask;

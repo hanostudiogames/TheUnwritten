@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using Common;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -36,7 +37,8 @@ namespace UI.Title
             titleTextTyper?.Initialize(new Typer.Param(OnCompleteTitleText)
                 .WithStartDelaySeconds(1f)
                 .WithEndDelaySeconds(1f)
-                .WithTypingSpeed(0.3f));
+                .WithTypingSpeed(0.3f)
+                .WithRevealMode(TextRevealMode.Character));
         }
 
         public override void Activate()

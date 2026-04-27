@@ -56,6 +56,7 @@ MonoBehaviour:
         LocalKey: 1
         TypingSpeed: 0.08
         EndDelaySeconds: 0.3
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 0
@@ -66,6 +67,7 @@ MonoBehaviour:
         LocalKey: 3
         TypingSpeed: 0.1
         EndDelaySeconds: 0.5
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 0
@@ -76,6 +78,7 @@ MonoBehaviour:
         LocalKey: 2
         TypingSpeed: 0.1
         EndDelaySeconds: 1
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 0
@@ -87,6 +90,7 @@ MonoBehaviour:
         LocalKey: 4
         TypingSpeed: 0.5
         EndDelaySeconds: 1
+        TextRevealMode: 0
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 0
@@ -97,6 +101,7 @@ MonoBehaviour:
         LocalKey: 6
         TypingSpeed: 0.1
         EndDelaySeconds: 1
+        TextRevealMode: 1
         AnswerIds: 010000000200000003000000
         SlotId: 0
         RequiredCardId: 0
@@ -108,6 +113,7 @@ MonoBehaviour:
         LocalKey: 5
         TypingSpeed: 0.1
         EndDelaySeconds: 1
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 0
@@ -118,6 +124,7 @@ MonoBehaviour:
         LocalKey: 7
         TypingSpeed: 0.1
         EndDelaySeconds: 1
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 0
@@ -128,6 +135,7 @@ MonoBehaviour:
         LocalKey: 8
         TypingSpeed: 0.2
         EndDelaySeconds: 1
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 0
@@ -150,6 +158,7 @@ MonoBehaviour:
         LocalKey: 9
         TypingSpeed: 0.2
         EndDelaySeconds: 1
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 0
@@ -166,6 +175,7 @@ MonoBehaviour:
         LocalKey: 10
         TypingSpeed: 0.1
         EndDelaySeconds: 1
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 0
@@ -176,6 +186,7 @@ MonoBehaviour:
         LocalKey: 11
         TypingSpeed: 0.1
         EndDelaySeconds: 1
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 0
@@ -187,6 +198,7 @@ MonoBehaviour:
         LocalKey: 12
         TypingSpeed: 0.1
         EndDelaySeconds: 1
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 0
@@ -197,6 +209,7 @@ MonoBehaviour:
         LocalKey: 13
         TypingSpeed: 0.2
         EndDelaySeconds: 0
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 0
@@ -208,6 +221,7 @@ MonoBehaviour:
         LocalKey: 14
         TypingSpeed: 0.1
         EndDelaySeconds: 1
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 0
@@ -230,6 +244,7 @@ MonoBehaviour:
         LocalKey: 16
         TypingSpeed: 0.1
         EndDelaySeconds: 6
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 0
@@ -253,6 +268,7 @@ MonoBehaviour:
         LocalKey: 17
         TypingSpeed: 0.1
         EndDelaySeconds: 1
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 1
         RequiredCardId: 0
@@ -264,6 +280,7 @@ MonoBehaviour:
         LocalKey: 15
         TypingSpeed: 0.1
         EndDelaySeconds: 1
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 0
@@ -281,6 +298,7 @@ MonoBehaviour:
         LocalKey: 18
         TypingSpeed: 0.1
         EndDelaySeconds: 1
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 1
@@ -291,6 +309,7 @@ MonoBehaviour:
         LocalKey: 19_flame
         TypingSpeed: 0.1
         EndDelaySeconds: 1
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 1
@@ -301,7 +320,8 @@ MonoBehaviour:
         LocalKey: 14_grant
         TypingSpeed: 0.1
         EndDelaySeconds: 1
-        AnswerIds:
+        TextRevealMode: 1
+        AnswerIds: 
         SlotId: 0
         RequiredCardId: 0
         DialogueActions:
@@ -331,6 +351,7 @@ MonoBehaviour:
         LocalKey: 16_after_shadow
         TypingSpeed: 0.1
         EndDelaySeconds: 1
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 2
@@ -341,6 +362,7 @@ MonoBehaviour:
         LocalKey: 16_after_flame
         TypingSpeed: 0.1
         EndDelaySeconds: 1
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 1
@@ -351,6 +373,7 @@ MonoBehaviour:
         LocalKey: 1_4_end
         TypingSpeed: 0.1
         EndDelaySeconds: 2
+        TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
         RequiredCardId: 0

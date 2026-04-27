@@ -28,8 +28,14 @@ namespace UI.Main
     {
         private IDialogueSlot _activeSlot = null;
         private SlotRecord _slotRecord = null;
+        private CardController _cardController = null;
         private UniTaskCompletionSource<CardRecord> _completionSource = null;
         private bool _filling = false;
+
+        public void SetCardController(CardController cardController)
+        {
+            _cardController = cardController;
+        }
 
         public void BeginSelection(IDialogueSlot activeSlot, SlotRecord slotRecord)
         {
@@ -37,6 +43,7 @@ namespace UI.Main
             _slotRecord = slotRecord;
             _completionSource = new UniTaskCompletionSource<CardRecord>();
             _filling = false;
+            _cardController?.SetSelectable(true);
         }
 
         public UniTask<CardRecord> AwaitCompletionAsync()
@@ -55,6 +62,7 @@ namespace UI.Main
         private async UniTaskVoid HandleCardSelectedAsync(CardRecord cardRecord)
         {
             _filling = true;
+            _cardController?.SetSelectable(false);
 
             var typer = _activeSlot?.Typer;
             var slotName = typer?.FirstEmptySlot();

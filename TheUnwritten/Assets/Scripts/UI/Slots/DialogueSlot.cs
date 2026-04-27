@@ -25,12 +25,14 @@ namespace UI.Slots
         {
             public string Text { get; } = string.Empty;
             public float TypingSpeed { get; private set; } = 0;
+            public TextRevealMode RevealMode { get; private set; } = TextRevealMode.SmoothLeftToRight;
             public float Height { get; private set; } = 0;
 
-            protected Param(string text, float typingSpeed)
+            protected Param(string text, float typingSpeed, TextRevealMode revealMode)
             {
                 Text = text;
                 TypingSpeed = typingSpeed;
+                RevealMode = revealMode;
             }
 
             public Param WithHeight(float height)
@@ -72,7 +74,8 @@ namespace UI.Slots
                 .WithEndDelaySeconds(1f);
 
             if (_param is Param param)
-                typerParam.WithTypingSpeed(param.TypingSpeed);
+                typerParam.WithTypingSpeed(param.TypingSpeed)
+                    .WithRevealMode(param.RevealMode);
             
             typer?.Initialize(typerParam);
         }

@@ -4,7 +4,6 @@ using Cysharp.Threading.Tasks;
 
 using Common;
 using Services;
-using UI.View;
 using UI.Main;
 
 namespace UI.Title

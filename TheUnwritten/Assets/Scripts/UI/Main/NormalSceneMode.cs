@@ -53,7 +53,7 @@ namespace UI.Main
         
                     case NarrationRecord narrationRecord:
                     { 
-                        dialogueSlot = CreateNarrationSlot(narrationRecord.LocalKey, narrationRecord.TypingSpeed, locale);
+                        dialogueSlot = CreateNarrationSlot(narrationRecord.LocalKey, narrationRecord.TypingSpeed, narrationRecord.TextRevealMode, locale);
                         break;
                     }
         
@@ -68,7 +68,7 @@ namespace UI.Main
                             continue;
                         }
 
-                        dialogueSlot = CreateNarrationSlot(eventRecord.LocalKey, eventRecord.TypingSpeed, locale);
+                        dialogueSlot = CreateNarrationSlot(eventRecord.LocalKey, eventRecord.TypingSpeed, eventRecord.TextRevealMode, locale);
                         DispatchEvent(eventRecord, dialogueSlot);
                         break;
                     }
@@ -96,13 +96,7 @@ namespace UI.Main
                     await ExecuteDialoguePostActionAsync(dialogueSlot.TMP, dialogueRecord.DialogueActions);
                 
                 await ShowAnswerAsync(dialogueRecord.AnswerIds);
-                // await TriggerEventAsync(eventId, dialogueRecord.SlotId, dialogueSlot);
             }
-            
-            // await view.ScrollToAsync(0);
-            // // await UniTask.Delay(TimeSpan.FromSeconds(5f));
-            //
-            // view.EnableScrollRect();
         }
     }
 }

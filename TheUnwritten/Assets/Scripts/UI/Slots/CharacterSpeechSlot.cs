@@ -17,7 +17,7 @@ namespace UI.Slots
             public IListener Listener { get; } = null;
             public string CharacterNameText { get; private set; } = string.Empty;
 
-            public Param(IListener listener, string text, float typingSpeed) : base(text, typingSpeed)
+            public Param(IListener listener, string text, float typingSpeed, TextRevealMode revealMode) : base(text, typingSpeed, revealMode)
             {
                 Listener = listener;
             }

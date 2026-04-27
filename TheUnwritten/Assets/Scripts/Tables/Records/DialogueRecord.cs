@@ -14,7 +14,8 @@ namespace Tables.Records
         public string LocalKey = string.Empty;
         public float TypingSpeed = 0.1f;
         public float EndDelaySeconds = 1f;
-
+        public TextRevealMode TextRevealMode = TextRevealMode.SmoothLeftToRight;
+        
         public int[] AnswerIds = null;
 
         public int SlotId = 0;

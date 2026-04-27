@@ -2,7 +2,12 @@ using UnityEngine;
 
 namespace Common
 {
-    public abstract class Presenter<TView, TModel> where TView : Element where TModel : class
+    public abstract class Presenter
+    {
+        public abstract void Activate();
+    }
+    
+    public abstract class Presenter<TView, TModel> : Presenter where TView : Element where TModel : class
     {
         protected TView _view = null;
         protected TModel _model = null;
@@ -13,7 +18,7 @@ namespace Common
             _model = model;
         }
 
-        public virtual void Activate()
+        public override void Activate()
         {
             _view?.Activate();
 

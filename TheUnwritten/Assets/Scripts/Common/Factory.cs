@@ -10,7 +10,7 @@ namespace Common
     {
         protected abstract TElement OnCreate<TElement>(Transform rootTr, out bool initialize) where TElement : Element;
         
-        protected virtual TPresenter OnCreatePresenter<TPresenter>() where TPresenter : class
+        protected virtual TPresenter OnCreatePresenter<TPresenter>() where TPresenter : Presenter
         {
             return null;
         }

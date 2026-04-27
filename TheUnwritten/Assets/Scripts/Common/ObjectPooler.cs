@@ -15,7 +15,7 @@ namespace Common
         void Deactivate(); // 넣을 때 호출
     }
 
-    public class ObjectPooler : MonoBehaviour
+    public class ObjectPooler : Element 
     {
         private readonly Dictionary<string, Queue<IPoolable>> _queues = new();
         private readonly Dictionary<string, HashSet<IPoolable>> _sets = new();
