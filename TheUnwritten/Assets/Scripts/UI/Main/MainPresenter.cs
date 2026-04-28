@@ -136,6 +136,13 @@ namespace UI.Main
             if (act == 1 && scene == 1)
                 await _view.FadeLibraryAsync(0, 3f);
         }
+
+        UniTask ISceneListener.OnExitAsync(int act, int scene)
+        {
+            _view?.ScrollToAsync(0).Forget();
+            
+            return UniTask.CompletedTask;
+        }
         #endregion
         
         protected override void OnDimensionChanged(bool isPortrait)

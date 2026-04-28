@@ -19,10 +19,7 @@ namespace Tables.Records
         public int[] AnswerIds = null;
 
         public int SlotId = 0;
-
-        // 0 이면 항상 재생. >0 이면 마지막으로 선택된 카드 Id 와 일치할 때만 재생 (분기 모놀로그용).
-        public int RequiredCardId = 0;
-
+        
         public List<DialogueAction> DialogueActions = null;
     }
 

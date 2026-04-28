@@ -20,6 +20,7 @@ namespace Tables.Records
     {
         public int Id = 0;
         public int[] AllowedCardIds = null;
+        public string SelectedDialogueLocalKey = string.Empty;
         public SlotResult[] SlotResults = null;
     }
 }

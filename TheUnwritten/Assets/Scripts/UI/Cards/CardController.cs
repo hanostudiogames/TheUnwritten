@@ -69,14 +69,6 @@ namespace UI.Cards
             }
         }
         
-        public void ShowCards()
-        {
-            if (_cardFanSpread == null)
-                return;
-
-            _cardFanSpread.gameObject.SetActive(true);
-        }
-
         public async UniTask ShowCardsAsync()
         {
             if (_cardFanSpread == null)
@@ -84,9 +76,8 @@ namespace UI.Cards
 
             _cardFanSpread.SetSelectable(false);
             _cardFanSpread.gameObject.SetActive(true);
-            await _cardFanSpread.PlayShowAnimationAsync();
             
-            // await UniTask.Delay(TimeSpan.FromSeconds(1f));
+            await _cardFanSpread.PlayShowAnimationAsync();
         }
 
         public void HideCards()

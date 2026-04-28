@@ -15,8 +15,13 @@ MonoBehaviour:
   SlotRecords:
   - Id: 1
     AllowedCardIds: 0200000001000000
+    SelectedDialogueLocalKey: 16_after_{0}
     SlotResults:
     - CardId: 2
       ResultLocalKey: slot_1_shadow
     - CardId: 1
       ResultLocalKey: slot_1_flame
+  - Id: 2
+    AllowedCardIds: 0200000001000000
+    SelectedDialogueLocalKey: 23_after_{0}
+    SlotResults: []

@@ -2,6 +2,7 @@ using UnityEngine.Localization.Settings;
 
 using Cysharp.Threading.Tasks;
 
+using Common;
 using Tables.Records;
 using UI.Cards;
 using UI.Slots;
@@ -26,6 +27,8 @@ namespace UI.Main
 
     public class SlotInteractionHandler : ICardSelectionHandler, CardSlot.IListener
     {
+        private const float SlotReplacementTypingSpeed = 0.5f;
+
         private IDialogueSlot _activeSlot = null;
         private SlotRecord _slotRecord = null;
         private CardController _cardController = null;
@@ -93,8 +96,10 @@ namespace UI.Main
 
                     if (!string.IsNullOrEmpty(result.ResultLocalKey))
                     {
-                        return LocalizationSettings.StringDatabase
-                            .GetLocalizedString("Dialogue", result.ResultLocalKey, locale);
+                        var local = LocalizationSettings.StringDatabase.GetLocalizedString("Dialogue", result.ResultLocalKey, locale);
+                        var text = UI.Utilities.TextSpriteUtility.ConvertToSpriteText(local);
+
+                        return text;
                     }
 
                     break;

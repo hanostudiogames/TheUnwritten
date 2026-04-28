@@ -37,8 +37,8 @@ namespace UI.Main
                 if(dialogueRecord == null)
                     continue;
 
-                if (!ShouldPlayRecord(dialogueRecord))
-                    continue;
+                // if (!ShouldPlayRecord(dialogueRecord))
+                //     continue;
 
                 IDialogueSlot dialogueSlot = null;
                 // int eventId = 0;

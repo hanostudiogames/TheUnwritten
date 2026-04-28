@@ -156,7 +156,7 @@ namespace UI.Main
         
         #region Answers
 
-        private void SetAnswers(int[] answerIds)
+        private void SetAnswers(int[] answerIds, bool hasDecipher)
         {
             if (answerIds == null)
                 return;
@@ -174,7 +174,7 @@ namespace UI.Main
                 {
                     int answerId = answerIds[i];
                     answerSlot.SetIndex(i + 1);
-                    answerSlot.SetAnswerId(answerId);
+                    answerSlot.SetAnswerId(answerId, hasDecipher);
                     
                     answerSlot.Activate();
                     continue;
@@ -185,9 +185,9 @@ namespace UI.Main
         }
         
         
-        public async UniTask ShowAnswersAsync(int[] answerIds)
+        public async UniTask ShowAnswersAsync(int[] answerIds, bool hasDecipher)
         {
-            SetAnswers(answerIds);
+            SetAnswers(answerIds, hasDecipher);
 
             // animation 
             if (!answersRootRectTr)

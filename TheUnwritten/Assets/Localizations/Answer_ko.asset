@@ -30,6 +30,18 @@ MonoBehaviour:
     m_Localized: "\uB354 \uC790\uC138\uD788 \uC0B4\uD3B4\uBCF8\uB2E4."
     m_Metadata:
       m_Items: []
+  - m_Id: 7517126188326912
+    m_Localized: write
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7517134711152640
+    m_Localized: delete
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7517140373463040
+    m_Localized: cover
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

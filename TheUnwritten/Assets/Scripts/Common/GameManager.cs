@@ -14,6 +14,7 @@ namespace Common
     {
         UniTask OnStartSceneAsync(int act, int scene);
         UniTask OnEndSceneAsync(int act, int scene);
+        UniTask OnExitAsync(int act, int scene);
     }
 
     public interface IGameManager
@@ -61,11 +62,17 @@ namespace Common
             if (!actTableContainer.HasNextScene(nextAct, _scene, out nextScene))
             {
                 if (!actTableContainer.HasNextAct(act, out nextAct))
+                {
+                    await NotifyExitAsync();
                     return;
+                }
                 
                 _scene = 0;
                 if (!actTableContainer.HasNextScene(nextAct, _scene, out nextScene))
+                {
+                    await NotifyExitAsync();
                     return;
+                }
             }
             
             StartActAsync(nextAct, nextScene).Forget();
@@ -93,6 +100,13 @@ namespace Common
             await UniTask.WhenAll(_sceneListeners
                 .Where(listener => listener != null)
                 .Select(listener => listener.OnEndSceneAsync(_act, _scene)));
+        }
+        
+        private async UniTask NotifyExitAsync()
+        {
+            await UniTask.WhenAll(_sceneListeners
+                .Where(listener => listener != null)
+                .Select(listener => listener.OnExitAsync(_act, _scene)));
         }
 
         private bool HasDialogue()

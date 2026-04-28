@@ -55,12 +55,15 @@ namespace UI.Main
                 return null;
             
             _dialogueCompletionSource = new();
-                        
-            // var characterNameLocalText = LocalizationSettings.StringDatabase.GetLocalizedString("Character", "messenger", locale);
+
+            var characterNameLocal = string.Empty;
+            if (!string.IsNullOrEmpty(record.CharacterLocalKey))
+                characterNameLocal = LocalizationSettings.StringDatabase.GetLocalizedString("Character", record.CharacterLocalKey, locale);
+            
             var localText = LocalizationSettings.StringDatabase.GetLocalizedString("Dialogue", record.LocalKey, locale);
             var param = new CharacterSpeechSlot.Param(this, localText, record.TypingSpeed, record.TextRevealMode)
-                .WithCharacterName(string.Empty);
-                        
+                .WithCharacterName(characterNameLocal);
+        
             return _context?.View?.CreateCharacterSpeechSlot(_context?.UIFactory, param);
         }
 
@@ -160,8 +163,20 @@ namespace UI.Main
                 return;
 
             _answerCompletionSource = new UniTaskCompletionSource();
+            
+            bool hasDecipher = false;
+            if (answerIds.Length > 1 && answerIds[0] == 1)
+            {
+                hasDecipher = true;
+            }
 
-            await view.ShowAnswersAsync(answerIds);
+            // if (answerIds.Length > 1 &&
+            //     answerIds[0] == 1)
+            // {
+            //     hasDecipher = true;
+            // }
+                
+            await view.ShowAnswersAsync(answerIds, hasDecipher);
                     
             await view.ScrollToAsync(0);
             view.EnableScrollRect();
@@ -232,17 +247,17 @@ namespace UI.Main
         }
 
         // RequiredCardId 가 지정된 레코드는 마지막으로 선택된 카드 Id 와 일치할 때만 재생한다.
-        protected bool ShouldPlayRecord(DialogueRecord record)
-        {
-            if (record == null)
-                return false;
-
-            if (record.RequiredCardId == 0)
-                return true;
-
-            var lastId = _context?.CardInventory?.LastSelectedCardId ?? 0;
-            return record.RequiredCardId == lastId;
-        }
+        // protected bool ShouldPlayRecord(DialogueRecord record)
+        // {
+        //     if (record == null)
+        //         return false;
+        //
+        //     if (record.RequiredCardId == 0)
+        //         return true;
+        //
+        //     var lastId = _context?.CardInventory?.LastSelectedCardId ?? 0;
+        //     return record.RequiredCardId == lastId;
+        // }
 
         public virtual void End()
         {

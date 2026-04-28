@@ -153,11 +153,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UI.Typer
   typingText: {fileID: 6155794798588654307}
   smoothRevealFadeCharacters: 6
-  typingSoundClip: {fileID: 8300000, guid: 0fc248888c58ca531fd80659780445c2, type: 3}
-  typingAudioSource: {fileID: 8388668367015996880}
-  typingSoundVolume: 1
-  typingSoundReplayDelay: 0.1
-  typingSoundPitchRange: {x: 0.96, y: 1.04}
 --- !u!82 &8388668367015996880
 AudioSource:
   m_ObjectHideFlags: 0

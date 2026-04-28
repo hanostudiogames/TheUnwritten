@@ -111,7 +111,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 8008572364382208
-    m_Localized: "\uC789\uD06C \uAD34\uBB3C\uC774 <slot_1>\uBC00\uC5B4\uB0B4\uBA70
+    m_Localized: "\uC789\uD06C \uAD34\uBB3C\uC774<slot_1> \uBC00\uC5B4\uB0B4\uBA70
       \uB2E4\uAC00\uC628\uB2E4."
     m_Metadata:
       m_Items: []
@@ -144,27 +144,64 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9000000000000002
-    m_Localized: "\uC790\uAE30 \uC790\uC2E0\uC758 \uC5B4\uB460\uC744 \uB6AB\uACE0 "
+    m_Localized: ' darkness'
     m_Metadata:
       m_Items: []
   - m_Id: 9000000000000003
-    m_Localized: "\uBD88\uAF43\uC744 \uB6AB\uACE0 "
+    m_Localized: ' flame'
     m_Metadata:
       m_Items: []
   - m_Id: 9000000000000004
-    m_Localized: "      <color=#374952>\u2014 \uB124\uAC00 \uC900 \uAC78\uB85C \uB124\uAC00
-      \uB9C9\uD614\uB2E4.</color>"
+    m_Localized: "      <color=#1D4A52>\u2014 \uB124\uAC00 \uC900 \uAC78\uB85C \uB124\uAC00
+      \uB9C9\uD614\uB2E4.</color>\n      <color=#1D4A52>\uC774 \uC138\uACC4\uB294
+      \uC790\uAE30 \uC790\uC2E0\uC744 \uB9C8\uC8FC\uD558\uBA74 \uD55C \uBC15\uC790
+      \uB2A6\uAD6C\uB098.</color>"
     m_Metadata:
       m_Items: []
   - m_Id: 9000000000000005
-    m_Localized: "      <color=#374952>\u2014 \uBC29\uAE08 \uADF8 \uAC80\uC740 \uCE74\uB4DC\uB294\u2026
+    m_Localized: "      <color=#1D4A52>\u2014 \uBC29\uAE08 \uADF8 \uAC80\uC740 \uCE74\uB4DC\uB294\u2026
       \uB098\uC911\uC5D0 \uC77D\uC790.</color>"
     m_Metadata:
       m_Items: []
   - m_Id: 9000000000000006
-    m_Localized: "\uAD34\uBB3C\uC774 \uD55C \uBC1C \uBB3C\uB7EC\uB0AC\uB2E4. \uAC80\uC740
-      \uC724\uACFD\uC774 \uAE00\uC790\uB4E4 \uC0AC\uC774\uB85C \uD769\uC5B4\uC84C\uB2E4.\n\u2014
-      \uB2E4\uC74C \uBB38\uC7A5\uC740, \uB2F9\uC2E0\uC774 \uC4F8 \uCC28\uB840\uC600\uB2E4."
+    m_Localized: "\uC789\uD06C\uAC00 \uB2E4\uC2DC \uBAA8\uC600\uB2E4. \uD55C \uBC88
+      \uD769\uC5B4\uC84C\uB2E4\uAC00 \u2014 \uB354 \uD070 \uD615\uC0C1\uC73C\uB85C.
+      \n\uAE00\uC790\uB4E4\uC774 \uBE60\uB974\uAC8C \uBE60\uC838\uB098\uAC00\uACE0
+      \uC788\uB2E4. \uC774 \uC138\uACC4\uC758 \uB2E8\uC5B4\uB4E4\uC774 \u2014 \uC800
+      \uC548\uC73C\uB85C."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10525632122314752
+    m_Localized: "<color=#6A1B9A>\uC678\uBD80\uC790. \uC11C\uC220\uC744 \uBB34\uB2E8
+      \uBCC0\uACBD\uD558\uC600\uB2E4. \uC81C\uAC70 \uB300\uC0C1\uC73C\uB85C \uC9C0\uC815\uD55C\uB2E4.</color>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10519838404370432
+    m_Localized: "<color=#54157B><sprite name=\"W\"><sprite name=\"R\"><sprite name=\"I\"><sprite
+      name=\"T\"><sprite name=\"T\"><sprite name=\"E\"><sprite name=\"N\"><color=#6A1B9A>\uC678\uBD80\uC790.
+      \uC11C\uC220\uC744 \uBB34\uB2E8 \uBCC0\uACBD\uD558\uC600\uB2E4. \uC81C\uAC70
+      \uB300\uC0C1\uC73C\uB85C \uC9C0\uC815\uD55C\uB2E4.</color>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10547295048163328
+    m_Localized: "      <color=#1D4A52>\uCE74\uB4DC\uB97C \uC4F4\uB2E4\uB294 \uAC74
+      \u2014 \uC774 \uC138\uACC4\uC758 \uB9D0\uC744 \uBE4C\uB9AC\uB294 \uAC83\uC774\uB2E4.</color>\n     
+      <color=#1D4A52>\uBE4C\uB9AC\uC9C0 \uC54A\uC73C\uBA74, \uC800 \uAD34\uBB3C\uC774
+      \uB9C8\uC800 \uAC00\uC838\uAC04\uB2E4.</color>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10550158390452224
+    m_Localized: "      <color=#1D4A52>\u2014 \uD55C \uC904. \uD55C \uC904\uC774
+      \uC904\uC5B4\uB4E0\uB2E4. \uC774\uAC74 \uBD84\uB7C9 \uC2F8\uC6C0\uC774\uAD6C\uB098.</color>\n     
+      <color=#1D4A52>\uB204\uAC00 \uB354 \uB9CE\uC774 \u2014 \uB204\uAC00 \uB35C
+      \uBE44\uC6CC\uB450\uB290\uB0D0.</color>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10565474822643712
+    m_Localized: "      <color=#1D4A52>\u2014 \uC904\uC9C0\uB3C4 \uC54A\uC558\uB2E4.
+      \uADF8\uB7EC\uB098 \u2014 \uD55C \uBC15\uC790\uAC00 \u2014 \uC5B4\uB514\uC11C
+      \uC654\uC9C0?</color>\n      <color=#1D4A52>\uB2A6\uC740 \uD55C \uBC15\uC790\uAC00,
+      \uB2E4\uC74C \uD638\uD761\uC744 \uB9CC\uB4E0\uB2E4.</color>"
     m_Metadata:
       m_Items: []
   references:

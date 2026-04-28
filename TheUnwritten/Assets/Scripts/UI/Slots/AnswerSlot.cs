@@ -18,7 +18,7 @@ namespace UI.Slots
         void Deactivate();
         
         void SetIndex(int index);
-        void SetAnswerId(int id);
+        void SetAnswerId(int id, bool hasDecipher);
     }
     
     public class AnswerSlot : Slot<AnswerSlot.Param>, IAnswerSlot
@@ -92,12 +92,15 @@ namespace UI.Slots
 
         private void SetIndexText()
         {
-            indexText?.SetText($"{_param?.Index}.");
+            // indexText?.SetText($"{_param?.Index}.");
         }
 
-        private void SetAnswerText()
+        private void SetAnswerText(bool hasDecipher)
         {
             var local = LocalizationSettings.StringDatabase.GetLocalizedString("Answer", $"{_param.AnswerId}", LocalizationSettings.SelectedLocale);
+            if(!hasDecipher)
+                local = UI.Utilities.TextSpriteUtility.ConvertToSpriteText(local);
+                
             answerText?.SetText(local);
         }
 
@@ -115,11 +118,11 @@ namespace UI.Slots
             SetIndexText();
         }
         
-        void IAnswerSlot.SetAnswerId(int id)
+        void IAnswerSlot.SetAnswerId(int id, bool hasDecipher)
         {
             _param?.WithAnswerId(id);
             
-            SetAnswerText();
+            SetAnswerText(hasDecipher);
         }
         #endregion
     }
