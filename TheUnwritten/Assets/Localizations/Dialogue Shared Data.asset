@@ -139,6 +139,10 @@ MonoBehaviour:
     m_Key: 23_after_shadow
     m_Metadata:
       m_Items: []
+  - m_Id: 10572050274967552
+    m_Key: 24
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

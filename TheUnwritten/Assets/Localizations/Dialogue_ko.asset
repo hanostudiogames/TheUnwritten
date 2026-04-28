@@ -177,8 +177,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 10519838404370432
-    m_Localized: "<color=#54157B><sprite name=\"W\"><sprite name=\"R\"><sprite name=\"I\"><sprite
-      name=\"T\"><sprite name=\"T\"><sprite name=\"E\"><sprite name=\"N\"><color=#6A1B9A>\uC678\uBD80\uC790.
+    m_Localized: "<sprite name=\"W\"><sprite name=\"R\"><sprite name=\"I\"><sprite
+      name=\"T\"><sprite name=\"T\"><sprite name=\"E\"><sprite name=\"N\"><color=#6A1B9A><color=#54157B>\uC678\uBD80\uC790.
       \uC11C\uC220\uC744 \uBB34\uB2E8 \uBCC0\uACBD\uD558\uC600\uB2E4. \uC81C\uAC70
       \uB300\uC0C1\uC73C\uB85C \uC9C0\uC815\uD55C\uB2E4.</color>"
     m_Metadata:
@@ -202,6 +202,14 @@ MonoBehaviour:
       \uADF8\uB7EC\uB098 \u2014 \uD55C \uBC15\uC790\uAC00 \u2014 \uC5B4\uB514\uC11C
       \uC654\uC9C0?</color>\n      <color=#1D4A52>\uB2A6\uC740 \uD55C \uBC15\uC790\uAC00,
       \uB2E4\uC74C \uD638\uD761\uC744 \uB9CC\uB4E0\uB2E4.</color>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10572050274967552
+    m_Localized: "\uC904\uC5B4\uB4E0 \uC790\uB9AC\uC5D0 \uC0C8 \uAE00\uC790\uB4E4\uC774
+      \uBE68\uB824\uB4E4\uC5B4\uC654\uB2E4. \uCC45\uC7A5 \uC5B4\uB518\uAC00\uC758
+      \uBB38\uC7A5\uC774 \uC0AC\uB77C\uC9C0\uACE0 \uC788\uB2E4. \uC789\uD06C \uAD34\uBB3C\uC758
+      \uD615\uCCB4\uAC00 \uB2E4\uC2DC \uBD80\uD480\uC5C8\uB2E4. \uC774\uC804\uBCF4\uB2E4
+      \u2014 \uB2E8\uB2E8\uD558\uAC8C."
     m_Metadata:
       m_Items: []
   references:

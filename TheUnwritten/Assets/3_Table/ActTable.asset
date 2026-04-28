@@ -47,6 +47,7 @@ MonoBehaviour:
       - rid: 6598480974526550003
       - rid: 6598481073631133910
       - rid: 6598481073631133948
+      - rid: 6598481073631134009
   references:
     version: 2
     RefIds:
@@ -334,7 +335,13 @@ MonoBehaviour:
         TextRevealMode: 1
         AnswerIds: 
         SlotId: 0
-        DialogueActions: []
+        DialogueActions:
+        - DialogueActionType: 12
+          TmpCount: 1
+          Duration: 2.2
+          TargetValue: 0
+          StartDelay: 0
+          EndDelay: 3
     - rid: 6598481073631133910
       type: {class: CharacterSpeechRecord, ns: Tables.Records, asm: Assembly-CSharp}
       data:
@@ -357,3 +364,19 @@ MonoBehaviour:
         SlotId: 2
         DialogueActions: []
         CharacterLocalKey: 
+    - rid: 6598481073631134009
+      type: {class: NarrationRecord, ns: Tables.Records, asm: Assembly-CSharp}
+      data:
+        LocalKey: 24
+        TypingSpeed: 0.1
+        EndDelaySeconds: 1
+        TextRevealMode: 1
+        AnswerIds: 
+        SlotId: 0
+        DialogueActions:
+        - DialogueActionType: 12
+          TmpCount: 1
+          Duration: 2
+          TargetValue: 0
+          StartDelay: 0
+          EndDelay: 3

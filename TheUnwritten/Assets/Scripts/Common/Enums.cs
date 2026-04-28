@@ -37,6 +37,7 @@ namespace Common
         Bleed,
         Converge,
         InkMonsterAppear,
+        SuckIntoMonster,
     }
    
     public enum TextRevealMode
@@ -45,4 +46,3 @@ namespace Common
         SmoothLeftToRight
     }
 }
-

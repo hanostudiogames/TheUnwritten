@@ -130,6 +130,10 @@ namespace UI.Main
 
                 await TextTypingAsync(dialogueSlot?.Typer, dialogueRecord.LocalKey, dialogueRecord.TextRevealMode,
                     dialogueRecord.TypingSpeed, dialogueRecord.EndDelaySeconds);
+
+                var dialogueActions = dialogueRecord.DialogueActions;
+                if (dialogueActions != null && dialogueActions.Count > 0)
+                    await ExecuteDialoguePostActionAsync(dialogueSlot?.TMP, dialogueActions, _monsterTMP);
                 
 
                 // var dialogueTyper = dialogueSlot?.Typer;

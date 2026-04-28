@@ -133,7 +133,10 @@ namespace UI.Main
                 inventory.AddCard(cardIds[i]);
         }
         
-        protected async UniTask ExecuteDialoguePostActionAsync(TextMeshProUGUI tmp, List<DialogueAction> dialogueActions)
+        protected async UniTask ExecuteDialoguePostActionAsync(
+            TextMeshProUGUI tmp,
+            List<DialogueAction> dialogueActions,
+            TextMeshProUGUI monsterTMPOverride = null)
         {
             var view = _context?.View;
             if (view == null)
@@ -145,9 +148,16 @@ namespace UI.Main
             var tmps = new List<TextMeshProUGUI>();
             tmps.Add(tmp);
             tmps.AddRange(view.TMPsInDialogueSlots());
+
+            var monsterTMP = monsterTMPOverride;
+            if (monsterTMP == null)
+                monsterTMP = _context
+                    ?.GetPayload<BattleModePayload>(SceneModeType.Battle)
+                    ?.MonsterTMP;
             
             var param = new DialoguePostAction.Param(tmps, _act, _scene)
-                .WithDialogueActions(dialogueActions);
+                .WithDialogueActions(dialogueActions)
+                .WithMonsterTMP(monsterTMP);
 
             await _dialoguePostAction.SetParam(param)
                 .ExecuteAsync();

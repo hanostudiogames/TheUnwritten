@@ -131,15 +131,16 @@ namespace UI.Cards
             if (_activeSlots.Count == 0)
                 return;
 
-            for (int i = 0; i < _activeSlots.Count; i++)
+            var slotsToShow = new List<CardSlot>(_activeSlots);
+            for (int i = 0; i < slotsToShow.Count; i++)
             {
-                var slot = _activeSlots[i];
+                var slot = slotsToShow[i];
                 slot.Rect.anchoredPosition = new Vector2(0, -400f);
                 slot.Rect.localRotation = Quaternion.identity;
                 slot.Rect.localScale = Vector3.one * 0.8f;
             }
 
-            await AnimateAll(duration);
+            await AnimateSequentially(slotsToShow, duration);
         }
 
         private async UniTask AddCardAnimated(CardSlot newSlot)
@@ -194,10 +195,35 @@ namespace UI.Cards
             if (count == 0) 
                 return;
 
+            await AnimateSlots(_activeSlots, count, animDuration);
+        }
+
+        private async UniTask AnimateSequentially(List<CardSlot> animationSlots, float animDuration)
+        {
+            if (animationSlots == null || animationSlots.Count == 0)
+                return;
+
+            for (int count = 1; count <= animationSlots.Count; count++)
+            {
+                if (!isActiveAndEnabled)
+                    return;
+
+                if (!await AnimateSlots(animationSlots, count, animDuration))
+                    return;
+
+                await UniTask.DelayFrame(1);
+            }
+        }
+
+        private async UniTask<bool> AnimateSlots(List<CardSlot> animationSlots, int count, float animDuration)
+        {
+            if (animationSlots == null || count == 0)
+                return false;
+
             if (animDuration <= 0f)
             {
-                SpreadImmediate();
-                return;
+                ApplyImmediate(animationSlots, count);
+                return true;
             }
 
             CancelAnimation();
@@ -209,13 +235,13 @@ namespace UI.Cards
 
             for (int i = 0; i < count; i++)
             {
-                var slot = _activeSlots[i];
+                var slot = animationSlots[i];
 
                 _startPositions[i] = slot.Rect.anchoredPosition;
                 _startRotations[i] = slot.Rect.localEulerAngles.z;
                 _startScales[i] = slot.Rect.localScale;
 
-                var hover = _activeHovers[i];
+                var hover = GetHover(slot);
                 if (hover != null)
                     hover.ForceExit();
             }
@@ -224,14 +250,14 @@ namespace UI.Cards
 
             while (time < animDuration)
             {
-                if (token.IsCancellationRequested) return;
+                if (token.IsCancellationRequested) return false;
 
                 time += Time.deltaTime;
                 float t = 1f - Mathf.Pow(1f - (time / animDuration), 2f);
 
                 for (int i = 0; i < count; i++)
                 {
-                    var slot = _activeSlots[i];
+                    var slot = animationSlots[i];
 
                     slot.Rect.anchoredPosition =
                         Vector2.Lerp(_startPositions[i], _targetPositions[i], t);
@@ -242,26 +268,30 @@ namespace UI.Cards
                 }
 
                 if (await UniTask.Yield(PlayerLoopTiming.Update, token).SuppressCancellationThrow())
-                    return;
+                    return false;
             }
 
             // 최종 보정
             for (int i = 0; i < count; i++)
             {
-                var slot = _activeSlots[i];
+                var slot = animationSlots[i];
 
                 slot.Rect.anchoredPosition = _targetPositions[i];
                 slot.Rect.localRotation =
                     Quaternion.Euler(0, 0, _targetRotations[i]);
                 slot.Rect.localScale = Vector3.one;
 
-                var hover = _activeHovers[i];
+                slot.Rect.SetSiblingIndex(i);
+
+                var hover = GetHover(slot);
                 if (hover != null)
                 {
                     hover.SetOrigin(_targetPositions[i],
                         Quaternion.Euler(0, 0, _targetRotations[i]));
                 }
             }
+
+            return true;
         }
 
         #endregion
@@ -306,6 +336,29 @@ namespace UI.Cards
             }
         }
 
+        private void ApplyImmediate(List<CardSlot> animationSlots, int count)
+        {
+            EnsureCache(count);
+            CalculateTargets(count);
+
+            for (int i = 0; i < count; i++)
+            {
+                var slot = animationSlots[i];
+                slot.Rect.anchoredPosition = _targetPositions[i];
+                slot.Rect.localRotation = Quaternion.Euler(0, 0, _targetRotations[i]);
+                slot.Rect.localScale = Vector3.one;
+                slot.Rect.SetSiblingIndex(i);
+
+                var hover = GetHover(slot);
+                if (hover != null)
+                {
+                    hover.ForceExit();
+                    hover.SetOrigin(_targetPositions[i],
+                        Quaternion.Euler(0, 0, _targetRotations[i]));
+                }
+            }
+        }
+
         #endregion
 
         #region Helpers
@@ -343,6 +396,14 @@ namespace UI.Cards
 
             if (!TryGetComponent(out _canvasGroup))
                 _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        }
+
+        private CardHover GetHover(CardSlot slot)
+        {
+            if (slot == null)
+                return null;
+
+            return slot.TryGetComponent<CardHover>(out var hover) ? hover : null;
         }
 
         public void DeactivateCardSlots()

@@ -7,6 +7,7 @@ using UnityEngine;
 
 using Cysharp.Threading.Tasks;
 using TMPro;
+using UI.Effects;
 
 namespace UI.Components
 {
@@ -88,6 +89,8 @@ namespace UI.Components
         {
             if (typingText == null)
                 return;
+
+            typingText.ClearState();
 
             _template = text ?? string.Empty;
             _slotValues.Clear();
@@ -180,6 +183,8 @@ namespace UI.Components
 
             if (string.IsNullOrEmpty(slotName) || !_slotValues.ContainsKey(slotName))
                 return;
+
+            typingText.ClearState();
 
             text ??= string.Empty;
 

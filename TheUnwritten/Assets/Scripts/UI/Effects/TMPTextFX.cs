@@ -22,14 +22,18 @@ namespace UI.Effects
             public float[] bleed;
             public float[] converge;
             public float[] shadowSpread;
+            public float[] suck;
 
             public Vector3[][] originalVertices;
             public Color32[][] originalColors;
             public int length;
 
             public Vector2 convergeTarget;
+            public Vector2 suckTarget;
             public Vector2[] scatterOffset;
             public Vector2[] shadowSpreadOffset;
+            public Vector2[] suckCurveOffset;
+            public float[] suckSpin;
             public Color bleedColor = Color.black;
             public Color shadowSpreadColor = new Color(0.04f, 0.02f, 0.08f, 0.12f);
         }
@@ -61,8 +65,11 @@ namespace UI.Effects
                 state.bleed = new float[count];
                 state.converge = new float[count];
                 state.shadowSpread = new float[count];
+                state.suck = new float[count];
                 state.scatterOffset = new Vector2[count];
                 state.shadowSpreadOffset = new Vector2[count];
+                state.suckCurveOffset = new Vector2[count];
+                state.suckSpin = new float[count];
                 state.length = count;
 
                 state.originalVertices = new Vector3[textInfo.meshInfo.Length][];
@@ -119,6 +126,8 @@ namespace UI.Effects
                 float bleed = state.bleed[i];
                 float converge = state.converge[i];
                 float shadowSpread = state.shadowSpread[i];
+                float suck = state.suck[i];
+                float suckEase = suck * suck * (3f - 2f * suck);
 
                 Vector3 pivot = (charInfo.bottomLeft + charInfo.topRight) * 0.5f;
 
@@ -134,6 +143,17 @@ namespace UI.Effects
                 Vector2 shadowOffset = (state.shadowSpreadOffset != null && i < state.shadowSpreadOffset.Length)
                     ? state.shadowSpreadOffset[i] * shadowSpread
                     : Vector2.zero;
+                Vector2 suckCurveOffset = (state.suckCurveOffset != null && i < state.suckCurveOffset.Length)
+                    ? state.suckCurveOffset[i] * Mathf.Sin(suckEase * Mathf.PI)
+                    : Vector2.zero;
+                Vector3 suckDest = new Vector3(
+                    state.suckTarget.x + suckCurveOffset.x,
+                    state.suckTarget.y + suckCurveOffset.y,
+                    0f);
+                Vector3 suckOffset = (suckDest - pivot) * suckEase;
+                float suckSpin = state.suckSpin != null && i < state.suckSpin.Length
+                    ? state.suckSpin[i]
+                    : 0f;
 
                 // 🔥 melt (글자 상단 고정, 하단이 늘어져 내림)
                 float topY = charInfo.topLeft.y;
@@ -145,7 +165,7 @@ namespace UI.Effects
                 float ft = 1f - Mathf.Pow(1f - fold, 3f);
 
                 // 🔥 rotation
-                float angle = rot * 90f;
+                float angle = rot * 90f + suckSpin * suckEase * 360f;
                 float rad = angle * Mathf.Deg2Rad;
                 float cos = Mathf.Cos(rad);
                 float sin = Mathf.Sin(rad);
@@ -155,7 +175,8 @@ namespace UI.Effects
                 float shakeY = Mathf.Cos(Time.time * 50f + i) * shake;
 
                 // 🔥 pulse (pivot 기준 균일 스케일)
-                float pulseScale = 1f + pulse;
+                float suckScale = Mathf.Lerp(1f, 0.03f, Mathf.Pow(suckEase, 1.15f));
+                float pulseScale = (1f + pulse) * suckScale;
 
                 for (int j = 0; j < 4; j++)
                 {
@@ -191,7 +212,7 @@ namespace UI.Effects
                     rx *= pulseScale;
                     ry *= pulseScale;
 
-                    vertices[idx] = pivot + convergeOffset + new Vector3(rx + shadowOffset.x, ry + shadowOffset.y, 0f);
+                    vertices[idx] = pivot + convergeOffset + suckOffset + new Vector3(rx + shadowOffset.x, ry + shadowOffset.y, 0f);
 
                     // bleed (vertex color를 bleedColor 쪽으로 블렌딩, 알파는 원본 유지)
                     Color finalColor = originalColors[idx];
@@ -208,6 +229,12 @@ namespace UI.Effects
                         Color target = state.shadowSpreadColor;
                         target.a = ((Color)originalColors[idx]).a * Mathf.Clamp01(state.shadowSpreadColor.a);
                         finalColor = Color.Lerp(finalColor, target, Mathf.Clamp01(shadowSpread));
+                    }
+
+                    if (suck > 0f)
+                    {
+                        float fade = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.58f, 1f, suckEase));
+                        finalColor.a *= 1f - fade;
                     }
 
                     colors[idx] = finalColor;
@@ -242,10 +269,15 @@ namespace UI.Effects
             Array.Clear(state.bleed, 0, state.bleed.Length);
             Array.Clear(state.converge, 0, state.converge.Length);
             Array.Clear(state.shadowSpread, 0, state.shadowSpread.Length);
+            Array.Clear(state.suck, 0, state.suck.Length);
             if (state.scatterOffset != null)
                 Array.Clear(state.scatterOffset, 0, state.scatterOffset.Length);
             if (state.shadowSpreadOffset != null)
                 Array.Clear(state.shadowSpreadOffset, 0, state.shadowSpreadOffset.Length);
+            if (state.suckCurveOffset != null)
+                Array.Clear(state.suckCurveOffset, 0, state.suckCurveOffset.Length);
+            if (state.suckSpin != null)
+                Array.Clear(state.suckSpin, 0, state.suckSpin.Length);
 
             ApplyAll(text, state);
         }
@@ -459,6 +491,115 @@ namespace UI.Effects
             return Mathf.Repeat(Mathf.Sin(seed * 12.9898f) * 43758.5453f, 1f);
         }
 
+        private static int[] BuildShuffledIndices(int count)
+        {
+            int[] indices = new int[count];
+            for (int i = 0; i < count; i++)
+                indices[i] = i;
+
+            for (int i = 0; i < count; i++)
+            {
+                int rand = UnityEngine.Random.Range(i, count);
+                (indices[i], indices[rand]) = (indices[rand], indices[i]);
+            }
+
+            return indices;
+        }
+
+        private static Vector2 GetTargetPointInLocalSpace(TMP_Text sourceText, TMP_Text targetText)
+        {
+            Vector3 targetWorld = GetTextAbsorbWorldPoint(targetText);
+            Vector3 local = sourceText.transform.InverseTransformPoint(targetWorld);
+            return new Vector2(local.x, local.y);
+        }
+
+        private static Vector3 GetTextAbsorbWorldPoint(TMP_Text targetText)
+        {
+            var textInfo = targetText.textInfo;
+            if (textInfo == null || textInfo.characterCount == 0)
+            {
+                targetText.ForceMeshUpdate();
+                textInfo = targetText.textInfo;
+            }
+
+            Vector2 min = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
+            Vector2 max = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
+            int visibleCount = 0;
+
+            if (textInfo != null)
+            {
+                for (int i = 0; i < textInfo.characterCount; i++)
+                {
+                    var charInfo = textInfo.characterInfo[i];
+                    if (!charInfo.isVisible)
+                        continue;
+
+                    visibleCount++;
+                    if (charInfo.bottomLeft.x < min.x) min.x = charInfo.bottomLeft.x;
+                    if (charInfo.bottomLeft.y < min.y) min.y = charInfo.bottomLeft.y;
+                    if (charInfo.topRight.x > max.x) max.x = charInfo.topRight.x;
+                    if (charInfo.topRight.y > max.y) max.y = charInfo.topRight.y;
+                }
+            }
+
+            Vector3 localTarget;
+            if (visibleCount > 0)
+            {
+                localTarget = new Vector3(
+                    (min.x + max.x) * 0.5f,
+                    min.y + (max.y - min.y) * 0.35f,
+                    0f);
+            }
+            else
+            {
+                var rectTransform = targetText.transform as RectTransform;
+                localTarget = rectTransform != null ? rectTransform.rect.center : Vector3.zero;
+            }
+
+            return targetText.transform.TransformPoint(localTarget);
+        }
+
+        private static void BuildSuckTrajectory(TMP_Text text, State state)
+        {
+            var textInfo = text.textInfo;
+            for (int i = 0; i < textInfo.characterCount; i++)
+            {
+                var charInfo = textInfo.characterInfo[i];
+                if (!charInfo.isVisible)
+                {
+                    state.suckCurveOffset[i] = Vector2.zero;
+                    state.suckSpin[i] = 0f;
+                    continue;
+                }
+
+                Vector2 charCenter = (charInfo.bottomLeft + charInfo.topRight) * 0.5f;
+                Vector2 toTarget = state.suckTarget - charCenter;
+                float n1 = Noise01(i * 19 + 5);
+                float n2 = Noise01(i * 23 + 11);
+                float n3 = Noise01(i * 29 + 17);
+                float n4 = Noise01(i * 37 + 7);
+
+                Vector2 dir;
+                if (toTarget.sqrMagnitude < 0.001f)
+                {
+                    float fallbackAngle = n1 * Mathf.PI * 2f;
+                    dir = new Vector2(Mathf.Cos(fallbackAngle), Mathf.Sin(fallbackAngle));
+                }
+                else
+                {
+                    dir = toTarget.normalized;
+                }
+
+                Vector2 perp = new Vector2(-dir.y, dir.x);
+                float side = n1 < 0.5f ? -1f : 1f;
+                float distance = Mathf.Clamp(toTarget.magnitude, 30f, 420f);
+                float curve = Mathf.Lerp(24f, Mathf.Min(160f, distance * 0.42f), n2);
+
+                state.suckCurveOffset[i] = perp * side * curve + dir * Mathf.Lerp(-18f, 12f, n3);
+                state.suckSpin[i] = Mathf.Lerp(-1.2f, 1.2f, n4);
+            }
+        }
+
         public static Tween DoConverge(this TMP_Text text, Vector2 targetLocal, float target, float duration)
         {
             var state = GetState(text);
@@ -474,6 +615,45 @@ namespace UI.Effects
 
                 ApplyAll(text, state);
             }, target, duration).SetEase(Ease.InCubic);
+        }
+
+        public static Tween DoSuckInto(this TMP_Text text, TMP_Text targetText, float duration, float delayStep = 0.012f)
+        {
+            if (text == null || targetText == null)
+                return null;
+
+            var state = GetState(text);
+            var textInfo = text.textInfo;
+            int count = textInfo.characterCount;
+            if (count <= 0)
+                return null;
+
+            state.suckTarget = GetTargetPointInLocalSpace(text, targetText);
+            BuildSuckTrajectory(text, state);
+
+            int[] indices = BuildShuffledIndices(count);
+            float time = 0f;
+            float perCharacterDuration = Mathf.Max(0.001f, duration);
+            float stagger = Mathf.Max(0f, delayStep);
+            float totalDuration = perCharacterDuration + stagger * (count - 1);
+
+            return DOTween.To(() => time, x =>
+            {
+                time = x;
+
+                for (int order = 0; order < count; order++)
+                {
+                    int i = indices[order];
+                    if (!textInfo.characterInfo[i].isVisible)
+                        continue;
+
+                    float t = Mathf.Clamp01((time - order * stagger) / perCharacterDuration);
+                    state.suck[i] = t;
+                    state.shake[i] = Mathf.Sin(t * Mathf.PI) * Mathf.Lerp(0.4f, 1.6f, Noise01(i * 41 + 13));
+                }
+
+                ApplyAll(text, state);
+            }, totalDuration, totalDuration).SetEase(Ease.Linear);
         }
 
         #endregion

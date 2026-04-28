@@ -20,6 +20,7 @@ namespace UI
             public int SceneIndex { get; private set; }
             
             public List<DialogueAction> DialogueActions { get; private set; } = new();
+            public TextMeshProUGUI MonsterTMP { get; private set; } = null;
 
             public Param(List<TextMeshProUGUI> tmps, int actIndex, int sceneIndex)
             {
@@ -31,6 +32,12 @@ namespace UI
             public Param WithDialogueActions(List<DialogueAction> dialogueActions)
             {
                 DialogueActions = dialogueActions;
+                return this;
+            }
+
+            public Param WithMonsterTMP(TextMeshProUGUI monsterTMP)
+            {
+                MonsterTMP = monsterTMP;
                 return this;
             }
         }
@@ -209,6 +216,24 @@ namespace UI
 
                         break;
                     }
+
+                    case DialogueActionType.SuckIntoMonster:
+                    {
+                        var monsterTMP = _param.MonsterTMP;
+                        if (monsterTMP == null)
+                            break;
+
+                        foreach (var tmp in tmps)
+                        {
+                            if (tmp == null || tmp == monsterTMP)
+                                continue;
+
+                            tmp.DoSuckInto(monsterTMP, action.Duration)?
+                                .SetDelay(action.StartDelay);
+                        }
+
+                        break;
+                    }
                 }
                 
                 await UniTask.Delay(TimeSpan.FromSeconds(action.EndDelay));
@@ -216,4 +241,3 @@ namespace UI
         }
     }
 }
-

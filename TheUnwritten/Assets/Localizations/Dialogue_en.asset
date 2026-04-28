@@ -135,8 +135,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 10519838404370432
-    m_Localized: "<color=#54157B><sprite name=\"W\"><sprite name=\"R\"><sprite name=\"I\"><sprite
-      name=\"T\"><sprite name=\"T\"><sprite name=\"E\"><sprite name=\"N\"><color=#6A1B9A>\uC678\uBD80\uC790.
+    m_Localized: "<sprite name=\"W\"><sprite name=\"R\"><sprite name=\"I\"><sprite
+      name=\"T\"><sprite name=\"T\"><sprite name=\"E\"><sprite name=\"N\"><color=#6A1B9A><color=#54157B>\uC678\uBD80\uC790.
       \uC11C\uC220\uC744 \uBB34\uB2E8 \uBCC0\uACBD\uD558\uC600\uB2E4. \uC81C\uAC70
       \uB300\uC0C1\uC73C\uB85C \uC9C0\uC815\uD55C\uB2E4.</color>"
     m_Metadata:
