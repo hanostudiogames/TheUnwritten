@@ -17,6 +17,7 @@ namespace UI.Main
         private TextMeshProUGUI _monsterTMP = null;
         private IDialogueSlot _dialogueSlot = null;
         private Tween _breathingTween = null;
+        private Vector3 _monsterBaseScale = Vector3.one;
 
         public BattleSceneMode(SceneModeContext sceneModeContext) : base(sceneModeContext)
         {
@@ -30,8 +31,6 @@ namespace UI.Main
             var view = _context?.View;
             if (view == null)
                 return;
-
-            // var cardInput = _context?.BattleCardInput;
             
             var dialogueRecords = _sceneRecord.DialogueRecords;
             if (dialogueRecords == null)
@@ -48,10 +47,10 @@ namespace UI.Main
             _dialogueSlot = payload.DialogueSlot;
             _slotId = payload.SlotId;
             _monsterTMP = payload.MonsterTMP;
-            // 호흡 트윈은 NormalSceneMode 에서 IsMonster 캡처 시점(몬스터 등장)부터
-            // 이미 돌고 있다. 여기서는 참조만 받아 종료 시 정리한다.
-            // _breathingTween = payload.BreathingTween;
             _context?.ClearPayload(Common.SceneModeType.Battle);
+
+            if (_monsterTMP == null)
+                return;
 
             CaptureMonsterTMP();
             Debug.Log($"[Battle] payload read — DialogueSlot={(_dialogueSlot!=null)}, SlotId={_slotId}, MonsterTMP={(_monsterTMP!=null ? _monsterTMP.name : "null")}, breathing={(_breathingTween!=null && _breathingTween.IsActive())}");
@@ -65,27 +64,44 @@ namespace UI.Main
             var lastCardId = _context?.CardInventory?.LastSelectedCardId ?? 0;
             Tween flameBleedTween = null;
             Tween shadowBleedTween = null;
-            Tween shadowMeltTween = null;
+            // Tween shadowMeltTween = null;
+            Tween shadowSpreadTween = null;
+            float duration = 2.5f;
 
-            if (lastCardId == 1 && _monsterTMP != null)
+            switch (lastCardId)
             {
-                // 불꽃 — Bleed 가 글자마다 다른 강도로 yoyo 노이즈 (DoBleedFlame),
-                // Shake 는 sin(time+i) 라 글자별 위상차로 부분 떨림.
-                var flameColor = new Color(1f, 0.42f, 0.08f, 1f);
-                flameBleedTween = _monsterTMP.DoBleedFlame(0.85f, 1.4f, flameColor);
-                _monsterTMP.DoShake(3f, 1.8f);
-            }
-            else if (lastCardId == 2 && _monsterTMP != null)
-            {
-                // 그림자 — 색이 검정보다 더 깊은 보라로 잠기고, 글자들이 랜덤 타이밍으로
-                // 천천히 늘어져 흘러내린다. delayStep 0.04 로 글자 사이 약간씩 시차를
-                // 두면 "녹는 파장" 이 글자열을 따라 번져가는 느낌이 살아난다.
-                var shadowColor = new Color(0.1f, 0.05f, 0.2f, 1f);
-                shadowBleedTween = _monsterTMP.DoBleed(0.85f, 2.5f, shadowColor);
-                shadowMeltTween = _monsterTMP.DORandomMelt(0.5f, 2.5f, 0.04f);
+                case 1:
+                {
+                    // 불꽃 — Bleed 가 글자마다 다른 강도로 yoyo 노이즈 (DoBleedFlame),
+                    // Shake 는 sin(time+i) 라 글자별 위상차로 부분 떨림.
+                    var flameColor = new Color(1f, 0.42f, 0.08f, 1f);
+                    flameBleedTween = _monsterTMP.DoBleedFlame(0.85f, duration, flameColor);
+                    _monsterTMP.DoShake(3f, duration);
+
+                    break;
+                }
+
+                case 2:
+                {
+                    // 그림자 — 색이 검정보다 더 깊은 보라로 잠기고, 글자들이 랜덤 타이밍으로
+                    // 천천히 늘어져 흘러내린다. delayStep 0.04 로 글자 사이 약간씩 시차를
+                    // 두면 "녹는 파장" 이 글자열을 따라 번져가는 느낌이 살아난다.
+                    var shadowColor = new Color(0.1f, 0.05f, 0.2f, 1f);
+                    var spreadColor = new Color(0.1f, 0.05f, 0.2f, 0.5f);
+                    shadowBleedTween = _monsterTMP.DoBleed(0.85f, duration, shadowColor);
+                    // shadowMeltTween = _monsterTMP.DORandomMelt(0.5f, 2.5f, 0.04f);
+                    shadowSpreadTween = _monsterTMP.DoShadowSpread(1f, duration, spreadColor);
+
+                    break;
+                }
             }
 
-            await UniTask.Delay(TimeSpan.FromSeconds(3));
+            await UniTask.Delay(TimeSpan.FromSeconds(duration));
+            // 
+            shadowBleedTween?.Kill();
+            // shadowMeltTween?.Kill();
+            shadowSpreadTween?.Kill();
+            // await RestoreMonsterToIdleAsync();
 
             var locale = LocalizationSettings.SelectedLocale;
 
@@ -113,30 +129,15 @@ namespace UI.Main
                 }
             }
 
-            // 전투 종료 — 몬스터 죽음. 호흡/불꽃/그림자 정지 후 원상태로 부드럽게 복귀.
-            _breathingTween?.Kill();
             flameBleedTween?.Kill();
-            shadowBleedTween?.Kill();
-            shadowMeltTween?.Kill();
-            if (_monsterTMP != null)
-            {
-                _monsterTMP.DoPulse(0f, 0.6f);
-                if (lastCardId == 1)
-                    _monsterTMP.DoBleed(0f, 0.8f);
-                else if (lastCardId == 2)
-                {
-                    _monsterTMP.DoBleed(0f, 0.8f);
-                    _monsterTMP.DoMelt(0f, 0.8f);
-                }
-            }
+            await RestoreMonsterToIdleAsync();
 
             await UniTask.CompletedTask;
         }
         
-        // IsMonster=1 인 EventRecord 의 TMP 를 BattleModePayload.MonsterTMP 로 기록하고
-        // 즉시 호흡 펄스를 시작한다. 호흡은 *몬스터 등장 → 죽음* 까지 끊김없이
-        // 살아있어야 하므로 Battle 씬 진입 시점이 아니라 등장 시점(여기) 에서 켠다.
-        // 카드 선택 비동기 대기, 씬 전환 모두 가로질러 DOTween 이 트윈을 유지한다.
+        // IsMonster=1 인 EventRecord 의 TMP 를 전투 대상으로 잡고 호흡을 시작한다.
+        // 호흡은 TMP 버텍스 펄스가 아니라 전체 Transform 스케일로 처리해
+        // 글자가 파르르 떨리는 느낌 없이 덩어리 전체가 천천히 부푼다.
         private void CaptureMonsterTMP()
         {
             if (_monsterTMP == null)
@@ -156,14 +157,56 @@ namespace UI.Main
             {
                 _breathingTween.Kill();
                 if (_monsterTMP != null)
-                    _monsterTMP.DoPulse(0f, 0.4f);
+                    _monsterTMP.transform.localScale = _monsterBaseScale;
             }
 
-            _monsterTMP.DoPulse(0.2f, 3f)
+            _monsterBaseScale = _monsterTMP.transform.localScale;
+            // _monsterTMP.DoPulse(0f, 0.3f);
+            _monsterTMP.DoShake(0f, 0.3f);
+
+            _breathingTween = _monsterTMP.transform
+                .DOScale(_monsterBaseScale * 1.06f, 1.8f)
                 .SetEase(Ease.InOutSine)
                 .SetLoops(-1, LoopType.Yoyo);
 
             Debug.Log($"[MonsterTMP] captured \"{_monsterTMP.name}\" + breathing started (chars={_monsterTMP.textInfo.characterCount})");
+        }
+
+        private async UniTask RestoreMonsterToIdleAsync()
+        {
+            if (_monsterTMP == null)
+                return;
+
+            float duration = 0.45f;
+
+            _breathingTween?.Kill();
+            
+            _monsterTMP.DoBleed(0f, 0.45f);
+            _monsterTMP.DoShadowSpread(0f, duration);
+            // _monsterTMP.DoMelt(0f, duration);
+            _monsterTMP.DoPulse(0f, duration);
+            _monsterTMP.DoShake(0f, 0.25f);
+
+            _monsterTMP.transform
+                .DOScale(_monsterBaseScale, duration)
+                .SetEase(Ease.InOutSine);
+
+            await UniTask.Delay(TimeSpan.FromSeconds(duration));
+
+            StartMonsterBreathing();
+        }
+
+        private void StartMonsterBreathing()
+        {
+            if (_monsterTMP == null)
+                return;
+
+            _breathingTween?.Kill();
+            _monsterTMP.transform.localScale = _monsterBaseScale;
+            _breathingTween = _monsterTMP.transform
+                .DOScale(_monsterBaseScale * 1.06f, 1.8f)
+                .SetEase(Ease.InOutSine)
+                .SetLoops(-1, LoopType.Yoyo);
         }
     }
 }

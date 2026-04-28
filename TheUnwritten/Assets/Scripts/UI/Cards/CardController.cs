@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using Tables.Containers;
+using System;
 
 namespace UI.Cards
 {
@@ -74,6 +75,18 @@ namespace UI.Cards
                 return;
 
             _cardFanSpread.gameObject.SetActive(true);
+        }
+
+        public async UniTask ShowCardsAsync()
+        {
+            if (_cardFanSpread == null)
+                return;
+
+            _cardFanSpread.SetSelectable(false);
+            _cardFanSpread.gameObject.SetActive(true);
+            await _cardFanSpread.PlayShowAnimationAsync();
+            
+            // await UniTask.Delay(TimeSpan.FromSeconds(1f));
         }
 
         public void HideCards()

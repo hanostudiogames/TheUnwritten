@@ -21,6 +21,7 @@ namespace UI.Effects
             public float[] pulse;
             public float[] bleed;
             public float[] converge;
+            public float[] shadowSpread;
 
             public Vector3[][] originalVertices;
             public Color32[][] originalColors;
@@ -28,7 +29,9 @@ namespace UI.Effects
 
             public Vector2 convergeTarget;
             public Vector2[] scatterOffset;
+            public Vector2[] shadowSpreadOffset;
             public Color bleedColor = Color.black;
+            public Color shadowSpreadColor = new Color(0.04f, 0.02f, 0.08f, 0.12f);
         }
 
         private static readonly Dictionary<TMP_Text, State> stateMap = new();
@@ -57,7 +60,9 @@ namespace UI.Effects
                 state.pulse = new float[count];
                 state.bleed = new float[count];
                 state.converge = new float[count];
+                state.shadowSpread = new float[count];
                 state.scatterOffset = new Vector2[count];
+                state.shadowSpreadOffset = new Vector2[count];
                 state.length = count;
 
                 state.originalVertices = new Vector3[textInfo.meshInfo.Length][];
@@ -113,6 +118,7 @@ namespace UI.Effects
                 float pulse = state.pulse[i];
                 float bleed = state.bleed[i];
                 float converge = state.converge[i];
+                float shadowSpread = state.shadowSpread[i];
 
                 Vector3 pivot = (charInfo.bottomLeft + charInfo.topRight) * 0.5f;
 
@@ -125,6 +131,9 @@ namespace UI.Effects
                     state.convergeTarget.y + scatter.y,
                     0f);
                 Vector3 convergeOffset = (convergeDest - pivot) * converge;
+                Vector2 shadowOffset = (state.shadowSpreadOffset != null && i < state.shadowSpreadOffset.Length)
+                    ? state.shadowSpreadOffset[i] * shadowSpread
+                    : Vector2.zero;
 
                 // 🔥 melt (글자 상단 고정, 하단이 늘어져 내림)
                 float topY = charInfo.topLeft.y;
@@ -182,20 +191,26 @@ namespace UI.Effects
                     rx *= pulseScale;
                     ry *= pulseScale;
 
-                    vertices[idx] = pivot + convergeOffset + new Vector3(rx, ry, 0f);
+                    vertices[idx] = pivot + convergeOffset + new Vector3(rx + shadowOffset.x, ry + shadowOffset.y, 0f);
 
                     // bleed (vertex color를 bleedColor 쪽으로 블렌딩, 알파는 원본 유지)
+                    Color finalColor = originalColors[idx];
                     if (bleed > 0f)
                     {
                         Color baseCol = originalColors[idx];
                         Color target = state.bleedColor;
                         target.a = baseCol.a;
-                        colors[idx] = Color.Lerp(baseCol, target, bleed);
+                        finalColor = Color.Lerp(baseCol, target, bleed);
                     }
-                    else
+
+                    if (shadowSpread > 0f)
                     {
-                        colors[idx] = originalColors[idx];
+                        Color target = state.shadowSpreadColor;
+                        target.a = ((Color)originalColors[idx]).a * Mathf.Clamp01(state.shadowSpreadColor.a);
+                        finalColor = Color.Lerp(finalColor, target, Mathf.Clamp01(shadowSpread));
                     }
+
+                    colors[idx] = finalColor;
                 }
             }
 
@@ -226,8 +241,11 @@ namespace UI.Effects
             Array.Clear(state.pulse, 0, state.pulse.Length);
             Array.Clear(state.bleed, 0, state.bleed.Length);
             Array.Clear(state.converge, 0, state.converge.Length);
+            Array.Clear(state.shadowSpread, 0, state.shadowSpread.Length);
             if (state.scatterOffset != null)
                 Array.Clear(state.scatterOffset, 0, state.scatterOffset.Length);
+            if (state.shadowSpreadOffset != null)
+                Array.Clear(state.shadowSpreadOffset, 0, state.shadowSpreadOffset.Length);
 
             ApplyAll(text, state);
         }
@@ -269,7 +287,7 @@ namespace UI.Effects
         public static Tween DoShake(this TMP_Text text, float target, float duration)
         {
             var state = GetState(text);
-            float current = 0f;
+            float current = state.shake.Length > 0 ? state.shake[0] : 0f;
 
             return DOTween.To(() => current, x =>
             {
@@ -329,10 +347,9 @@ namespace UI.Effects
             }, target, duration).SetEase(Ease.InOutQuad);
         }
 
-        // 불꽃이 글자들을 *부분부분* 핥는 듯한 효과. globalStrength 가 0↔maxStrength 로
-        // yoyo 진동하고, 각 글자는 인덱스+시간 기반 sin 노이즈에 따라 [0, globalStrength]
-        // 범위로 흩어진다 → 어떤 글자는 진하게, 어떤 글자는 옅게, 시간에 따라 패턴 이동.
-        // 일반 DoBleed 가 uniform fill 인 반면 이쪽은 항상 partial.
+        // 불꽃이 글자들을 *부분부분* 핥는 듯한 효과.
+        // duration 은 전체 지속 시간이 아니라 0→maxStrength 한 번의 flicker half-cycle 시간이다.
+        // 호출부에서 별도 지속 시간 동안 유지한 뒤 Kill/복귀시키는 구조.
         public static Tween DoBleedFlame(this TMP_Text text, float maxStrength, float duration, Color? bleedColor = null)
         {
             var state = GetState(text);
@@ -359,6 +376,87 @@ namespace UI.Effects
                 });
 
             return tween;
+        }
+
+        public static Tween DoShadowSpread(this TMP_Text text, float strength, float duration, Color? shadowColor = null)
+        {
+            var state = GetState(text);
+            state.shadowSpreadColor = shadowColor ?? new Color(0.04f, 0.02f, 0.08f, 0.12f);
+
+            if (strength > 0f)
+                BuildShadowSpreadOffsets(text, state);
+
+            float current = state.shadowSpread.Length > 0 ? state.shadowSpread[0] : 0f;
+
+            return DOTween.To(() => current, x =>
+            {
+                current = x;
+                for (int i = 0; i < state.shadowSpread.Length; i++)
+                    state.shadowSpread[i] = x;
+
+                ApplyAll(text, state);
+            }, strength, duration).SetEase(strength > current ? Ease.OutCubic : Ease.InOutSine);
+        }
+
+        private static void BuildShadowSpreadOffsets(TMP_Text text, State state)
+        {
+            text.ForceMeshUpdate();
+            var textInfo = text.textInfo;
+
+            Vector2 min = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
+            Vector2 max = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
+            int visibleCount = 0;
+
+            for (int i = 0; i < textInfo.characterCount; i++)
+            {
+                var charInfo = textInfo.characterInfo[i];
+                if (!charInfo.isVisible)
+                    continue;
+
+                visibleCount++;
+                if (charInfo.bottomLeft.x < min.x) min.x = charInfo.bottomLeft.x;
+                if (charInfo.bottomLeft.y < min.y) min.y = charInfo.bottomLeft.y;
+                if (charInfo.topRight.x > max.x) max.x = charInfo.topRight.x;
+                if (charInfo.topRight.y > max.y) max.y = charInfo.topRight.y;
+            }
+
+            Vector2 center = visibleCount > 0
+                ? new Vector2((min.x + max.x) * 0.5f, (min.y + max.y) * 0.5f)
+                : Vector2.zero;
+
+            for (int i = 0; i < textInfo.characterCount; i++)
+            {
+                var charInfo = textInfo.characterInfo[i];
+                if (!charInfo.isVisible)
+                {
+                    state.shadowSpreadOffset[i] = Vector2.zero;
+                    continue;
+                }
+
+                Vector2 charCenter = (charInfo.bottomLeft + charInfo.topRight) * 0.5f;
+                Vector2 dir = charCenter - center;
+                float n1 = Noise01(i * 17 + 3);
+                float n2 = Noise01(i * 31 + 9);
+
+                if (dir.sqrMagnitude < 0.001f)
+                {
+                    float fallbackAngle = n1 * Mathf.PI * 2f;
+                    dir = new Vector2(Mathf.Cos(fallbackAngle), Mathf.Sin(fallbackAngle));
+                }
+                else
+                {
+                    dir.Normalize();
+                }
+
+                float angle = Mathf.Atan2(dir.y, dir.x) + Mathf.Lerp(-0.75f, 0.75f, n1);
+                float distance = Mathf.Lerp(48f, 92f, n2);
+                state.shadowSpreadOffset[i] = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * distance;
+            }
+        }
+
+        private static float Noise01(int seed)
+        {
+            return Mathf.Repeat(Mathf.Sin(seed * 12.9898f) * 43758.5453f, 1f);
         }
 
         public static Tween DoConverge(this TMP_Text text, Vector2 targetLocal, float target, float duration)
@@ -468,7 +566,8 @@ namespace UI.Effects
 
         // 잉크괴물 등장 연출
         //  Phase 1 (응집): 글자들이 랜덤하게 녹아내리며 중심-하단으로 수렴
-        //  Phase 2 (형성): 검정으로 번지며 팽창 + 떨림 → 덩어리 실루엣이 "숨쉬는" 상태
+        //  Phase 2 (형성): 검정으로 번지며 팽창하고 짧게 흔들린다. 전투 중 호흡은
+        //  TMP 버텍스가 아니라 RectTransform 전체 스케일로 별도 처리한다.
         public static Sequence DoInkMonsterAppear(this TMP_Text text, float duration)
         {
             var state = GetState(text);
@@ -507,10 +606,11 @@ namespace UI.Effects
             seq.Append(text.DORandomMelt(1.2f, t1, 0.025f));
             seq.Join(text.DoConverge(target, 0.75f, t1));
 
-            // Phase 2 — 형성 (검정 번짐 + 팽창 + 떨림)
+            // Phase 2 — 형성 (검정 번짐 + 팽창 + 짧은 충격)
             seq.Append(text.DoBleed(1f, t2));
             seq.Join(text.DoPulse(0.3f, t2));
             seq.Join(text.DoShake(4f, t2));
+            seq.Append(text.DoShake(0f, 0.25f));
 
             return seq;
         }

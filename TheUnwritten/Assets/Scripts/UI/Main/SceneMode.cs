@@ -193,7 +193,7 @@ namespace UI.Main
             await cardController.SetCardsAsync(availableCardIds);
 
             await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
-            cardController.ShowCards();
+            await cardController.ShowCardsAsync();
 
             if (_context?.CardSelectionHandler != null)
             {

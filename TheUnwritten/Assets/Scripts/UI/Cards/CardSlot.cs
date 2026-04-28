@@ -42,7 +42,7 @@ namespace UI.Cards
         private CardHover _hover;
 
         public RectTransform Rect => rectTr;
-        public bool IsSelectable { get; private set; }
+        public bool IsSelectable { get; private set; } = false;
 
         public override void Initialize(Param param)
         {
@@ -65,7 +65,7 @@ namespace UI.Cards
             if (_hover != null)
                 _hover.IsSelectable = value;
 
-            if (!value && _hover != null && _hover.IsHovering)
+            if (!value && _hover != null)
                 _hover.ForceExit();
         }
 
@@ -83,7 +83,9 @@ namespace UI.Cards
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (!IsSelectable) return;
+            if (!IsSelectable) 
+                return;
+            
             _hover?.Enter();
         }
 

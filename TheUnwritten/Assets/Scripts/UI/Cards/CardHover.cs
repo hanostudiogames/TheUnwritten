@@ -35,7 +35,7 @@ namespace UI.Cards
                 return;
 
             _isHovering = true;
-            Play(true).Forget();
+            PlayAsync(true).Forget();
         }
 
         public void Exit()
@@ -44,11 +44,12 @@ namespace UI.Cards
                 return;
 
             _isHovering = false;
-            Play(false).Forget();
+            PlayAsync(false).Forget();
         }
 
         public void ForceExit()
         {
+            _cts?.Cancel();
             _isHovering = false;
             SnapToOrigin();
         }
@@ -72,7 +73,7 @@ namespace UI.Cards
             rectTr.localScale = Vector3.one;
         }
 
-        private async UniTask Play(bool enter)
+        private async UniTask PlayAsync(bool enter)
         {
             _cts?.Cancel();
             _cts = new CancellationTokenSource();
@@ -106,8 +107,12 @@ namespace UI.Cards
                 rectTr.localScale = Vector3.Lerp(startScale, targetScale, t);
                 rectTr.localRotation = Quaternion.Lerp(startRot, targetRot, t);
 
-                await UniTask.Yield(PlayerLoopTiming.Update, token);
+                if (await UniTask.Yield(PlayerLoopTiming.Update, token).SuppressCancellationThrow())
+                    return;
             }
+
+            if (!IsSelectable && enter)
+                return;
 
             rectTr.anchoredPosition = targetPos;
             rectTr.localScale = targetScale;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.RegularExpressions;
 using Common;
 using UnityEngine;
@@ -246,36 +247,33 @@ namespace UI.Components
         {
             float originalCanvasAlpha = typingText.canvasRenderer.GetAlpha();
             bool wasEnabled = typingText.enabled;
+            int fadeWindow = Mathf.Max(1, smoothRevealFadeCharacters);
+            int revealableCount = CountRevealableParts(rendered);
 
             typingText.enabled = false;
             typingText.canvasRenderer.SetAlpha(0f);
-            typingText.SetText(rendered);
+            typingText.SetText(BuildAlphaRevealText(rendered, 0f, fadeWindow));
             typingText.maxVisibleCharacters = int.MaxValue;
             typingText.ForceMeshUpdate(true, true);
-            SetAllCharacterAlpha(0, false);
 
             typingText.enabled = wasEnabled;
-            SetAllCharacterAlpha(0);
             typingText.canvasRenderer.SetAlpha(0f);
 
             await UniTask.Yield(PlayerLoopTiming.PostLateUpdate);
-            SetAllCharacterAlpha(0);
             typingText.canvasRenderer.SetAlpha(0f);
 
             if (_param != null)
                 await UniTask.Delay(TimeSpan.FromSeconds(_param.StartDelaySeconds));
 
-            int visibleCount = CountVisibleCharacters();
-            if (visibleCount <= 0)
+            if (revealableCount <= 0)
             {
                 typingText.canvasRenderer.SetAlpha(originalCanvasAlpha);
-                SetAllCharacterAlpha(255);
+                typingText.SetText(rendered);
                 return;
             }
 
             float typingSpeed = _param?.TypingSpeed + 0.05f ?? 0.1f;
-            float duration = Mathf.Max(0.001f, typingSpeed * visibleCount);
-            int fadeWindow = Mathf.Max(1, smoothRevealFadeCharacters);
+            float duration = Mathf.Max(0.001f, typingSpeed * revealableCount);
 
             typingText.canvasRenderer.SetAlpha(originalCanvasAlpha);
 
@@ -283,14 +281,78 @@ namespace UI.Components
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
-                float head = Mathf.Lerp(0f, visibleCount + fadeWindow, elapsed / duration);
-                ApplyLeftToRightAlpha(head, fadeWindow);
+                float head = Mathf.Lerp(0f, revealableCount + fadeWindow, elapsed / duration);
+                typingText.SetText(BuildAlphaRevealText(rendered, head, fadeWindow));
+                typingText.ForceMeshUpdate();
                 
                 await UniTask.Yield(PlayerLoopTiming.Update);
             }
 
-            SetAllCharacterAlpha(255);
+            typingText.SetText(rendered);
+            typingText.ForceMeshUpdate();
             typingText.canvasRenderer.SetAlpha(originalCanvasAlpha);
+        }
+
+        private int CountRevealableParts(string rendered)
+        {
+            int count = 0;
+            var matches = PartRegex.Matches(rendered ?? string.Empty);
+
+            for (int i = 0; i < matches.Count; i++)
+            {
+                if (IsRevealablePart(matches[i].Value))
+                    count++;
+            }
+
+            return count;
+        }
+
+        private string BuildAlphaRevealText(string rendered, float head, int fadeWindow)
+        {
+            var builder = new StringBuilder((rendered?.Length ?? 0) * 2);
+            var matches = PartRegex.Matches(rendered ?? string.Empty);
+            int visibleIndex = 0;
+
+            for (int i = 0; i < matches.Count; i++)
+            {
+                string part = matches[i].Value;
+                if (!IsRevealablePart(part))
+                {
+                    builder.Append(part);
+                    continue;
+                }
+
+                bool isDash = IsDashPart(part);
+                float characterFadeWindow = isDash ? 1f : fadeWindow;
+                float revealOffset = isDash ? 1f : 0f;
+                byte alpha = (byte)Mathf.RoundToInt(
+                    Mathf.Clamp01((head - visibleIndex + revealOffset) / characterFadeWindow) * 255f);
+
+                builder.Append("<alpha=#");
+                builder.Append(alpha.ToString("X2"));
+                builder.Append(">");
+                builder.Append(part);
+                visibleIndex++;
+            }
+
+            builder.Append("<alpha=#FF>");
+            return builder.ToString();
+        }
+
+        private static bool IsRevealablePart(string part)
+        {
+            if (string.IsNullOrEmpty(part))
+                return false;
+
+            if (part.StartsWith("<"))
+                return part.StartsWith("<sprite", StringComparison.OrdinalIgnoreCase);
+
+            return !string.IsNullOrWhiteSpace(part);
+        }
+
+        private static bool IsDashPart(string part)
+        {
+            return part.Length == 1 && IsDashCharacter(part[0]);
         }
 
         private int CountVisibleCharacters()
@@ -331,7 +393,7 @@ namespace UI.Components
                 visibleIndex++;
             }
 
-            typingText.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32);
+            ApplyCharacterAlphaChanges();
         }
 
         private static bool IsDashCharacter(char character)
@@ -361,7 +423,24 @@ namespace UI.Components
                     SetCharacterAlpha(character, alpha);
             }
 
-            typingText.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32);
+            ApplyCharacterAlphaChanges();
+        }
+
+        private void ApplyCharacterAlphaChanges()
+        {
+            if (typingText == null || typingText.textInfo == null)
+                return;
+
+            var textInfo = typingText.textInfo;
+            for (int i = 0; i < textInfo.meshInfo.Length; i++)
+            {
+                var meshInfo = textInfo.meshInfo[i];
+                if (meshInfo.mesh == null || meshInfo.colors32 == null)
+                    continue;
+
+                meshInfo.mesh.colors32 = meshInfo.colors32;
+                typingText.UpdateGeometry(meshInfo.mesh, i);
+            }
         }
 
         private void SetCharacterAlpha(TMP_CharacterInfo character, byte alpha)

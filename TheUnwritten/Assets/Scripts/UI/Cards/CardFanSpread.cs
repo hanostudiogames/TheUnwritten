@@ -30,22 +30,24 @@ namespace UI.Cards
         private float[] _startRotations;
 
         private CancellationTokenSource _cts;
-        private bool _selectable = true;
+        private bool _selectable = false;
+        private CanvasGroup _canvasGroup = null;
 
         public List<CardSlot> CardSlots => slots;
-
-        #region Unity
-
+        
         private async void Start()
         {
             if (!Application.isPlaying)
                 return;
 
+            EnsureCanvasGroup();
             SetSelectable(_selectable);
             
             foreach (var slot in slots)
             {
-                if (!IsValid(slot)) continue;
+                if (!IsValid(slot)) 
+                    continue;
+                
                 slot.Rect.anchoredPosition = new Vector2(0, -800f);
             }
 
@@ -81,11 +83,12 @@ namespace UI.Cards
             CancelAnimation();
         }
 
-        #endregion
-
-        #region Public
-
-        public async UniTask InitializeCards(List<CardSlot> initialCards)
+        private void Awake()
+        {
+            EnsureCanvasGroup();
+        }
+        
+        private async UniTask InitializeCards(List<CardSlot> initialCards)
         {
             CancelAnimation();
             slots.Clear();
@@ -103,14 +106,46 @@ namespace UI.Cards
         public void SetSelectable(bool value)
         {
             _selectable = value;
+            EnsureCanvasGroup();
+
+            if (_canvasGroup != null)
+            {
+                _canvasGroup.interactable = value;
+                _canvasGroup.blocksRaycasts = value;
+            }
 
             foreach (var slot in slots)
+            {
                 slot?.SetSelectable(value);
+            }
         }
 
-        public async UniTask AddCardAnimated(CardSlot newSlot)
+        public async UniTask PlayShowAnimationAsync()
         {
-            if (!IsValid(newSlot)) return;
+            if (!Application.isPlaying)
+                return;
+
+            SetSelectable(false);
+            BuildActiveSlots();
+
+            if (_activeSlots.Count == 0)
+                return;
+
+            for (int i = 0; i < _activeSlots.Count; i++)
+            {
+                var slot = _activeSlots[i];
+                slot.Rect.anchoredPosition = new Vector2(0, -400f);
+                slot.Rect.localRotation = Quaternion.identity;
+                slot.Rect.localScale = Vector3.one * 0.8f;
+            }
+
+            await AnimateAll(duration);
+        }
+
+        private async UniTask AddCardAnimated(CardSlot newSlot)
+        {
+            if (!IsValid(newSlot)) 
+                return;
 
             slots.Add(newSlot);
             newSlot.SetSelectable(_selectable);
@@ -121,7 +156,7 @@ namespace UI.Cards
             await AnimateAll(duration);
         }
 
-        public void SpreadImmediate()
+        private void SpreadImmediate()
         {
             BuildActiveSlots();
             if (_activeSlots.Count == 0) 
@@ -149,8 +184,6 @@ namespace UI.Cards
                 }
             }
         }
-
-        #endregion
 
         #region Core Animation
 
@@ -301,6 +334,15 @@ namespace UI.Cards
             _cts.Cancel();
             _cts.Dispose();
             _cts = null;
+        }
+
+        private void EnsureCanvasGroup()
+        {
+            if (_canvasGroup != null)
+                return;
+
+            if (!TryGetComponent(out _canvasGroup))
+                _canvasGroup = gameObject.AddComponent<CanvasGroup>();
         }
 
         public void DeactivateCardSlots()
