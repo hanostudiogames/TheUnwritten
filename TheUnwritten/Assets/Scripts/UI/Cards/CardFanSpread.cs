@@ -31,6 +31,7 @@ namespace UI.Cards
 
         private CancellationTokenSource _cts;
         private bool _selectable = false;
+        private bool _isShowingAnimation = false;
         private CanvasGroup _canvasGroup = null;
 
         public List<CardSlot> CardSlots => slots;
@@ -106,6 +107,11 @@ namespace UI.Cards
         public void SetSelectable(bool value)
         {
             _selectable = value;
+            ApplySelectableState(value && !_isShowingAnimation);
+        }
+
+        private void ApplySelectableState(bool value)
+        {
             EnsureCanvasGroup();
 
             if (_canvasGroup != null)
@@ -125,22 +131,32 @@ namespace UI.Cards
             if (!Application.isPlaying)
                 return;
 
+            _isShowingAnimation = true;
             SetSelectable(false);
-            BuildActiveSlots();
 
-            if (_activeSlots.Count == 0)
-                return;
-
-            var slotsToShow = new List<CardSlot>(_activeSlots);
-            for (int i = 0; i < slotsToShow.Count; i++)
+            try
             {
-                var slot = slotsToShow[i];
-                slot.Rect.anchoredPosition = new Vector2(0, -400f);
-                slot.Rect.localRotation = Quaternion.identity;
-                slot.Rect.localScale = Vector3.one * 0.8f;
-            }
+                BuildActiveSlots();
 
-            await AnimateSequentially(slotsToShow, duration);
+                if (_activeSlots.Count == 0)
+                    return;
+
+                var slotsToShow = new List<CardSlot>(_activeSlots);
+                for (int i = 0; i < slotsToShow.Count; i++)
+                {
+                    var slot = slotsToShow[i];
+                    slot.Rect.anchoredPosition = new Vector2(0, -400f);
+                    slot.Rect.localRotation = Quaternion.identity;
+                    slot.Rect.localScale = Vector3.one * 0.8f;
+                }
+
+                await AnimateSequentially(slotsToShow, duration);
+            }
+            finally
+            {
+                _isShowingAnimation = false;
+                ApplySelectableState(_selectable);
+            }
         }
 
         private async UniTask AddCardAnimated(CardSlot newSlot)
