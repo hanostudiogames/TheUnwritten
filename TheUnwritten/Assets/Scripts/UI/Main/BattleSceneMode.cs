@@ -15,10 +15,18 @@ namespace UI.Main
 {
     public class BattleSceneMode : SceneMode
     {
+        private static readonly Color FlameCorrosionColor = new Color(1f, 0.36f, 0.06f, 1f);
+        private static readonly Color ShadowCorrosionColor = new Color(0.08f, 0.03f, 0.14f, 1f);
+        private static readonly Color SpeechCorrosionColor = new Color(0.06f, 0.02f, 0.08f, 1f);
+
         private TextMeshProUGUI _monsterTMP = null;
         // private IDialogueSlot _dialogueSlot = null;
         private Tween _breathingTween = null;
         private Vector3 _monsterBaseScale = Vector3.one;
+        private int _monsterHitCount = 0;
+        private int _monsterEstimatedMaxHits = 1;
+        private int _monsterSpeechCorrosionRunId = 0;
+        private bool _monsterNearDeathStarted = false;
 
         public BattleSceneMode(SceneModeContext sceneModeContext) : base(sceneModeContext)
         {
@@ -51,6 +59,10 @@ namespace UI.Main
             if (_monsterTMP == null)
                 return;
 
+            _monsterHitCount = 0;
+            _monsterNearDeathStarted = false;
+            _monsterEstimatedMaxHits = Mathf.Max(1, (slotId > 0 ? 1 : 0) + CountCardPrompts(dialogueRecords));
+
             CaptureMonsterTMP();
             Debug.Log($"[Battle] payload read — DialogueSlot={(dialogueSlot!=null)}, SlotId={slotId}, MonsterTMP={(_monsterTMP!=null ? _monsterTMP.name : "null")}, breathing={(_breathingTween!=null && _breathingTween.IsActive())}");
 
@@ -59,6 +71,8 @@ namespace UI.Main
             var cardRecord = await ShowCardAsync(slotId > 0 ? slotId : 1, dialogueSlot);
             if (cardRecord != null)
             {
+                PlayMonsterHitReaction(cardRecord.Id);
+
                 // 카드 선택에 따른 괴물 연출 분기.
                 // - 불꽃(Id=1): 외부 공격, burning. 주황 bleed 깜빡임 + 떨림 — 격렬·아프게.
                 // - 그림자(Id=2): 내부 잠식, melting. 깊은 보라 bleed + 글자별 랜덤 melt —
@@ -122,6 +136,9 @@ namespace UI.Main
                     await RestoreMonsterToIdleAsync();
                 }
 
+                // if (dialogueRecord.LocalKey == "24")
+                //     StartMonsterNearDeathCollapse();
+
                 // if (!ShouldPlayRecord(dialogueRecord))
                 //     continue;
 
@@ -133,25 +150,20 @@ namespace UI.Main
 
                 var dialogueActions = dialogueRecord.DialogueActions;
                 if (dialogueActions != null && dialogueActions.Count > 0)
+                {
+                    bool monsterAbsorbedText = HasDialogueAction(dialogueActions, DialogueActionType.SuckIntoMonster);
+
                     await ExecuteDialoguePostActionAsync(dialogueSlot?.TMP, dialogueActions, _monsterTMP);
-                
 
-                // var dialogueTyper = dialogueSlot?.Typer;
-                // if (dialogueTyper != null)
-                // {
-                //     var typerParam = new Typer.Param(null)
-                //         .WithRevealMode(dialogueRecord.TextRevealMode)
-                //         .WithTypingSpeed(dialogueRecord.TypingSpeed)
-                //         .WithEndDelaySeconds(dialogueRecord.EndDelaySeconds);
-
-                //     dialogueTyper.Initialize(typerParam);
-                //     await dialogueTyper.TypeTextAsync(localText);
-                // }
+                    if (monsterAbsorbedText)
+                        AdoptMonsterCurrentScaleAsBreathingBase();
+                }
                 
                 cardRecord = await ShowCardAsync(dialogueRecord.SlotId, dialogueSlot);
-                // lastCardId = _context?.CardInventory?.LastSelectedCardId ?? 0;
                 if (cardRecord != null)
                 {
+                    PlayMonsterHitReaction(cardRecord.Id);
+
                     var slotRecord = SlotTableContainer.Instance?.GetSlotRecord(dialogueRecord.SlotId);
                     if (slotRecord != null)
                     {
@@ -172,13 +184,25 @@ namespace UI.Main
             // var dialogueTyper = dialogueSlot?.Typer;
             if (typer != null)
             {
+                int corrosionRunId = 0;
                 var typerParam = new Typer.Param(null)
                     .WithRevealMode(revealMode)
                     .WithTypingSpeed(typingSpeed)
                     .WithEndDelaySeconds(endDelaySeconds);
 
                 typer.Initialize(typerParam);
-                await typer.TypeTextAsync(localText);
+
+                if (ShouldCorrodeMonsterWhileTyping(localText))
+                    corrosionRunId = BeginMonsterSpeechCorrosion();
+
+                try
+                {
+                    await typer.TypeTextAsync(localText);
+                }
+                finally
+                {
+                    EndMonsterSpeechCorrosion(corrosionRunId);
+                }
             }
         }
 
@@ -266,6 +290,153 @@ namespace UI.Main
                 .DOScale(_monsterBaseScale * 1.06f, 1.8f)
                 .SetEase(Ease.InOutSine)
                 .SetLoops(-1, LoopType.Yoyo);
+        }
+
+        private void AdoptMonsterCurrentScaleAsBreathingBase()
+        {
+            if (_monsterTMP == null || _monsterNearDeathStarted)
+                return;
+
+            _breathingTween?.Kill();
+            _monsterBaseScale = _monsterTMP.transform.localScale;
+            _breathingTween = _monsterTMP.transform
+                .DOScale(_monsterBaseScale * 1.06f, 1.8f)
+                .SetEase(Ease.InOutSine)
+                .SetLoops(-1, LoopType.Yoyo);
+        }
+
+        private bool HasDialogueAction(System.Collections.Generic.List<DialogueAction> dialogueActions, DialogueActionType actionType)
+        {
+            if (dialogueActions == null)
+                return false;
+
+            for (int i = 0; i < dialogueActions.Count; ++i)
+            {
+                var action = dialogueActions[i];
+                if (action != null && action.DialogueActionType == actionType)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private int CountCardPrompts(Tables.Records.DialogueRecord[] dialogueRecords)
+        {
+            if (dialogueRecords == null)
+                return 0;
+
+            int count = 0;
+            for (int i = 0; i < dialogueRecords.Length; i++)
+            {
+                if (dialogueRecords[i] != null && dialogueRecords[i].SlotId > 0)
+                    count++;
+            }
+
+            return count;
+        }
+
+        private void PlayMonsterHitReaction(int cardId)
+        {
+            if (_monsterTMP == null || _monsterNearDeathStarted)
+                return;
+
+            _monsterHitCount++;
+
+            float pressure = MonsterDamagePressure();
+            int minDropCount = 1 + Mathf.FloorToInt(pressure * 1.4f);
+            int maxDropCount = Mathf.Max(minDropCount, 2 + Mathf.CeilToInt(pressure * 3f));
+            var corrosionColor = cardId == 1 ? FlameCorrosionColor : ShadowCorrosionColor;
+
+            _monsterTMP.DoCorrodedLetterDrop(
+                minDropCount,
+                maxDropCount,
+                Mathf.Lerp(0.82f, 1.12f, pressure),
+                pressure,
+                0.035f,
+                corrosionColor);
+
+            if (pressure >= 0.55f)
+            {
+                int extraDropCount = 1 + Mathf.FloorToInt(pressure * 2f);
+                _monsterTMP.DoLetterDrop(1, extraDropCount, 1.15f, pressure, 0.06f, corrosionColor)
+                    ?.SetDelay(0.32f);
+            }
+        }
+
+        private float MonsterDamagePressure()
+        {
+            if (_monsterEstimatedMaxHits <= 0)
+                return 0f;
+
+            return Mathf.Clamp01((float)_monsterHitCount / _monsterEstimatedMaxHits);
+        }
+
+        private bool ShouldCorrodeMonsterWhileTyping(string localText)
+        {
+            if (_monsterTMP == null || _monsterNearDeathStarted)
+                return false;
+
+            if (string.IsNullOrEmpty(localText))
+                return false;
+
+            return localText.IndexOf("#6A1B9A", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   localText.IndexOf("#54157B", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   localText.IndexOf("<sprite name=\"W\"", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private int BeginMonsterSpeechCorrosion()
+        {
+            int runId = ++_monsterSpeechCorrosionRunId;
+            RunMonsterSpeechCorrosionAsync(runId).Forget();
+            return runId;
+        }
+
+        private void EndMonsterSpeechCorrosion(int runId)
+        {
+            if (runId > 0 && _monsterSpeechCorrosionRunId == runId)
+                _monsterSpeechCorrosionRunId++;
+        }
+
+        private async UniTaskVoid RunMonsterSpeechCorrosionAsync(int runId)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(UnityEngine.Random.Range(0.12f, 0.28f)));
+
+            while (_monsterTMP != null && _monsterSpeechCorrosionRunId == runId)
+            {
+                float pressure = MonsterDamagePressure();
+                int maxDropCount = pressure >= 0.6f ? 2 : 1;
+
+                _monsterTMP.DoCorrodedLetterDrop(
+                    1,
+                    maxDropCount,
+                    Mathf.Lerp(0.9f, 0.62f, pressure),
+                    pressure,
+                    0.025f,
+                    SpeechCorrosionColor);
+
+                float interval = Mathf.Lerp(1.05f, 0.32f, pressure);
+                await UniTask.Delay(TimeSpan.FromSeconds(interval));
+            }
+        }
+
+        private void StartMonsterNearDeathCollapse()
+        {
+            if (_monsterTMP == null || _monsterNearDeathStarted)
+                return;
+
+            _monsterNearDeathStarted = true;
+            _monsterSpeechCorrosionRunId++;
+            _breathingTween?.Kill();
+
+            _monsterTMP.DoShake(6f, 0.35f);
+            _monsterTMP.DoBleed(1f, 0.7f, ShadowCorrosionColor);
+            _monsterTMP.DoShadowSpread(1.15f, 1.4f, new Color(0.07f, 0.02f, 0.12f, 0.65f));
+            _monsterTMP.DoMonsterNearDeathCollapse(2.1f);
+
+            _monsterTMP.transform
+                .DOScale(_monsterBaseScale * 0.92f, 0.42f)
+                .SetEase(Ease.InOutSine)
+                .SetLoops(2, LoopType.Yoyo);
         }
     }
 }

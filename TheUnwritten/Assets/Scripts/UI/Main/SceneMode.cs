@@ -103,15 +103,18 @@ namespace UI.Main
             if (slot == null)
                 return;
 
-            // 기존 페이로드(앞선 IsMonster 캡처 등) 가 있으면 보존하고 Battle 메타만
-            // 갱신. MonsterTMP 는 이 레코드 자체가 IsMonster=1 일 때만 덮어쓰고,
-            // 그렇지 않으면 미리 캡처해둔 값을 유지한다.
+            // 기존 페이로드(전투 시작 슬롯 등) 가 있으면 보존한다. IsMonster 레코드는
+            // 몬스터 TMP 만 갱신하고, SlotId=0 인 몬스터 대사가 전투 슬롯을 덮지 않게 한다.
             var payload = _context.GetPayload<BattleModePayload>(SceneModeType.Battle)
                           ?? new BattleModePayload();
             payload.Act = _act;
             payload.Scene = _scene;
-            payload.SlotId = record.SlotId;
-            payload.DialogueSlot = slot;
+            if (!record.IsMonster || record.SlotId > 0)
+            {
+                payload.SlotId = record.SlotId;
+                payload.DialogueSlot = slot;
+            }
+
             if (record.IsMonster)
                 payload.MonsterTMP = slot.TMP;
 

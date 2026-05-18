@@ -83,14 +83,6 @@ MonoBehaviour:
     m_Key: 17
     m_Metadata:
       m_Items: []
-  - m_Id: 8658564787724288
-    m_Key: 18
-    m_Metadata:
-      m_Items: []
-  - m_Id: 8659217266237440
-    m_Key: 19_flame
-    m_Metadata:
-      m_Items: []
   - m_Id: 8659316344086528
     m_Key: 18_seal
     m_Metadata:
@@ -141,6 +133,22 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 10572050274967552
     m_Key: 24
+    m_Metadata:
+      m_Items: []
+  - m_Id: 11538141784563712
+    m_Key: 25
+    m_Metadata:
+      m_Items: []
+  - m_Id: 11538567888101376
+    m_Key: 26
+    m_Metadata:
+      m_Items: []
+  - m_Id: 11539288486305792
+    m_Key: 27
+    m_Metadata:
+      m_Items: []
+  - m_Id: 11539678451720192
+    m_Key: slot_3_flame
     m_Metadata:
       m_Items: []
   m_Metadata:

@@ -29,6 +29,7 @@ namespace UI.Title
         public override void Activate()
         {
             base.Activate();
+            _uiManager?.HideTopAsync(true).Forget();
         }
 
         public void OpenMainView()

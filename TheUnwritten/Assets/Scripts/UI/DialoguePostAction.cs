@@ -12,6 +12,11 @@ namespace UI
 {
     public class DialoguePostAction
     {
+        private const float MonsterAbsorbGrowStrength = 0.22f;
+        private const float MonsterAbsorbGrowDuration = 0.18f;
+        private const float MonsterAbsorbShakeSettleDuration = 0.18f;
+        private const float MonsterAbsorbShakeStrength = 1.6f;
+
         public class Param
         {
             public List<TextMeshProUGUI> TMPs { get; private set; } = new();
@@ -92,6 +97,8 @@ namespace UI
                     continue;
                 
                 // await UniTask.Delay(TimeSpan.FromSeconds(action.StartDelay));
+                float blockingDuration = 0f;
+                bool delayHandled = false;
                 
                 switch (action.DialogueActionType)
                 {
@@ -228,16 +235,60 @@ namespace UI
                             if (tmp == null || tmp == monsterTMP)
                                 continue;
 
-                            tmp.DoSuckInto(monsterTMP, action.Duration)?
-                                .SetDelay(action.StartDelay);
+                            var tween = tmp.DoSuckInto(monsterTMP, action.Duration);
+                            if (tween == null)
+                                continue;
+
+                            tween.SetDelay(action.StartDelay);
+                            blockingDuration = Mathf.Max(
+                                blockingDuration,
+                                action.StartDelay + tween.Duration(false));
+                        }
+
+                        if (blockingDuration > 0f)
+                        {
+                            await UniTask.Delay(TimeSpan.FromSeconds(blockingDuration));
+                            await PlayMonsterAbsorbGrowthAsync(monsterTMP);
+                            await UniTask.Delay(TimeSpan.FromSeconds(action.EndDelay));
+                            delayHandled = true;
                         }
 
                         break;
                     }
                 }
                 
-                await UniTask.Delay(TimeSpan.FromSeconds(action.EndDelay));
+                if (!delayHandled)
+                    await UniTask.Delay(TimeSpan.FromSeconds(blockingDuration + action.EndDelay));
             }
+        }
+
+        private async UniTask PlayMonsterAbsorbGrowthAsync(TextMeshProUGUI monsterTMP)
+        {
+            if (monsterTMP == null)
+                return;
+
+            var monsterTransform = monsterTMP.transform;
+            monsterTransform.DOKill();
+
+            Vector3 startScale = monsterTransform.localScale;
+            Vector3 targetScale = startScale * (1f + MonsterAbsorbGrowStrength);
+
+            PlayTween(
+                monsterTransform
+                    .DOScale(targetScale, MonsterAbsorbGrowDuration)
+                    .SetEase(Ease.OutBack));
+            PlayTween(monsterTMP.DoShake(MonsterAbsorbShakeStrength, MonsterAbsorbGrowDuration));
+
+            await UniTask.Delay(TimeSpan.FromSeconds(MonsterAbsorbGrowDuration));
+
+            PlayTween(monsterTMP.DoShake(0f, MonsterAbsorbShakeSettleDuration));
+
+            await UniTask.Delay(TimeSpan.FromSeconds(MonsterAbsorbShakeSettleDuration));
+        }
+
+        private void PlayTween(Tween tween)
+        {
+            tween?.SetAutoKill(true);
         }
     }
 }

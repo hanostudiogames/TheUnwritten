@@ -19,9 +19,16 @@ namespace UI.Main
 {
     public class MainView : Common.View<MainPresenter>
     {
+        private const float DialogueSlotShiftDuration = 0.45f;
+        private const float DialogueSlotFadeDuration = 0.18f;
+        private static readonly Color32 ActSceneTextColor = new(0xF0, 0xC8, 0x6A, 0xFF);
+        private static readonly Color32 ActSceneOutlineColor = new(0x2A, 0x16, 0x08, 0xFF);
+        private const float ActSceneOutlineWidth = 0.2f;
+
         [SerializeField] private RectTransform bgRectTr = null;
         [SerializeField] private CardFanSpread cardFanSpread = null;
         [SerializeField] private Image libraryImg = null;
+        [SerializeField] private TextMeshProUGUI actSceneTMP = null;
         
         [Header("Narrative")]
         [SerializeField] private ScrollRect narrativeScrollRect = null;
@@ -58,6 +65,8 @@ namespace UI.Main
                 
                 _answerSlots?.AddRange(answerSlots);
             }
+
+            ApplyActSceneTextStyle();
         }
         
         public override void Activate()
@@ -81,6 +90,29 @@ namespace UI.Main
                 answerSlot.Initialize(new AnswerSlot.Param(listener));
             }
         }
+
+        public void UpdateActScene(int act, int scene)
+        {
+            if (actSceneTMP == null)
+                return;
+
+            ApplyActSceneTextStyle();
+            actSceneTMP.text = $"{act}-{scene}";
+        }
+
+        private void ApplyActSceneTextStyle()
+        {
+            if (actSceneTMP == null)
+                return;
+
+            actSceneTMP.color = ActSceneTextColor;
+            actSceneTMP.faceColor = ActSceneTextColor;
+            actSceneTMP.fontStyle |= FontStyles.Bold;
+            actSceneTMP.fontWeight = FontWeight.Bold;
+            actSceneTMP.outlineColor = ActSceneOutlineColor;
+            actSceneTMP.outlineWidth = ActSceneOutlineWidth;
+            actSceneTMP.UpdateMeshPadding();
+        }
         
         public CharacterSpeechSlot CreateCharacterSpeechSlot(UIFactory uiFactory, CharacterSpeechSlot.Param param)
         {
@@ -88,10 +120,15 @@ namespace UI.Main
                 return null;
             
             param?.WithHeight(ViewportHalfHeight);
-           
+
+            var transition = CaptureDialogueContentTransition();
             var slot = uiFactory.Create<CharacterSpeechSlot, CharacterSpeechSlot.Param>(narrativeScrollRect?.content, param);
             if(slot != null)
+            {
                 _dialogueSlots?.Add(slot);
+                PrepareDialogueSlotFadeIn(slot);
+                PlayDialogueSlotAddedAnimationAsync(transition, slot).Forget();
+            }
             
             return slot;
         }
@@ -102,12 +139,118 @@ namespace UI.Main
                 return null;
 
             param?.WithHeight(ViewportHalfHeight);
-            
+
+            var transition = CaptureDialogueContentTransition();
             var slot = uiFactory.Create<NarrationSlot, NarrationSlot.Param>(narrativeScrollRect?.content, param);
             if(slot != null)
+            {
                 _dialogueSlots?.Add(slot);
+                PrepareDialogueSlotFadeIn(slot);
+                PlayDialogueSlotAddedAnimationAsync(transition, slot).Forget();
+            }
 
             return slot;
+        }
+
+        private DialogueContentTransition CaptureDialogueContentTransition()
+        {
+            var contentRectTr = narrativeScrollRect?.content;
+            if (!contentRectTr)
+                return default;
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(contentRectTr);
+            Canvas.ForceUpdateCanvases();
+
+            return new DialogueContentTransition(
+                contentRectTr,
+                contentRectTr.rect.height);
+        }
+
+        private async UniTaskVoid PlayDialogueSlotAddedAnimationAsync(
+            DialogueContentTransition transition,
+            IDialogueSlot addedSlot)
+        {
+            var contentRectTr = narrativeScrollRect?.content;
+            if (!contentRectTr)
+                return;
+
+            await UniTask.Yield(PlayerLoopTiming.PostLateUpdate);
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(contentRectTr);
+            Canvas.ForceUpdateCanvases();
+
+            if (transition.Content == contentRectTr)
+            {
+                float heightDelta = Mathf.Max(0f, contentRectTr.rect.height - transition.Height);
+                if (heightDelta > 0.01f)
+                {
+                    var targetPosition = contentRectTr.anchoredPosition;
+                    var startPosition = targetPosition - Vector2.up * heightDelta;
+
+                    contentRectTr.DOKill(false);
+                    contentRectTr.anchoredPosition = startPosition;
+                    contentRectTr.DOAnchorPos(targetPosition, DialogueSlotShiftDuration)
+                        .SetEase(Ease.OutCubic)
+                        .SetUpdate(true);
+                }
+            }
+
+            PlayDialogueSlotFadeIn(addedSlot);
+        }
+
+        private void PlayDialogueSlotFadeIn(IDialogueSlot dialogueSlot)
+        {
+            var canvasGroup = GetOrCreateDialogueSlotCanvasGroup(dialogueSlot);
+            if (canvasGroup == null)
+                return;
+
+            canvasGroup.DOKill(false);
+            canvasGroup.DOFade(1f, DialogueSlotFadeDuration)
+                .SetEase(Ease.OutCubic)
+                .SetUpdate(true);
+        }
+
+        private void PrepareDialogueSlotFadeIn(IDialogueSlot dialogueSlot)
+        {
+            var canvasGroup = GetOrCreateDialogueSlotCanvasGroup(dialogueSlot);
+            if (canvasGroup == null)
+                return;
+
+            canvasGroup.DOKill(false);
+            canvasGroup.alpha = 0f;
+        }
+
+        private CanvasGroup GetOrCreateDialogueSlotCanvasGroup(IDialogueSlot dialogueSlot)
+        {
+            var rectTr = GetDialogueSlotRect(dialogueSlot);
+            if (!rectTr)
+                return null;
+
+            if (!rectTr.TryGetComponent<CanvasGroup>(out var canvasGroup))
+                canvasGroup = rectTr.gameObject.AddComponent<CanvasGroup>();
+
+            return canvasGroup;
+        }
+
+        private RectTransform GetDialogueSlotRect(IDialogueSlot dialogueSlot)
+        {
+            var component = dialogueSlot as Component;
+            if (component == null)
+                return null;
+
+            return component.transform as RectTransform;
+        }
+
+        private readonly struct DialogueContentTransition
+        {
+            public readonly RectTransform Content;
+            public readonly float Height;
+
+            public DialogueContentTransition(RectTransform content, float height)
+            {
+                Content = content;
+                Height = height;
+            }
         }
 
         public async UniTask ScrollToAsync(float positionY)
@@ -222,4 +365,3 @@ namespace UI.Main
         }
     }
 }
-

@@ -24,6 +24,13 @@ namespace UI.Cards
             _cardFanSpread?.SetSelectable(value);
         }
 
+        public UniTask PlaySubmitAnimationAsync(CardSlot selectedSlot)
+        {
+            return _cardFanSpread != null
+                ? _cardFanSpread.PlaySubmitAnimationAsync(selectedSlot)
+                : UniTask.CompletedTask;
+        }
+
         public async UniTask SetCardsAsync(int[] cardIds)
         {
             if (cardIds == null || cardIds.Length == 0)

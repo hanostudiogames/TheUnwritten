@@ -6,6 +6,7 @@ using Common;
 using UnityEngine;
 
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using TMPro;
 using UI.Effects;
 
@@ -90,7 +91,7 @@ namespace UI.Components
             if (typingText == null)
                 return;
 
-            typingText.ClearState();
+            ClearRenderedText();
 
             _template = text ?? string.Empty;
             _slotValues.Clear();
@@ -111,6 +112,7 @@ namespace UI.Components
             else if (typingText.alignment == TextAlignmentOptions.Center)
             {
                 typingText?.SetText(string.Empty);
+                typingText.maxVisibleCharacters = int.MaxValue;
 
                 await UniTask.Yield(PlayerLoopTiming.PostLateUpdate);
 
@@ -176,7 +178,41 @@ namespace UI.Components
 
         // 이미 타이핑이 끝난 Typer 의 특정 슬롯 위치에 text 를 한 글자씩 채워넣는다.
         // Center/비Center 모두 동일하게 SetText 재빌드 방식으로 처리한다 (중간 삽입이라 maxVisibleCharacters 불가).
-        public async UniTask TypeIntoSlotAsync(string slotName, string text)
+        public UniTask TypeIntoSlotAsync(string slotName, string text)
+        {
+            return TypeIntoSlotInternalAsync(
+                slotName,
+                text,
+                _param?.TypingSpeed ?? 0.05f,
+                0f,
+                0f,
+                0f);
+        }
+
+        public UniTask TypeIntoSlotWithImpactAsync(
+            string slotName,
+            string text,
+            float preShakeDuration,
+            float preShakeStrength,
+            float slamInterval,
+            float slamStrength)
+        {
+            return TypeIntoSlotInternalAsync(
+                slotName,
+                text,
+                Mathf.Max(0.001f, slamInterval),
+                preShakeDuration,
+                preShakeStrength,
+                slamStrength);
+        }
+
+        private async UniTask TypeIntoSlotInternalAsync(
+            string slotName,
+            string text,
+            float typingSpeed,
+            float preShakeDuration,
+            float preShakeStrength,
+            float slamStrength)
         {
             if (typingText == null)
                 return;
@@ -188,31 +224,173 @@ namespace UI.Components
 
             text ??= string.Empty;
 
-            float typingSpeed = _param?.TypingSpeed ?? 0.05f;
+            var rectTr = typingText.rectTransform;
+            Vector2 originalAnchoredPosition = rectTr != null ? rectTr.anchoredPosition : Vector2.zero;
+            Vector3 originalScale = rectTr != null ? rectTr.localScale : Vector3.one;
 
-            _slotValues[slotName] = string.Empty;
-            RefreshVisibleText();
-            await UniTask.Yield(PlayerLoopTiming.PostLateUpdate);
-
-            var matches = PartRegex.Matches(text);
-            string current = string.Empty;
-            for (int i = 0; i < matches.Count; ++i)
+            try
             {
-                string part = matches[i].Value;
-                current += part;
-                _slotValues[slotName] = current;
+                _slotValues[slotName] = string.Empty;
                 RefreshVisibleText();
+                await UniTask.Yield(PlayerLoopTiming.PostLateUpdate);
 
-                bool isTag = part.StartsWith("<");
-                bool isSpriteTag = part.StartsWith("<sprite");
-                if (!isTag || isSpriteTag)
+                if (preShakeDuration > 0f && rectTr != null && preShakeStrength > 0f)
                 {
-                    await UniTask.Delay(TimeSpan.FromSeconds(typingSpeed));
+                    await PlaySlotPreReplacementShakeAsync(
+                        rectTr,
+                        originalAnchoredPosition,
+                        preShakeDuration,
+                        preShakeStrength);
+                }
+
+                var matches = PartRegex.Matches(text);
+                string current = string.Empty;
+                for (int i = 0; i < matches.Count; ++i)
+                {
+                    string part = matches[i].Value;
+                    current += part;
+                    _slotValues[slotName] = current;
+                    RefreshVisibleText();
+
+                    if (IsRevealablePart(part))
+                    {
+                        if (slamStrength > 0f)
+                        {
+                            await PlayLatestVisibleCharacterSlamAsync(slamStrength, typingSpeed);
+                        }
+                        else
+                        {
+                            await UniTask.Delay(TimeSpan.FromSeconds(typingSpeed));
+                        }
+                    }
+                }
+
+                _slotValues[slotName] = text;
+                RefreshVisibleText();
+            }
+            finally
+            {
+                if (rectTr != null)
+                {
+                    rectTr.anchoredPosition = originalAnchoredPosition;
+                    rectTr.localScale = originalScale;
                 }
             }
+        }
 
-            _slotValues[slotName] = text;
-            RefreshVisibleText();
+        private async UniTask PlaySlotPreReplacementShakeAsync(
+            RectTransform rectTr,
+            Vector2 originalAnchoredPosition,
+            float duration,
+            float strength)
+        {
+            Tween shakeTween = null;
+
+            try
+            {
+                shakeTween = rectTr
+                    .DOShakeAnchorPos(
+                        duration,
+                        new Vector2(strength, strength * 0.55f),
+                        48,
+                        90f,
+                        false,
+                        true)
+                    .SetEase(Ease.Linear);
+
+                await shakeTween;
+                await UniTask.Delay(TimeSpan.FromSeconds(0.08f));
+            }
+            finally
+            {
+                if (shakeTween != null && shakeTween.IsActive())
+                    shakeTween.Kill();
+
+                rectTr.anchoredPosition = originalAnchoredPosition;
+            }
+        }
+
+        private async UniTask PlayLatestVisibleCharacterSlamAsync(
+            float strength,
+            float interval)
+        {
+            if (typingText == null)
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(interval));
+                return;
+            }
+
+            typingText.ForceMeshUpdate();
+
+            int characterIndex = LastVisibleCharacterIndex();
+            if (characterIndex < 0)
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(interval));
+                return;
+            }
+
+            var textInfo = typingText.textInfo;
+            var character = textInfo.characterInfo[characterIndex];
+            int materialIndex = character.materialReferenceIndex;
+            int vertexIndex = character.vertexIndex;
+            var vertices = textInfo.meshInfo[materialIndex].vertices;
+
+            Vector3[] originalVertices = new Vector3[4];
+            for (int i = 0; i < 4; i++)
+                originalVertices[i] = vertices[vertexIndex + i];
+
+            Vector3 pivot = (originalVertices[0] + originalVertices[2]) * 0.5f;
+            float duration = Mathf.Clamp(interval * 0.72f, 0.08f, 0.14f);
+            float remaining = Mathf.Max(0f, interval - duration);
+            float elapsed = 0f;
+
+            try
+            {
+                while (elapsed < duration)
+                {
+                    float t = Mathf.Clamp01(elapsed / duration);
+                    float settle = 1f - Mathf.Pow(1f - t, 3f);
+                    float overshoot = Mathf.Sin(t * Mathf.PI) * -strength * 0.18f;
+                    float yOffset = Mathf.Lerp(strength * 1.35f, 0f, settle) + overshoot;
+                    float shake = Mathf.Sin(Time.time * 95f) * strength * 0.08f * (1f - t);
+                    float scale = 1f + (1f - settle) * 0.28f;
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        Vector3 direction = originalVertices[i] - pivot;
+                        vertices[vertexIndex + i] = pivot + direction * scale + new Vector3(shake, yOffset, 0f);
+                    }
+
+                    typingText.UpdateVertexData(TMP_VertexDataUpdateFlags.Vertices);
+                    await UniTask.Yield(PlayerLoopTiming.Update);
+                    elapsed += Time.deltaTime;
+                }
+
+                if (remaining > 0f)
+                    await UniTask.Delay(TimeSpan.FromSeconds(remaining));
+            }
+            finally
+            {
+                for (int i = 0; i < 4; i++)
+                    vertices[vertexIndex + i] = originalVertices[i];
+
+                typingText.UpdateVertexData(TMP_VertexDataUpdateFlags.Vertices);
+            }
+        }
+
+        private int LastVisibleCharacterIndex()
+        {
+            if (typingText == null || typingText.textInfo == null)
+                return -1;
+
+            var characters = typingText.textInfo.characterInfo;
+            for (int i = typingText.textInfo.characterCount - 1; i >= 0; i--)
+            {
+                if (characters[i].isVisible)
+                    return i;
+            }
+
+            return -1;
         }
 
         private void RefreshVisibleText()
@@ -224,6 +402,29 @@ namespace UI.Components
             typingText.ForceMeshUpdate();
             typingText.maxVisibleCharacters = typingText.textInfo.characterCount;
             SetAllCharacterAlpha(255);
+        }
+
+        private void ClearRenderedText()
+        {
+            if (typingText == null)
+                return;
+
+            typingText.ClearState();
+            typingText.maxVisibleCharacters = 0;
+            typingText.SetText(string.Empty);
+            typingText.ForceMeshUpdate(true, true);
+            typingText.ClearMesh();
+
+            var subMeshes = typingText.GetComponentsInChildren<TMP_SubMeshUI>(true);
+            for (int i = 0; i < subMeshes.Length; i++)
+            {
+                var subMesh = subMeshes[i];
+                if (subMesh == null)
+                    continue;
+
+                subMesh.canvasRenderer.SetMesh(null);
+                subMesh.mesh?.Clear();
+            }
         }
 
         private string RenderTemplate()

@@ -23,6 +23,10 @@ namespace UI.Effects
             public float[] converge;
             public float[] shadowSpread;
             public float[] suck;
+            public float[] letterDrop;
+            public float[] letterMissing;
+            public float[] letterCorrosion;
+            public float[] letterDropShake;
 
             public Vector3[][] originalVertices;
             public Color32[][] originalColors;
@@ -33,9 +37,12 @@ namespace UI.Effects
             public Vector2[] scatterOffset;
             public Vector2[] shadowSpreadOffset;
             public Vector2[] suckCurveOffset;
+            public Vector2[] letterDropOffset;
             public float[] suckSpin;
+            public float[] letterDropSpin;
             public Color bleedColor = Color.black;
             public Color shadowSpreadColor = new Color(0.04f, 0.02f, 0.08f, 0.12f);
+            public Color corrosionColor = new Color(0.08f, 0.03f, 0.02f, 1f);
         }
 
         private static readonly Dictionary<TMP_Text, State> stateMap = new();
@@ -53,7 +60,7 @@ namespace UI.Effects
                 stateMap[text] = state;
             }
 
-            if (state.length != count)
+            if (state.length != count || state.letterDrop == null || state.letterDrop.Length != count)
             {
                 state.shear = new float[count];
                 state.fold = new float[count];
@@ -66,10 +73,16 @@ namespace UI.Effects
                 state.converge = new float[count];
                 state.shadowSpread = new float[count];
                 state.suck = new float[count];
+                state.letterDrop = new float[count];
+                state.letterMissing = new float[count];
+                state.letterCorrosion = new float[count];
+                state.letterDropShake = new float[count];
                 state.scatterOffset = new Vector2[count];
                 state.shadowSpreadOffset = new Vector2[count];
                 state.suckCurveOffset = new Vector2[count];
+                state.letterDropOffset = new Vector2[count];
                 state.suckSpin = new float[count];
+                state.letterDropSpin = new float[count];
                 state.length = count;
 
                 state.originalVertices = new Vector3[textInfo.meshInfo.Length][];
@@ -128,6 +141,11 @@ namespace UI.Effects
                 float shadowSpread = state.shadowSpread[i];
                 float suck = state.suck[i];
                 float suckEase = suck * suck * (3f - 2f * suck);
+                float letterDrop = state.letterDrop[i];
+                float letterDropEase = letterDrop * letterDrop * (3f - 2f * letterDrop);
+                float letterMissing = state.letterMissing[i];
+                float letterCorrosion = state.letterCorrosion[i];
+                float letterDropShake = state.letterDropShake[i];
 
                 Vector3 pivot = (charInfo.bottomLeft + charInfo.topRight) * 0.5f;
 
@@ -154,6 +172,12 @@ namespace UI.Effects
                 float suckSpin = state.suckSpin != null && i < state.suckSpin.Length
                     ? state.suckSpin[i]
                     : 0f;
+                Vector2 letterDropOffset = (state.letterDropOffset != null && i < state.letterDropOffset.Length)
+                    ? state.letterDropOffset[i] * letterDropEase
+                    : Vector2.zero;
+                float letterDropSpin = state.letterDropSpin != null && i < state.letterDropSpin.Length
+                    ? state.letterDropSpin[i]
+                    : 0f;
 
                 // 🔥 melt (글자 상단 고정, 하단이 늘어져 내림)
                 float topY = charInfo.topLeft.y;
@@ -165,7 +189,7 @@ namespace UI.Effects
                 float ft = 1f - Mathf.Pow(1f - fold, 3f);
 
                 // 🔥 rotation
-                float angle = rot * 90f + suckSpin * suckEase * 360f;
+                float angle = rot * 90f + suckSpin * suckEase * 360f + letterDropSpin * letterDropEase * 180f;
                 float rad = angle * Mathf.Deg2Rad;
                 float cos = Mathf.Cos(rad);
                 float sin = Mathf.Sin(rad);
@@ -173,6 +197,8 @@ namespace UI.Effects
                 // 🔥 shake (시간 기반)
                 float shakeX = Mathf.Sin(Time.time * 60f + i) * shake;
                 float shakeY = Mathf.Cos(Time.time * 50f + i) * shake;
+                float letterShakeX = Mathf.Sin(Time.time * 22f + i * 0.73f) * letterDropShake;
+                float letterShakeY = Mathf.Cos(Time.time * 17f + i * 1.11f) * letterDropShake * 0.65f;
 
                 // 🔥 pulse (pivot 기준 균일 스케일)
                 float suckScale = Mathf.Lerp(1f, 0.03f, Mathf.Pow(suckEase, 1.15f));
@@ -212,7 +238,10 @@ namespace UI.Effects
                     rx *= pulseScale;
                     ry *= pulseScale;
 
-                    vertices[idx] = pivot + convergeOffset + suckOffset + new Vector3(rx + shadowOffset.x, ry + shadowOffset.y, 0f);
+                    vertices[idx] = pivot + convergeOffset + suckOffset + new Vector3(
+                        rx + shadowOffset.x + letterDropOffset.x + letterShakeX,
+                        ry + shadowOffset.y + letterDropOffset.y + letterShakeY,
+                        0f);
 
                     // bleed (vertex color를 bleedColor 쪽으로 블렌딩, 알파는 원본 유지)
                     Color finalColor = originalColors[idx];
@@ -231,10 +260,29 @@ namespace UI.Effects
                         finalColor = Color.Lerp(finalColor, target, Mathf.Clamp01(shadowSpread));
                     }
 
+                    if (letterCorrosion > 0f)
+                    {
+                        Color target = state.corrosionColor;
+                        target.a = finalColor.a;
+                        finalColor = Color.Lerp(finalColor, target, Mathf.Clamp01(letterCorrosion));
+
+                        float vertexNoise = Noise01(i * 53 + j * 17 + 23);
+                        float flicker = Mathf.InverseLerp(-1f, 1f, Mathf.Sin(Time.time * 16f + i * 1.37f + j));
+                        float bite = Mathf.Lerp(0.18f, 0.72f, vertexNoise) * Mathf.Lerp(0.65f, 1f, flicker);
+                        finalColor.a *= 1f - Mathf.Clamp01(letterCorrosion * bite);
+                    }
+
                     if (suck > 0f)
                     {
                         float fade = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.58f, 1f, suckEase));
                         finalColor.a *= 1f - fade;
+                    }
+
+                    if (letterDrop > 0f || letterMissing > 0f)
+                    {
+                        float dropFade = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.56f, 1f, letterDropEase));
+                        float alphaLoss = Mathf.Clamp01(Mathf.Max(letterMissing, dropFade));
+                        finalColor.a *= 1f - alphaLoss;
                     }
 
                     colors[idx] = finalColor;
@@ -270,14 +318,22 @@ namespace UI.Effects
             Array.Clear(state.converge, 0, state.converge.Length);
             Array.Clear(state.shadowSpread, 0, state.shadowSpread.Length);
             Array.Clear(state.suck, 0, state.suck.Length);
+            Array.Clear(state.letterDrop, 0, state.letterDrop.Length);
+            Array.Clear(state.letterMissing, 0, state.letterMissing.Length);
+            Array.Clear(state.letterCorrosion, 0, state.letterCorrosion.Length);
+            Array.Clear(state.letterDropShake, 0, state.letterDropShake.Length);
             if (state.scatterOffset != null)
                 Array.Clear(state.scatterOffset, 0, state.scatterOffset.Length);
             if (state.shadowSpreadOffset != null)
                 Array.Clear(state.shadowSpreadOffset, 0, state.shadowSpreadOffset.Length);
             if (state.suckCurveOffset != null)
                 Array.Clear(state.suckCurveOffset, 0, state.suckCurveOffset.Length);
+            if (state.letterDropOffset != null)
+                Array.Clear(state.letterDropOffset, 0, state.letterDropOffset.Length);
             if (state.suckSpin != null)
                 Array.Clear(state.suckSpin, 0, state.suckSpin.Length);
+            if (state.letterDropSpin != null)
+                Array.Clear(state.letterDropSpin, 0, state.letterDropSpin.Length);
 
             ApplyAll(text, state);
         }
@@ -654,6 +710,209 @@ namespace UI.Effects
 
                 ApplyAll(text, state);
             }, totalDuration, totalDuration).SetEase(Ease.Linear);
+        }
+
+        #endregion
+
+        #region ===== LETTER DROP =====
+
+        public static Tween DoLetterDrop(
+            this TMP_Text text,
+            int minCount,
+            int maxCount,
+            float duration,
+            float damagePressure = 0f,
+            float delayStep = 0.035f,
+            Color? corrosionColor = null)
+        {
+            return DoLetterDropInternal(
+                text,
+                minCount,
+                maxCount,
+                duration,
+                damagePressure,
+                delayStep,
+                false,
+                true,
+                corrosionColor);
+        }
+
+        public static Tween DoCorrodedLetterDrop(
+            this TMP_Text text,
+            int minCount,
+            int maxCount,
+            float duration,
+            float damagePressure = 0f,
+            float delayStep = 0.05f,
+            Color? corrosionColor = null)
+        {
+            return DoLetterDropInternal(
+                text,
+                minCount,
+                maxCount,
+                duration,
+                damagePressure,
+                delayStep,
+                true,
+                true,
+                corrosionColor);
+        }
+
+        public static Tween DoMonsterNearDeathCollapse(this TMP_Text text, float duration)
+        {
+            return DoLetterDropInternal(
+                text,
+                int.MaxValue,
+                int.MaxValue,
+                duration,
+                1f,
+                0.018f,
+                true,
+                true,
+                new Color(0.03f, 0.01f, 0.06f, 1f));
+        }
+
+        private static Tween DoLetterDropInternal(
+            TMP_Text text,
+            int minCount,
+            int maxCount,
+            float duration,
+            float damagePressure,
+            float delayStep,
+            bool corrodeFirst,
+            bool leaveMissing,
+            Color? corrosionColor)
+        {
+            if (text == null)
+                return null;
+
+            var state = GetState(text);
+            if (corrosionColor.HasValue)
+                state.corrosionColor = corrosionColor.Value;
+
+            int[] indices = SelectLetterDropIndices(text, state, minCount, maxCount);
+            if (indices == null || indices.Length == 0)
+                return null;
+
+            float pressure = Mathf.Clamp01(damagePressure);
+            for (int i = 0; i < indices.Length; i++)
+                PrepareLetterDrop(state, indices[i], pressure);
+
+            float time = 0f;
+            float perCharacterDuration = Mathf.Max(0.001f, duration);
+            float stagger = Mathf.Max(0f, delayStep);
+            float totalDuration = perCharacterDuration + stagger * (indices.Length - 1);
+
+            return DOTween.To(() => time, x =>
+                {
+                    time = x;
+
+                    for (int order = 0; order < indices.Length; order++)
+                    {
+                        int i = indices[order];
+                        if (i < 0 || i >= state.letterDrop.Length)
+                            continue;
+
+                        float t = Mathf.Clamp01((time - order * stagger) / perCharacterDuration);
+                        if (t <= 0f)
+                            continue;
+
+                        float corrosionRise = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0f, corrodeFirst ? 0.32f : 0.18f, t));
+                        float corrosionFall = 1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.72f, 1f, t));
+                        float corrosion = corrosionRise * Mathf.Max(0.35f, corrosionFall);
+
+                        state.letterDrop[i] = t;
+                        state.letterCorrosion[i] = corrodeFirst
+                            ? Mathf.Clamp01(corrosion)
+                            : Mathf.Clamp01(corrosion * 0.55f);
+                        state.letterDropShake[i] = Mathf.Sin(t * Mathf.PI) * Mathf.Lerp(0.7f, 2.8f, pressure);
+
+                        if (leaveMissing)
+                            state.letterMissing[i] = Mathf.Max(
+                                state.letterMissing[i],
+                                Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.62f, 1f, t)));
+                    }
+
+                    ApplyAll(text, state);
+                }, totalDuration, totalDuration)
+                .SetEase(Ease.Linear)
+                .OnComplete(() =>
+                {
+                    for (int i = 0; i < indices.Length; i++)
+                    {
+                        int index = indices[i];
+                        if (index < 0 || index >= state.letterDrop.Length)
+                            continue;
+
+                        state.letterDrop[index] = 0f;
+                        state.letterCorrosion[index] = 0f;
+                        state.letterDropShake[index] = 0f;
+
+                        if (leaveMissing)
+                            state.letterMissing[index] = 1f;
+                    }
+
+                    ApplyAll(text, state);
+                });
+        }
+
+        private static int[] SelectLetterDropIndices(TMP_Text text, State state, int minCount, int maxCount)
+        {
+            var textInfo = text.textInfo;
+            if (textInfo == null || textInfo.characterCount <= 0)
+                return new int[0];
+
+            var available = new List<int>();
+            for (int i = 0; i < textInfo.characterCount; i++)
+            {
+                if (!textInfo.characterInfo[i].isVisible)
+                    continue;
+
+                if (state.letterMissing != null &&
+                    i < state.letterMissing.Length &&
+                    state.letterMissing[i] >= 0.95f)
+                    continue;
+
+                available.Add(i);
+            }
+
+            if (available.Count == 0)
+                return new int[0];
+
+            int lower = Mathf.Clamp(minCount, 0, available.Count);
+            int upper = Mathf.Clamp(Mathf.Max(maxCount, lower), lower, available.Count);
+            if (upper <= 0)
+                return new int[0];
+
+            int count = UnityEngine.Random.Range(lower, upper + 1);
+            for (int i = 0; i < available.Count; i++)
+            {
+                int rand = UnityEngine.Random.Range(i, available.Count);
+                (available[i], available[rand]) = (available[rand], available[i]);
+            }
+
+            var selected = new int[count];
+            for (int i = 0; i < count; i++)
+                selected[i] = available[i];
+
+            return selected;
+        }
+
+        private static void PrepareLetterDrop(State state, int index, float pressure)
+        {
+            if (state.letterDrop == null || index < 0 || index >= state.letterDrop.Length)
+                return;
+
+            float side = UnityEngine.Random.value < 0.5f ? -1f : 1f;
+            float lateral = UnityEngine.Random.Range(16f, 52f) * Mathf.Lerp(1f, 1.7f, pressure);
+            float fall = UnityEngine.Random.Range(78f, 168f) * Mathf.Lerp(1f, 1.65f, pressure);
+            float spin = UnityEngine.Random.Range(0.65f, 1.65f) * Mathf.Lerp(1f, 1.45f, pressure);
+
+            state.letterDrop[index] = 0f;
+            state.letterCorrosion[index] = 0f;
+            state.letterDropShake[index] = 0f;
+            state.letterDropOffset[index] = new Vector2(side * lateral, -fall);
+            state.letterDropSpin[index] = side * spin;
         }
 
         #endregion

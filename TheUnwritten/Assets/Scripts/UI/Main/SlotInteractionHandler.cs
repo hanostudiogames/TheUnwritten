@@ -27,7 +27,11 @@ namespace UI.Main
 
     public class SlotInteractionHandler : ICardSelectionHandler, CardSlot.IListener
     {
-        private const float SlotReplacementTypingSpeed = 0.5f;
+        private const float SlotPreReplacementShakeDuration = 3f;
+        private const float SlotPreReplacementShakeStrength = 10f;
+        private const float SlotReplacementSlamInterval = 0.3f;
+        private const float SlotReplacementSlamStrength = 18f;
+        private const int SlotAfterSubmitDelayMilliseconds = 120;
 
         private IDialogueSlot _activeSlot = null;
         private SlotRecord _slotRecord = null;
@@ -54,18 +58,24 @@ namespace UI.Main
             return _completionSource?.Task ?? UniTask.FromResult<CardRecord>(null);
         }
 
-        void CardSlot.IListener.OnCardSelected(CardRecord cardRecord)
+        void CardSlot.IListener.OnCardSelected(CardSlot cardSlot, CardRecord cardRecord)
         {
             if (_filling || cardRecord == null)
                 return;
 
-            HandleCardSelectedAsync(cardRecord).Forget();
+            HandleCardSelectedAsync(cardSlot, cardRecord).Forget();
         }
 
-        private async UniTaskVoid HandleCardSelectedAsync(CardRecord cardRecord)
+        private async UniTaskVoid HandleCardSelectedAsync(CardSlot cardSlot, CardRecord cardRecord)
         {
             _filling = true;
             _cardController?.SetSelectable(false);
+
+            if (_cardController != null)
+                await _cardController.PlaySubmitAnimationAsync(cardSlot);
+
+            await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
+            await UniTask.Delay(SlotAfterSubmitDelayMilliseconds);
 
             var typer = _activeSlot?.Typer;
             var slotName = typer?.FirstEmptySlot();
@@ -73,7 +83,13 @@ namespace UI.Main
             if (!string.IsNullOrEmpty(slotName))
             {
                 var text = ResolveSlotResultText(cardRecord);
-                await typer.TypeIntoSlotAsync(slotName, text);
+                await typer.TypeIntoSlotWithImpactAsync(
+                    slotName,
+                    text,
+                    SlotPreReplacementShakeDuration,
+                    SlotPreReplacementShakeStrength,
+                    SlotReplacementSlamInterval,
+                    SlotReplacementSlamStrength);
             }
 
             _completionSource?.TrySetResult(cardRecord);

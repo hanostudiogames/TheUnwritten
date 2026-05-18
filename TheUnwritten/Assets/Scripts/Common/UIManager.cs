@@ -8,6 +8,7 @@ using UnityEngine.UI;
 
 using Common;
 using DG.Tweening;
+using UI.Components;
 using UI.Slots;
 
 namespace Common
@@ -17,6 +18,9 @@ namespace Common
         TElement Create<TElement>(RectTransform rootRectTr, out bool initialize) where TElement : Element;
         
         void RegisterDimensionHandler<TType>(Action<bool> handler);
+
+        UniTask ShowTopAsync(bool instant = false);
+        UniTask HideTopAsync(bool instant = false);
 
         UniTask FadeInOutAsync(Func<UniTask> taskFunc, Action onComplete);
     }
@@ -28,9 +32,15 @@ namespace Common
         [SerializeField] private RectTransform viewRootRectTr = null;
         [SerializeField] private RectTransformDimensionHandler dimensionHandler = null;
         [SerializeField] private Image dimmedImage = null;
+        [SerializeField] private TopSlideAnimator topSlideAnimator = null;
 
         private readonly Dictionary<System.Type, GameObject> _cachedPrefabs = new ();
         private ObjectPooler _objectPooler = null;
+
+        private void Awake()
+        {
+            CacheTopSlideAnimator();
+        }
         
         public async UniTask InitializeAsync(AddressableManager addressableManager, ObjectPooler objectPooler)
         {
@@ -102,6 +112,30 @@ namespace Common
         public void RegisterDimensionHandler<TType>(Action<bool> handler) => dimensionHandler?.RegisterDimensionHandler<TType>(handler);
         public void UnregisterDimensionHandler<TType>() => dimensionHandler?.UnregisterDimensionHandler<TType>();
 
+        public UniTask ShowTopAsync(bool instant = false)
+        {
+            var animator = CacheTopSlideAnimator();
+            return animator != null ? animator.ShowAsync(instant) : UniTask.CompletedTask;
+        }
+
+        public UniTask HideTopAsync(bool instant = false)
+        {
+            var animator = CacheTopSlideAnimator();
+            return animator != null ? animator.HideAsync(instant) : UniTask.CompletedTask;
+        }
+
+        [ContextMenu("Top/Show")]
+        private void ShowTopFromContextMenu()
+        {
+            ShowTopAsync().Forget();
+        }
+
+        [ContextMenu("Top/Hide")]
+        private void HideTopFromContextMenu()
+        {
+            HideTopAsync().Forget();
+        }
+
         public async UniTask FadeInOutAsync(Func<UniTask> taskFunc, Action onComplete)
         {
             if (dimmedImage == null)
@@ -124,6 +158,13 @@ namespace Common
             
             onComplete?.Invoke();
         }
+
+        private TopSlideAnimator CacheTopSlideAnimator()
+        {
+            if (topSlideAnimator == null)
+                topSlideAnimator = GetComponentInChildren<TopSlideAnimator>(true);
+
+            return topSlideAnimator;
+        }
     }
 }
-

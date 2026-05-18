@@ -100,10 +100,6 @@ MonoBehaviour:
     m_Localized: The Ink Creature pushes<slot_1>.
     m_Metadata:
       m_Items: []
-  - m_Id: 8658564787724288
-    m_Localized: 
-    m_Metadata:
-      m_Items: []
   - m_Id: 9000000000000001
     m_Localized: "A thread of the black current \u2014 leapt to your fingertip. It
       was cold. And, familiar.\nOn your palm, it became a single card."
@@ -127,18 +123,14 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9000000000000006
-    m_Localized: "\uC789\uD06C\uAC00 \uB2E4\uC2DC \uBAA8\uC600\uB2E4. \uD55C \uBC88
-      \uD769\uC5B4\uC84C\uB2E4\uAC00 \u2014 \uB354 \uD070 \uD615\uC0C1\uC73C\uB85C.
-      \n\uAE00\uC790\uB4E4\uC774 \uBE60\uB974\uAC8C \uBE60\uC838\uB098\uAC00\uACE0
-      \uC788\uB2E4. \uC774 \uC138\uACC4\uC758 \uB2E8\uC5B4\uB4E4\uC774 \u2014 \uC800
-      \uC548\uC73C\uB85C."
+    m_Localized: "The ink gathered again. Scattered once \u2014 and reformed, larger.\nLetters
+      were leaving things faster now. Words of this world \u2014 pulled into it."
     m_Metadata:
       m_Items: []
   - m_Id: 10519838404370432
     m_Localized: "<sprite name=\"W\"><sprite name=\"R\"><sprite name=\"I\"><sprite
-      name=\"T\"><sprite name=\"T\"><sprite name=\"E\"><sprite name=\"N\"><color=#6A1B9A><color=#54157B>\uC678\uBD80\uC790.
-      \uC11C\uC220\uC744 \uBB34\uB2E8 \uBCC0\uACBD\uD558\uC600\uB2E4. \uC81C\uAC70
-      \uB300\uC0C1\uC73C\uB85C \uC9C0\uC815\uD55C\uB2E4.</color>"
+      name=\"T\"><sprite name=\"T\"><sprite name=\"E\"><sprite name=\"N\"><color=#6A1B9A><color=#54157B>Outsider.
+      Transferring narrative volume directly. Threat tier \u2014 rising.</color>"
     m_Metadata:
       m_Items: []
   - m_Id: 10525632122314752
@@ -147,10 +139,42 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 10547295048163328
-    m_Localized: "      <color=#1D4A52>\uCE74\uB4DC\uB97C \uC4F4\uB2E4\uB294 \uAC74
-      \u2014 \uC774 \uC138\uACC4\uC758 \uB9D0\uC744 \uBE4C\uB9AC\uB294 \uAC83\uC774\uB2E4.</color>\n     
-      <color=#1D4A52>\uBE4C\uB9AC\uC9C0 \uC54A\uC73C\uBA74, \uC800 \uAD34\uBB3C\uC774
-      \uB9C8\uC800 \uAC00\uC838\uAC04\uB2E4.</color>"
+    m_Localized: "      <color=#1D4A52>\u2014 To play a card is to borrow this world's
+      words.</color>\n      <color=#1D4A52>If I don't borrow them, the monster takes
+      the rest.</color>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10565474822643712
+    m_Localized: "      <color=#1D4A52>\u2014 Nothing shrank. But \u2014 where did
+      that one late beat come from?</color>\n      <color=#1D4A52>A late beat \u2014
+      makes the next breath.</color>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10550158390452224
+    m_Localized: "      <color=#1D4A52>\u2014 A line. One line gone. So this is a
+      fight of length.</color>\n      <color=#1D4A52>Who writes more \u2014 who keeps
+      less unwritten.</color>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10572050274967552
+    m_Localized: New letters poured in to fill the gap. Somewhere in the book, a
+      sentence was disappearing. The monster's shape swelled again. Harder than before.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 11538141784563712
+    m_Localized: "<sprite name=\"W\"><sprite name=\"R\"><sprite name=\"I\"><sprite
+      name=\"T\"><sprite name=\"T\"><sprite name=\"E\"><sprite name=\"N\"><color=#6A1B9A>Outsider's
+      card pattern \u2014 monotone. Threat avoidable \u2014 yet, possibility of threat
+      termination \u2014 measuring.\n</color>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 11538567888101376
+    m_Localized: "      <color=#1D4A52>\u2014 The flame doesn't bite like before.</color>\n     
+      <color=#1D4A52>A bigger card? Or \u2014 a different one.</color>"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 11539288486305792
+    m_Localized: The ink's flow must be stopped<slot_3>.
     m_Metadata:
       m_Items: []
   references:

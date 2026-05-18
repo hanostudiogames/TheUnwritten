@@ -25,3 +25,9 @@ MonoBehaviour:
     AllowedCardIds: 0200000001000000
     SelectedDialogueLocalKey: 23_after_{0}
     SlotResults: []
+  - Id: 3
+    AllowedCardIds: 0200000001000000
+    SelectedDialogueLocalKey: 23_after_{0}
+    SlotResults:
+    - CardId: 1
+      ResultLocalKey: slot_3_flame

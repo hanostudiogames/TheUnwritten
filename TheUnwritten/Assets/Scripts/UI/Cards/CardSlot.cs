@@ -16,7 +16,7 @@ namespace UI.Cards
     {
         public interface IListener
         {
-            void OnCardSelected(CardRecord cardRecord);
+            void OnCardSelected(CardSlot cardSlot, CardRecord cardRecord);
         }
 
         public class Param : ElementParam
@@ -99,7 +99,9 @@ namespace UI.Cards
             if (!IsSelectable) 
                 return;
 
-            _param?.Listener?.OnCardSelected(_param.CardRecord);
+            SetSelectable(false);
+            _hover?.ForceExit();
+            _param?.Listener?.OnCardSelected(this, _param.CardRecord);
         }
     }
 }

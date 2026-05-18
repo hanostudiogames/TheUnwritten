@@ -19,6 +19,14 @@ namespace UI.Cards
         [Header("애니메이션")]
         [SerializeField] private float duration = 0.25f;
 
+        [Header("선택 제출 연출")]
+        [SerializeField] private float submitPopDuration = 0.18f;
+        [SerializeField] private float submitFlyDuration = 0.34f;
+        [SerializeField] private float submitPopLift = 95f;
+        [SerializeField] private float submitFlyLift = 280f;
+        [SerializeField] private float submitPopScale = 1.24f;
+        [SerializeField] private float submitEndScale = 0.72f;
+
         private readonly List<CardSlot> _activeSlots = new();
         private readonly List<CardHover> _activeHovers = new();
         private readonly List<CardSlot> _initialSlots = new();
@@ -145,6 +153,7 @@ namespace UI.Cards
                 for (int i = 0; i < slotsToShow.Count; i++)
                 {
                     var slot = slotsToShow[i];
+                    SetSlotAlpha(slot, 1f);
                     slot.Rect.anchoredPosition = new Vector2(0, -400f);
                     slot.Rect.localRotation = Quaternion.identity;
                     slot.Rect.localScale = Vector3.one * 0.8f;
@@ -171,6 +180,69 @@ namespace UI.Cards
             newSlot.Rect.localScale = Vector3.one * 0.8f;
 
             await AnimateAll(duration);
+        }
+
+        public async UniTask PlaySubmitAnimationAsync(CardSlot selectedSlot)
+        {
+            if (!Application.isPlaying || !IsValid(selectedSlot))
+                return;
+
+            CancelAnimation();
+            _cts = new CancellationTokenSource();
+            var token = _cts.Token;
+
+            BuildActiveSlots();
+            if (_activeSlots.Count == 0 || !_activeSlots.Contains(selectedSlot))
+                return;
+
+            ApplySelectableState(false);
+
+            int count = _activeSlots.Count;
+            var startPositions = new Vector2[count];
+            var startScales = new Vector3[count];
+            var startRotations = new float[count];
+            var startAlphas = new float[count];
+            var canvasGroups = new CanvasGroup[count];
+            int selectedIndex = _activeSlots.IndexOf(selectedSlot);
+
+            for (int i = 0; i < count; i++)
+            {
+                var slot = _activeSlots[i];
+                var hover = GetHover(slot);
+                hover?.ForceExit();
+
+                startPositions[i] = slot.Rect.anchoredPosition;
+                startScales[i] = slot.Rect.localScale;
+                startRotations[i] = slot.Rect.localEulerAngles.z;
+                canvasGroups[i] = GetOrCreateSlotCanvasGroup(slot);
+                startAlphas[i] = canvasGroups[i] != null ? canvasGroups[i].alpha : 1f;
+            }
+
+            selectedSlot.Rect.SetAsLastSibling();
+
+            bool cancelled = await AnimateSubmitPopAsync(
+                selectedIndex,
+                startPositions,
+                startScales,
+                startRotations,
+                startAlphas,
+                canvasGroups,
+                token);
+
+            if (cancelled)
+                return;
+
+            bool flyCancelled = await AnimateSubmitFlyAsync(
+                selectedIndex,
+                startPositions,
+                startScales,
+                startRotations,
+                startAlphas,
+                canvasGroups,
+                token);
+
+            if (!flyCancelled)
+                await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
         }
 
         private void SpreadImmediate()
@@ -312,6 +384,165 @@ namespace UI.Cards
 
         #endregion
 
+        #region Submit Animation
+
+        private async UniTask<bool> AnimateSubmitPopAsync(
+            int selectedIndex,
+            Vector2[] startPositions,
+            Vector3[] startScales,
+            float[] startRotations,
+            float[] startAlphas,
+            CanvasGroup[] canvasGroups,
+            CancellationToken token)
+        {
+            float animDuration = Mathf.Max(0.001f, submitPopDuration);
+            float time = 0f;
+
+            while (time < animDuration)
+            {
+                if (token.IsCancellationRequested)
+                    return true;
+
+                time += Time.deltaTime;
+                float t = EaseOutBack(Mathf.Clamp01(time / animDuration));
+
+                ApplySubmitPose(
+                    selectedIndex,
+                    startPositions,
+                    startScales,
+                    startRotations,
+                    startAlphas,
+                    canvasGroups,
+                    t,
+                    false);
+
+                if (await UniTask.Yield(PlayerLoopTiming.Update, token).SuppressCancellationThrow())
+                    return true;
+            }
+
+            ApplySubmitPose(
+                selectedIndex,
+                startPositions,
+                startScales,
+                startRotations,
+                startAlphas,
+                canvasGroups,
+                1f,
+                false);
+
+            return false;
+        }
+
+        private async UniTask<bool> AnimateSubmitFlyAsync(
+            int selectedIndex,
+            Vector2[] startPositions,
+            Vector3[] startScales,
+            float[] startRotations,
+            float[] startAlphas,
+            CanvasGroup[] canvasGroups,
+            CancellationToken token)
+        {
+            float animDuration = Mathf.Max(0.001f, submitFlyDuration);
+            float time = 0f;
+
+            while (time < animDuration)
+            {
+                if (token.IsCancellationRequested)
+                    return true;
+
+                time += Time.deltaTime;
+                float t = EaseOutCubic(Mathf.Clamp01(time / animDuration));
+
+                ApplySubmitPose(
+                    selectedIndex,
+                    startPositions,
+                    startScales,
+                    startRotations,
+                    startAlphas,
+                    canvasGroups,
+                    t,
+                    true);
+
+                if (await UniTask.Yield(PlayerLoopTiming.Update, token).SuppressCancellationThrow())
+                    return true;
+            }
+
+            ApplySubmitPose(
+                selectedIndex,
+                startPositions,
+                startScales,
+                startRotations,
+                startAlphas,
+                canvasGroups,
+                1f,
+                true);
+
+            return false;
+        }
+
+        private void ApplySubmitPose(
+            int selectedIndex,
+            Vector2[] startPositions,
+            Vector3[] startScales,
+            float[] startRotations,
+            float[] startAlphas,
+            CanvasGroup[] canvasGroups,
+            float t,
+            bool flyOut)
+        {
+            for (int i = 0; i < _activeSlots.Count; i++)
+            {
+                var slot = _activeSlots[i];
+                if (!IsValid(slot))
+                    continue;
+
+                bool selected = i == selectedIndex;
+                if (selected)
+                {
+                    Vector2 popPosition = new(0f, startPositions[i].y + submitPopLift);
+                    Vector2 flyPosition = new(0f, startPositions[i].y + submitFlyLift);
+                    Vector3 popScale = Vector3.one * submitPopScale;
+                    Vector3 flyScale = Vector3.one * submitEndScale;
+                    float rotation = flyOut ? 0f : Mathf.LerpAngle(startRotations[i], 0f, t);
+
+                    slot.Rect.anchoredPosition = flyOut
+                        ? Vector2.Lerp(popPosition, flyPosition, t)
+                        : Vector2.Lerp(startPositions[i], popPosition, t);
+                    slot.Rect.localScale = flyOut
+                        ? Vector3.Lerp(popScale, flyScale, t)
+                        : Vector3.Lerp(startScales[i], popScale, t);
+                    slot.Rect.localRotation = Quaternion.Euler(0f, 0f, rotation);
+
+                    float alpha = flyOut ? Mathf.Lerp(1f, 0f, t) : Mathf.Lerp(startAlphas[i], 1f, t);
+                    SetCanvasGroupAlpha(canvasGroups[i], alpha);
+                }
+                else
+                {
+                    Vector2 popPosition = startPositions[i] + Vector2.down * 42f;
+                    Vector2 flyPosition = startPositions[i] + Vector2.down * 85f;
+                    Vector3 popScale = Vector3.one * 0.92f;
+                    Vector3 flyScale = Vector3.one * 0.82f;
+                    float popRotation = Mathf.LerpAngle(startRotations[i], 0f, 0.65f);
+                    float rotation = flyOut
+                        ? Mathf.LerpAngle(popRotation, 0f, t)
+                        : Mathf.LerpAngle(startRotations[i], popRotation, t);
+
+                    slot.Rect.anchoredPosition = flyOut
+                        ? Vector2.Lerp(popPosition, flyPosition, t)
+                        : Vector2.Lerp(startPositions[i], popPosition, t);
+                    slot.Rect.localScale = flyOut
+                        ? Vector3.Lerp(popScale, flyScale, t)
+                        : Vector3.Lerp(startScales[i], popScale, t);
+                    slot.Rect.localRotation = Quaternion.Euler(0f, 0f, rotation);
+                    SetCanvasGroupAlpha(
+                        canvasGroups[i],
+                        flyOut ? Mathf.Lerp(0.38f, 0f, t) : Mathf.Lerp(startAlphas[i], 0.38f, t));
+                }
+            }
+        }
+
+        #endregion
+
         #region Layout
 
         private void CalculateTargets(int count)
@@ -414,6 +645,43 @@ namespace UI.Cards
                 _canvasGroup = gameObject.AddComponent<CanvasGroup>();
         }
 
+        private CanvasGroup GetOrCreateSlotCanvasGroup(CardSlot slot)
+        {
+            if (slot == null)
+                return null;
+
+            if (!slot.TryGetComponent(out CanvasGroup canvasGroup))
+                canvasGroup = slot.gameObject.AddComponent<CanvasGroup>();
+
+            return canvasGroup;
+        }
+
+        private void SetSlotAlpha(CardSlot slot, float alpha)
+        {
+            SetCanvasGroupAlpha(GetOrCreateSlotCanvasGroup(slot), alpha);
+        }
+
+        private void SetCanvasGroupAlpha(CanvasGroup canvasGroup, float alpha)
+        {
+            if (canvasGroup == null)
+                return;
+
+            canvasGroup.alpha = Mathf.Clamp01(alpha);
+        }
+
+        private float EaseOutCubic(float t)
+        {
+            return 1f - Mathf.Pow(1f - Mathf.Clamp01(t), 3f);
+        }
+
+        private float EaseOutBack(float t)
+        {
+            t = Mathf.Clamp01(t);
+            const float c1 = 1.70158f;
+            const float c3 = c1 + 1f;
+            return 1f + c3 * Mathf.Pow(t - 1f, 3f) + c1 * Mathf.Pow(t - 1f, 2f);
+        }
+
         private CardHover GetHover(CardSlot slot)
         {
             if (slot == null)
@@ -429,6 +697,7 @@ namespace UI.Cards
 
             for (int i = 0; i < slots.Count; ++i)
             {
+                SetSlotAlpha(slots[i], 1f);
                 slots[i]?.Deactivate();
             }
         }

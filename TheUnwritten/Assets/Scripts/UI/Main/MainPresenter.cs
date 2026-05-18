@@ -27,6 +27,7 @@ namespace UI.Main
         ISceneListener
     {
         private readonly UIFactory _uiFactory = null;
+        private readonly UIManager _uiManager = null;
         private readonly IGameManager _gameManager = null;
         private readonly SceneModeContext _sceneModeContext = null;
         
@@ -42,6 +43,7 @@ namespace UI.Main
             _view = view;
 
             _gameManager = gameManager;
+            _uiManager = uiManager;
             _uiFactory = new UIFactory(uiManager);
             
             var cardController = new CardController(view.CardFanSpread);
@@ -65,6 +67,7 @@ namespace UI.Main
         {
             base.Activate();
             
+            _uiManager?.ShowTopAsync().Forget();
             _view.FadeLibraryAsync(0, 0).Forget();
         }
 
@@ -125,6 +128,8 @@ namespace UI.Main
 
         async UniTask ISceneListener.OnStartSceneAsync(int act, int scene)
         {
+            _view?.UpdateActScene(act, scene);
+
             if (act == 1 && scene < 3)
                 await _view.FadeLibraryAsync(0.45f, 3f);
             
